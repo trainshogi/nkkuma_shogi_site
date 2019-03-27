@@ -1,0 +1,55 @@
+
+span{
+    cursor: pointer;
+}
+.contents{
+    position: relative;
+    text-align: center;
+    width: 80%;
+    margin: 5px auto;
+    z-index: 1;
+}
+.contents #pic1{
+    width: 100%;
+    z-index: 1;
+    image-orientation: from-image;
+}
+p {
+    text-align: center;
+}
+div#back {
+    text-align: center;
+}
+#tmpfoot{
+    text-align: center;
+}
+#board{
+    width:260px;
+    height:230px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family:'ＭＳ ゴシック', 'MS Gothic', 'Osaka－等幅', Osaka-mono, monospace;
+    font-size:14px;
+    color:#999;
+}
+#board_img{
+    position: relative;
+    background-image: url(../img/ban.png);
+    background-size: contain;
+    margin-left: 14.5%;
+    margin-right: 14.5%;
+}
+#board_img:before {
+    content:"";
+    display: block;
+    padding-top: 106%; /* 高さを幅の75%に固定 */
+}
+#board_koma {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+}
+#board_koma tr td img{
+    height:10%;
+}

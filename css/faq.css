@@ -1,0 +1,82 @@
+h3{
+	position: relative;
+	padding: 0.25em 0;
+	/*margin: 0 0.25em;*/
+	text-indent: 0.25em
+}
+h3:after {
+	content: "";
+	display: block;
+	height: 4px;
+	background: -moz-linear-gradient(to right, rgb(255, 186, 115), #ffb2b2);
+	background: -webkit-linear-gradient(to right, rgb(255, 186, 115), #ffb2b2);
+	background: linear-gradient(to right, rgb(255, 186, 115), #ffb2b2);
+}
+
+/*ボックス全体*/
+.accbox {
+    margin: 1em 0;
+    padding: 2;
+    width: 100%;/*最大幅*/
+}
+
+/*ラベル*/
+.accbox label {
+    display: block;
+    margin: 1.5px 0;
+    padding : 13px 12px;
+    color: #FF9F00;	/*#ffba47*/
+    font-weight: bold;
+    background: #fff2cc;
+    cursor :pointer;
+    transition: all 0.5s;
+	text-shadow: 
+        white 1px 1px 0, white -1px -1px 0,/*右下、左上*/
+        white -1px 1px 0, white 1px -1px 0,/*右上、左下*/
+        white 0px 1px 0, white  0-1px 0,/*右、左*/
+        white -1px 0 0, white 1px 0 0;/*上、下*/
+}
+
+/*アイコンを表示*/
+.accbox label:before {
+    content: '\f059';
+    font-family: 'FontAwesome';
+    padding-right: 8px;
+}
+
+/*ラベルホバー時*/
+.accbox label:hover {
+    background :#ffe9a9;
+}
+
+/*チェックは隠す*/
+.accbox input {
+    display: none;
+}
+
+/*中身を非表示にしておく*/
+.accbox .accshow {
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: 0.8s;
+}
+
+/*クリックで中身表示*/
+.cssacc:checked + label + .accshow {
+    height: auto;
+    padding: 5px;
+    background: #fff5eb;
+    opacity: 1;
+}
+
+.accbox .accshow p {
+    margin: 10px 10px;
+	text-align: left;
+}
+
+/*アイコンを入れ替える*/
+.cssacc:checked + label:before {
+    content: '\f059';
+}

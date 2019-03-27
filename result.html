@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/faq.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <p class="lead">
+      <img src="img/SHOGIWEB_TITLE.png" width="100%">
+      <img id="howtoimg" src='img/shogi_intro.png' width="100%" height="auto"></img>
+      <textarea id="board" style="width:260px; height:230px; font-family:'ＭＳ ゴシック', 'MS Gothic', 'Osaka－等幅', Osaka-mono, monospace; font-size:14px; color:#999;">{{ message|safe }}</textarea>
+    </p>
+    
+    <p>Thank you!</p>
+    <div id="back"><button type="button" class="btn btn-primary" onclick="history.back()">戻る</button></div>
+    
+    <div id="tmpfoot">
+      <br><!--タグはここから--><table border="0" cellspacing="0" cellpadding="0" align="center"><tr><td align="center"><a href="http://www.rays-counter.com/"><img src="http://www.rays-counter.com/d412_f6_024/5b42d99ac1c89/" alt="アクセスカウンター" border="0"></a></td></tr><tr><td align="center"><img src="http://www.rays-counter.com/images/counter_01.gif" border="0"><img src="http://www.rays-counter.com/images/counter_02.gif" border="0"><img src="http://www.rays-counter.com/images/counter_03.gif" border="0"><img src="http://www.rays-counter.com/images/counter_04.gif" border="0" ><img src="http://www.rays-counter.com/images/counter_05.gif" border="0"></td></tr></table><!--ここまで-->
+      <form action="/faq" method="post"><button type="submit" class="btn btn-default">FAQ</button></form>
+      <br>開発：nkkuma　twitter始めました 
+      <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      <a class="twitter-timeline" height="400px" href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw">Tweets by nkkuma_service</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
+      <a href="//af.moshimo.com/af/c/click?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733&guid=ON" target="_blank" rel="nofollow"><img src="//image.moshimo.com/af-img/0866/000000022733.jpg" width="234" height="60" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733" width="1" height="1" style="border:none;">
+    </div>
+    {% endblock %}
+    
+  </body>
+</html>

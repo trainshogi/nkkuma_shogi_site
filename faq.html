@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% block content %}
+<!-- Form
+================================================== -->
+<p class="lead">
+  <img src="/static/img/SHOGIWEB_TITLE.png" width="100%">
+</p>
+
+<h3>FAQ</h3>
+
+<div class="accbox">
+  <!--ラベル1-->
+    <input type="checkbox" id="label1" class="cssacc" />
+    <label for="label1">使い方がわからない</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+      以下の通りにご使用ください。
+        <ol>
+          <li>Camera ボタンをタップし、将棋盤を撮影</li>
+          <li>画面に現れる黒枠の頂点を、将棋盤の頂点（内枠）に合わせる</li>
+          <li>先手/後手を確認（ボタンタップで切り替え）</li>
+          <li>Submit ボタンをタップ</li>
+          <li>しばらく待つと、kifデータ（テキスト）が生成</li>
+          <li>全選択→コピー等で将棋アプリで使用可</li>
+        </ol>
+      </p>
+    </div>
+    <!--//ラベル1-->
+    <!--ラベル2-->
+    <input type="checkbox" id="label2" class="cssacc" />
+    <label for="label2">撮影後画面のスクロールができない</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+        画面のスクロールは写真外で行ってください。写真上でのスクロールはできません。
+      </p>
+    </div>
+    <!--//ラベル2-->
+    <!--ラベル3-->
+    <input type="checkbox" id="label3" class="cssacc" />
+    <label for="label3">kif データが生成されない</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+        画像やkif データの送信には時間がかかるため、焦らずゆっくりお待ちください。
+        高速な通信環境下ではより短い時間でサービスをご利用いただけます。
+      </p>
+    </div>
+    <!--//ラベル3-->
+    <!--ラベル4-->
+    <input type="checkbox" id="label4" class="cssacc" />
+    <label for="label4">生成されたkif データが間違っている</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>    kif データ表示画面で修正可能です。メモやメール等と同様に修正箇所をタップし打ち直してください。
+      後手番の駒の先頭には'v'を付けます。間違いが多い場合には写真を取り直してください。
+      </p>
+    </div>
+    <!--//ラベル4-->
+    <!--ラベル5-->
+    <input type="checkbox" id="label5" class="cssacc" />
+    <label for="label5">持ち駒が認識されない</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+      現在持ち駒の認識は実装されていませんが、今後実装予定です。
+      対応アプリに読み込んだ後、持ち駒の追加を行ってください。
+      </p>
+    </div>
+    <!--//ラベル5-->
+    <!--ラベル6-->
+    <input type="checkbox" id="label6" class="cssacc" />
+    <label for="label6">対応ブラウザ</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+      HTML5 に対応した標準的なスマートフォン向けブラウザ（chrome，safari など）でご利用ください。
+      利用の際はスマートフォンを縦向きにしてください。
+      </p>
+    </div>
+    <!--//ラベル6-->
+    <!--ラベル7-->
+    <input type="checkbox" id="label7" class="cssacc" />
+    <label for="label7">対応機種</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+      ブラウザ依存のWebアプリケーションのため、機種に依存するとは考えにくいですが、現在対応機種を確認しております。確認済み機種は以下の通りです。
+      </p>
+      <p>iPhne SE，iPod touch（第6世代），HUAWEI Nova lite，HTC 10</p>
+    </div>
+    <!--//ラベル7-->
+    <!--ラベル8-->
+    <input type="checkbox" id="label8" class="cssacc" />
+    <label for="label8">対応アプリ</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>
+      現在生成したkifデータをコピーし使用できるアプリを確認しております。確認済みアプリは以下の通りです。
+      </p>
+      <p>
+      Android : ShogiDroid，ぴよ将棋
+      </p>
+      <p>
+      iPhone : ぴよ将棋
+      </p>
+    </div>
+    <!--//ラベル8-->
+    <!--ラベル9-->
+    <input type="checkbox" id="label9" class="cssacc" />
+    <label for="label9">バグが発生した</label>
+    <div class="accshow">
+      <!--ここに隠す中身-->
+      <p>発生したバグについて<a href="https://twitter.com/nkkuma_service"　target="_blank">NKKUMA 公式ツイッター</a>までお寄せください。お問い合わせの際はバグ発生の時間と詳細をお伝えください。
+    </div>
+    <!--//ラベル9-->
+</div><!--//.accbox-->
+<div id="back"><button type="button" class="btn btn-primary" onclick="history.back()">戻る</button></div>
+<div id="tmpfoot">
+  <br><!--タグはここから--><table border="0" cellspacing="0" cellpadding="0" align="center"><tr><td align="center"><a href="http://www.rays-counter.com/"><img src="http://www.rays-counter.com/d412_f6_024/5b42d99ac1c89/" alt="アクセスカウンター" border="0"></a></td></tr><tr><td align="center"><img src="http://www.rays-counter.com/images/counter_01.gif" border="0"><img src="http://www.rays-counter.com/images/counter_02.gif" border="0"><img src="http://www.rays-counter.com/images/counter_03.gif" border="0"><img src="http://www.rays-counter.com/images/counter_04.gif" border="0" ><img src="http://www.rays-counter.com/images/counter_05.gif" border="0"></td></tr></table><!--ここまで-->
+  <br>開発：nkkuma　twitter始めました 
+  <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <a class="twitter-timeline" height="400px" href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw">Tweets by nkkuma_service</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
+</div>
+<a href="//af.moshimo.com/af/c/click?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733&guid=ON" target="_blank" rel="nofollow"><img src="//image.moshimo.com/af-img/0866/000000022733.jpg" width="234" height="60" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733" width="1" height="1" style="border:none;">
+{% endblock %}
