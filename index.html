@@ -25,10 +25,10 @@
       <img id="howtoimg" src='img/shogi_intro.png' width="100%" height="auto"></img>
       <div id="kekka_text"style="display: none; text-align: center;">認識結果</div>
       <textarea id="board" style="display: none">{{ message|safe }}</textarea>
-      <div id="board_img">
-        <table id="board_koma" align="center" width="75%" height="100%">
-          <tr align="center" height="3.125%"></tr>
-          <tr align="center" height="10.416%">
+      <div id="board_img" >
+        <table id="board_koma" align="center" width="100%" height="100%">
+          <tr align="center" ><td></td></tr> 
+          <tr align="center" >
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
@@ -39,7 +39,7 @@
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
           </tr>
-          <tr align="center" height="10.416%">
+          <tr align="center">
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
@@ -50,7 +50,7 @@
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
           </tr>
-          <tr align="center" height="10.416%">
+          <tr align="center">
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
@@ -61,7 +61,7 @@
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
           </tr>
-          <tr align="center" height="10.416%">
+          <tr align="center">
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
@@ -72,7 +72,7 @@
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
           </tr>
-          <tr align="center" height="10.416%">
+          <tr align="center">
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
@@ -83,10 +83,54 @@
             <td><img src="img/koma/vと.png" /></td>
             <td><img src="img/koma/vと.png" /></td>
           </tr>
-          <tr align="center" height="3.125%"></tr>
+          <tr align="center">
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+          </tr>
+          <tr align="center">
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+          </tr>
+          <tr align="center">
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+          </tr>
+          <tr align="center">
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+            <td><img src="img/koma/vと.png" /></td>
+          </tr>
+          <tr align="center" ><td></td></tr> 
         </table>
       </div>
-      <div style="text-align:center;">
+      <div id="copy_btn" style="text-align:center;display: none;">
         <button type="button" class="btn btn-primary" onclick="clip_text()">Copy!</button>
       </div>
       <div id="guruguru" class="loader" style="display: none">Loading...</div>
@@ -155,6 +199,7 @@
       function again(){
         display_form_button();
         clear_form_inner();
+        hide_result();
       }
       function file_upload(){
           // 結果の非表示

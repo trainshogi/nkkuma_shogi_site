@@ -45,24 +45,35 @@ function display_form_button(){
     form.style.height = "initial";
     again.style.display = "none";
 }
-function before_reco(){
+function hide_result(){
     var result_place = document.getElementById('board');
+    var result_img = document.getElementById('board_img');
+    var copy_btn = document.getElementById('copy_btn');
     var kekka_text = document.getElementById('kekka_text');
     var again = document.getElementById('again');
-    var guruguru = document.getElementById('guruguru');
     kekka_text.style.display="none";
     result_place.style.display="none";
+    result_img.style.display="none";
+    copy_btn.style.display="none";
     again.style.display="none";
-    guruguru.style.display="block";
+}
+function before_reco(){
+    var guruguru = document.getElementById('guruguru');
+    hide_result();
     hide_form_button();        
+    guruguru.style.display="block";
 }
 function after_reco(){
     var result_place = document.getElementById('board');
+    var result_img = document.getElementById('board_img');
+    var copy_btn = document.getElementById('copy_btn');
     var kekka_text = document.getElementById('kekka_text');
     var again = document.getElementById('again');
     var guruguru = document.getElementById('guruguru');
     guruguru.style.display="none";
     kekka_text.style.display="block";
     result_place.style.display="block";
+    result_img.style.display="block";
+    copy_btn.style.display="block";
     again.style.display="block";
 }
