@@ -85,6 +85,8 @@ function canvasDraw() {
         }else{
           rotate = 0;
           canvasHeight= img.height * (canvasWidth / img.width);
+          $(".contents").height(canvasHeight);
+          $("#pic1").height(canvasHeight);
           pic1.style.backgroundSize = canvasWidth + "px "+ canvasHeight + "px";
         }
         // imgタグに表示
