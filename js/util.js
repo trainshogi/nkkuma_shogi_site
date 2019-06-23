@@ -123,7 +123,7 @@ function json_to_kif(result_json){
     // i = 行番号 // j = 列番号
     for(i=0;i<9;i++){
         kif_text += "|";
-        for(j=0;j<9;j++){kif_text += ban_result["\""+str(j+1)+str(i+1)+"\""];}
+        for(j=0;j<9;j++){kif_text += ban_result["\""+String(j+1)+String(i+1)+"\""];}
         kif_text += "|"+kansuuji[i]+"\n";
     }
 
