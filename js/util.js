@@ -115,7 +115,7 @@ function json_to_kif(result_json){
     var teban       = result_json['teban'];
     
     kif_text += "後手の持駒：";
-    for (koma in gote_mochi)  {kif_text+=gote_mochi[koma] +"　"};
+    for (koma in gote_mochi)  {kif_text+=koma+gote_mochi[koma] +"　"};
     kif_text += "\n";
     kif_text += "  ９ ８ ７ ６ ５ ４ ３ ２ １\n";
     kif_text += "+---------------------------+\n";
