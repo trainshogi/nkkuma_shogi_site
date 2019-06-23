@@ -32,13 +32,14 @@ function file_upload(){
         cache       : false,
         contentType : false,
         processData : false,
-        dataType    : "text",
+        dataType    : "json",
         success: function(data, textStatus, jqXHR){
           // alert(data);
-          var result = data.replace(/<br>/g, '\n');
-          result_place.textContent = result;
+          var result = data;//.replace(/<br>/g, '\n');
+          result_place.textContent = json_to_kif(result);
           // disp_result(result);
-          disp_koma(result);
+          // disp_koma(result);
+          disp_koma_json(result);
           // ぐるぐるの非表示
           // 結果部分の表示
           after_reco();

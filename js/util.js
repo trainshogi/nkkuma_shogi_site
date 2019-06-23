@@ -93,6 +93,49 @@ function disp_koma(string){
         }
     }
 }
+function disp_koma_json(result_json){
+    var table = document.getElementById('board_koma');
+    var ban_result = result_json['ban_result'];
+    for(i=0;i<9;i++){
+        // i = 行番号
+        for(j=0;j<9;j++){
+            // j = 列番号
+            var koma_place = table.rows[i].cells[j].children[0];
+            var koma_img = "../img/koma/"+ban_result[str(j+1)+str(i+1)]+".png";
+            koma_place.src = koma_img;
+        }
+    }
+}
+function json_to_kif(result_json){
+    var kansuuji    = ["一","二","三","四","五","六","七","八","九"];
+    var kif_text    = "";
+    var ban_result  = result_json['ban_result'];
+    var sente_mochi = result_json['sente_mochi'];
+    var gote_mochi  = result_json['gote_mochi'];
+    var teban       = result_json['teban'];
+    
+    kif_text += "後手の持駒：";
+    for (koma in gote_mochi)  {kif_text+=gote_mochi[koma] +"　"};
+    kif_text += "\n";
+    kif_text += "  ９ ８ ７ ６ ５ ４ ３ ２ １\n";
+    kif_text += "+---------------------------+\n";
+
+    // i = 行番号 // j = 列番号
+    for(i=0;i<9;i++){
+        kif_text += "|";
+        for(j=0;j<9;j++){kif_text += ban_result[str(j+1)+str(i+1)];}
+        kif_text += "|"+kansuuji[i]+"\n";
+    }
+
+    kif_text += "+---------------------------+\n"
+    kif_text += "先手の持駒："
+    for (koma in sente_mochi) {kif_text+=koma+sente_mochi[koma]+"　"}
+    kif_text += "\n"
+    
+    kif_text += "\n"
+    kif_text += teban
+    return kif_text
+}
 function before_reco(){
     var guruguru = document.getElementById('guruguru');
     hide_result();
