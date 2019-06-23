@@ -101,7 +101,7 @@ function disp_koma_json(result_json){
         for(j=0;j<9;j++){
             // j = 列番号
             var koma_place = table.rows[i].cells[j].children[0];
-            var koma_img = "../img/koma/"+ban_result[String(j+1)+String(i+1)]+".png";
+            var koma_img = "../img/koma/"+ban_result["\""+String(j)+String(i)+"\""]+".png";
             koma_place.src = koma_img;
         }
     }
@@ -123,7 +123,7 @@ function json_to_kif(result_json){
     // i = 行番号 // j = 列番号
     for(i=0;i<9;i++){
         kif_text += "|";
-        for(j=0;j<9;j++){kif_text += ban_result["\""+String(j+1)+String(i+1)+"\""];}
+        for(j=0;j<9;j++){kif_text += ban_result["\""+String(j)+String(i)+"\""];}
         kif_text += "|"+kansuuji[i]+"\n";
     }
 
