@@ -101,7 +101,7 @@ function disp_koma_json(result_json){
         for(j=0;j<9;j++){
             // j = 列番号
             var koma_place = table.rows[i].cells[j].children[0];
-            var koma_img = "../img/koma/"+ban_result[str(j+1)+str(i+1)]+".png";
+            var koma_img = "../img/koma/"+ban_result[String(j+1)+String(i+1)]+".png";
             koma_place.src = koma_img;
         }
     }
