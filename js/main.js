@@ -1,3 +1,7 @@
+$(function(){
+  $("#board_img").load("shogiban.html");
+});
+
 function clip_text(){
   var result_txt = document.getElementById('board');
   if(execCopy(result_txt.value)){
