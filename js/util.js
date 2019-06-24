@@ -93,6 +93,33 @@ function disp_koma(string){
         }
     }
 }
+
+function koma2index(string){
+    var koma = ["歩","香","桂","銀","金","角","飛"];
+    return koma.indexOf(string)
+}
+
+function kanji2int(kanji){
+    var kansuuji = ["","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
+    return kansuuji.indexOf(kanji)+1
+}
+
+function int2kanji(kazu){
+    var kansuuji = ["","","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
+    return kansuuji[kazu]
+}
+
+function disp_mochigoma_sub(sengo,string,kazu,result_json){
+    var sengo_int = 0;
+    if (sengo == "sente_mochi"){sengo_int = 0;}
+    var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
+    result_json[sengo][string] = int2kanji(kazu);
+    mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
+    if (kazu == 0){mochigoma.children('img')[0].style.opacity=0.5; delete result_json[sengo][string];}
+    else {mochigoma.children[0].style.opacity=1;}
+    return result_json
+}
+
 function disp_koma_json(result_json){
     var table = document.getElementById('board_koma');
     var ban_result = result_json['ban_result'];
@@ -105,6 +132,8 @@ function disp_koma_json(result_json){
             koma_place.src = koma_img;
         }
     }
+    var sente_mochi = result_json['sente_mochi'];
+    for (koma in sente_mochi) { result_json = disp_mochigoma_subv("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
 }
 function json_to_kif(result_json){
     var kansuuji    = ["一","二","三","四","五","六","七","八","九"];

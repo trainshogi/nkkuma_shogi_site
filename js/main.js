@@ -27,28 +27,16 @@ function fix(string){
 
 function fix_mochigoma(method,sengo,string){
   var kazu = 1; // == real num
-  var koma = ["歩","香","桂","銀","金","角","飛"]
-  var kansuuji = ["","","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
+  var max_koma = [18,4,4,4,4,2,2];
   var result_place = document.getElementById('board');
   if(method=='add'){
-    if (sengo=="gote"){// gote
-      if (result_json['gote_mochi'][string]){
-        if (result_json['gote_mochi'][string] == ""){kazu == 2;}
-        else {kazu=(kansuuji.indexOf(result_json['gote_mochi'][string])+1)%19;}}
-      result_json['gote_mochi'][string] = kansuuji[kazu];
-
-    }
-    else{              // sente
-      var mochigoma = document.getElementsByClassName('mochigoma-list')[0].children[koma.indexOf(string)].children[0];
-      if (result_json['sente_mochi'][string]){
-        if (result_json['sente_mochi'][string] == ""){kazu == 2;}
-        else {kazu=(kansuuji.indexOf(result_json['sente_mochi'][string])+1)%19;}}
-      result_json['sente_mochi'][string] = kansuuji[kazu];
-      mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
-      if (kazu == 0){mochigoma.children('img')[0].style.opacity=0.5;}
-      else {mochigoma.children('img')[0].style.opacity=1;}
+    sengo_str = sengo + "_mochi"
+    if (result_json[sengo_str][string]){
+      if (result_json[sengo_str][string] == ""){kazu == 2;}
+      else {kazu=(kanji2int(result_json[sengo_str][string])+1)%(max_koma[koma2index(string)]+1);}
     }
   }
+  result_json = disp_mochigoma_sub(sengo_str,string,kazu,result_json);
   result_place.textContent = json_to_kif(result_json);
 }
 
