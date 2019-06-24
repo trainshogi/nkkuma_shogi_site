@@ -133,7 +133,7 @@ function disp_koma_json(result_json){
         }
     }
     var sente_mochi = result_json['sente_mochi'];
-    for (koma in sente_mochi) { result_json = disp_mochigoma_subv("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
+    for (koma in sente_mochi) { result_json = disp_mochigoma_sub("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
 }
 function json_to_kif(result_json){
     var kansuuji    = ["一","二","三","四","五","六","七","八","九"];

@@ -31,7 +31,7 @@ function fix_mochigoma(method,sengo,string){
   var result_place = document.getElementById('board');
   if(method=='add'){
     sengo_str = sengo + "_mochi"
-    if (result_json[sengo_str][string]){
+    if (string in result_json[sengo_str]){
       if (result_json[sengo_str][string] == ""){kazu == 2;}
       else {kazu=(kanji2int(result_json[sengo_str][string])+1)%(max_koma[koma2index(string)]+1);}
     }
