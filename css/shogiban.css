@@ -42,7 +42,10 @@
     width: 9%;
 
     /* 見た目調整 */
-    height: 9%;
     margin: 16px;
     background: rgba(255, 0, 0, 0.4);
+}
+
+.item > div > img{
+    width: 100%;
 }
