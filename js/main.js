@@ -5,19 +5,19 @@ $(function(){
 var fix_place = '00';
 
 function ban_click(string){
-  fix_place = string;
-  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[8-Number(fix_place.charAt(0))];
+  fix_place = String(8-Number(string.charAt(0)))+String(Number(string.charAt(1)));
+  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[Number(fix_place.charAt(0))];
   var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
   result_img.style.backgroundColor = 'skyblue';
   fix_imglist.style.display = "block"
 }
 
 function fix(string){
-  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[8-Number(fix_place.charAt(0))];
+  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[Number(fix_place.charAt(0))];
   var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
   var result_place = document.getElementById('board');
   // fix
-  result_json["\""+fix_place+"\""] = string;
+  result_json["ban_result"]["\""+fix_place+"\""] = string;
   result_img.children[0].src = "../img/koma/"+string+".png";
   result_place.textContent = json_to_kif(result_json);
 
