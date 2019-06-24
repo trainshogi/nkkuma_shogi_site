@@ -39,12 +39,12 @@ function fix_mochigoma(method,sengo,string){
 
     }
     else{              // sente
-      var mochigoma = document.getElementsByClassName('mochigoma-list')[0].children[string.indexOf(koma)].children[0];
+      var mochigoma = document.getElementsByClassName('mochigoma-list')[0].children[koma.indexOf(string)].children[0];
       if (result_json['sente_mochi'][string]){
         if (result_json['sente_mochi'][string] == ""){kazu == 2;}
         else {kazu=(kansuuji.indexOf(result_json['sente_mochi'][string])+1)%19;}}
       result_json['sente_mochi'][string] = kansuuji[kazu];
-      mochigoma.children('p')[0].data = String(kazu);
+      mochigoma.children['p'][0].data = String(kazu);
       if (kazu == 0){mochigoma.children('img')[0].style.opacity=0.5;}
       else {mochigoma.children('img')[0].style.opacity=1;}
     }
