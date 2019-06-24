@@ -115,7 +115,7 @@ function disp_mochigoma_sub(sengo,string,kazu,result_json){
     var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
     result_json[sengo][string] = int2kanji(kazu);
     mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
-    if (kazu == 0){mochigoma.children('img')[0].style.opacity=0.5; delete result_json[sengo][string];}
+    if (kazu == 0){mochigoma.children[0].style.opacity=0.5; delete result_json[sengo][string];}
     else {mochigoma.children[0].style.opacity=1;}
     return result_json
 }

@@ -32,7 +32,7 @@ function fix_mochigoma(method,sengo,string){
   if(method=='add'){
     sengo_str = sengo + "_mochi"
     if (string in result_json[sengo_str]){
-      if (result_json[sengo_str][string] == ""){kazu == 2;}
+      if (result_json[sengo_str][string] == ""){kazu = 2;}
       else {kazu=(kanji2int(result_json[sengo_str][string])+1)%(max_koma[koma2index(string)]+1);}
     }
   }
