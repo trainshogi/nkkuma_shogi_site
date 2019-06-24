@@ -15,6 +15,7 @@ function ban_click(string){
 function fix(string){
   var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[8-Number(fix_place.charAt(0))];
   var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
+  var result_place = document.getElementById('board');
   // fix
   result_json["\""+fix_place+"\""] = string;
   result_img.children[0].src = "../img/koma/"+string+".png";
