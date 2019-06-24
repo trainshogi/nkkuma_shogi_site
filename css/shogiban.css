@@ -30,6 +30,29 @@
     vertical-align: bottom;
 }
 
+/*持ち駒用*/
+.mochigoma-list {
+    display: table;
+    width: 100%;
+}
+.mochigoma {/*親div*/
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;/*相対配置*/
+}
+.mochigoma p {
+    position: absolute;/*絶対配置*/
+    color: black;
+    top: 0;
+    right: 0;
+}
+.mochigoma img {
+    width: 100%;
+}
+
+/*修正Interface用*/
+
 .horizontal-list {
     overflow-x: auto;
     white-space: nowrap;
