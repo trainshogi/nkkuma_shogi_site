@@ -2,6 +2,28 @@ $(function(){
   $("#board_img").load("shogiban.html");
 });
 
+var fix_place = '00';
+
+function ban_click(string){
+  fix_place = string;
+  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[8-Number(fix_place.charAt(0))];
+  var fix_imglist = document.getElementsByClassName('horizontal-list');
+  result_img.style.backgroundColor = 'skyblue';
+  fix_imglist.style.display = "block"
+}
+
+function fix(string){
+  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[8-Number(fix_place.charAt(0))];
+  var fix_imglist = document.getElementsByClassName('horizontal-list');
+  // fix
+  result_json["\""+fix_place+"\""] = string;
+  result_img.children[0].src = "../img/koma/"+string+".png";
+  result_place.textContent = json_to_kif(result_json);
+
+  result_img.style.backgroundColor = 'transparent';
+  fix_imglist.style.display = "none";
+}
+
 function clip_text(){
   var result_txt = document.getElementById('board');
   if(execCopy(result_txt.value)){
@@ -35,11 +57,11 @@ function file_upload(){
         dataType    : "json",
         success: function(data, textStatus, jqXHR){
           // alert(data);
-          var result = data;//.replace(/<br>/g, '\n');
-          result_place.textContent = json_to_kif(result);
+          result_json = data;//.replace(/<br>/g, '\n');
+          result_place.textContent = json_to_kif(result_json);
           // disp_result(result);
           // disp_koma(result);
-          disp_koma_json(result);
+          disp_koma_json(result_json);
           // ぐるぐるの非表示
           // 結果部分の表示
           after_reco();

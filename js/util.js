@@ -136,6 +136,7 @@ function json_to_kif(result_json){
     kif_text += teban
     return kif_text
 }
+
 function before_reco(){
     var guruguru = document.getElementById('guruguru');
     hide_result();
