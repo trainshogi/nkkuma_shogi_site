@@ -12,7 +12,7 @@
 }
 #board_koma {
     position: absolute;
-    top: 3%;
+    top: 11vw;
     left: 3%;
 }
 #board_koma tr{
@@ -56,11 +56,12 @@
 }
 #gote_mochi{
     position: absolute;
-    top: 2%;
+    top: 1vw;
 }
 #sente_mochi{
-    padding-top: 13%;
-    padding-bottom: 1%;
+    padding-top: 7vw;
+    padding-bottom: 0.5vw;
+    margin-bottom: 0px;
 }
 
 /*修正Interface用*/
