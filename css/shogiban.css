@@ -59,7 +59,7 @@
     top: 1vw;
 }
 #sente_mochi{
-    padding-top: 7vw;
+    padding-top: 8vw;
     padding-bottom: 0.5vw;
     margin-bottom: 0px;
 }
@@ -70,6 +70,7 @@
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
+    padding-inline-start: 1vw;
 }
 
 .item {
@@ -78,8 +79,8 @@
     width: 9%;
 
     /* 見た目調整 */
-    margin: 16px;
-    background: rgba(255, 0, 0, 0.4);
+    margin: 1vw;
+    background: rgba(255, 70, 0, 0.4);
 }
 
 .item > div > img{
