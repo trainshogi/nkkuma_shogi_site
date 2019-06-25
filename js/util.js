@@ -137,12 +137,23 @@ function disp_koma_json(result_json){
     var sente_mochi = result_json['sente_mochi'];
     for (koma in sente_mochi) { result_json = disp_mochigoma_sub("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
 }
+function sort_mochigoma(mochi){
+    var sorted = {};
+    if('飛' in mochi){sorted['飛']=mochi['飛'];}
+    if('角' in mochi){sorted['角']=mochi['角'];}
+    if('金' in mochi){sorted['金']=mochi['金'];}
+    if('銀' in mochi){sorted['銀']=mochi['銀'];}
+    if('桂' in mochi){sorted['桂']=mochi['桂'];}
+    if('香' in mochi){sorted['香']=mochi['香'];}
+    if('歩' in mochi){sorted['歩']=mochi['歩'];}
+    return sorted
+}
 function json_to_kif(result_json){
     var kansuuji    = ["一","二","三","四","五","六","七","八","九"];
     var kif_text    = "";
     var ban_result  = result_json['ban_result'];
-    var sente_mochi = result_json['sente_mochi'];
-    var gote_mochi  = result_json['gote_mochi'];
+    var sente_mochi = sort_mochigoma(result_json['sente_mochi']);
+    var gote_mochi  = sort_mochigoma(result_json['gote_mochi']);
     var teban       = result_json['teban'];
     
     kif_text += "後手の持駒：";
