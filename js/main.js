@@ -55,6 +55,8 @@ function again(){
   hide_result();
 }
 function file_upload(){
+    // 値の格納
+    get_js_variable();
     // 結果の非表示
     // ぐるぐるを表示
     before_reco();
