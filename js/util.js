@@ -111,7 +111,7 @@ function int2kanji(kazu){
 
 function disp_mochigoma_sub(sengo,string,kazu,result_json){
     var sengo_int = 0;
-    if (sengo == "sente_mochi"){sengo_int = 0;}
+    if (sengo == "sente_mochi"){sengo_int = 1;}
     var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
     result_json[sengo][string] = int2kanji(kazu);
     mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
@@ -132,6 +132,8 @@ function disp_koma_json(result_json){
             koma_place.src = koma_img;
         }
     }
+    var gote_mochi = result_json['gote_mochi'];
+    for (koma in gote_mochi) { result_json = disp_mochigoma_sub("gote_mochi",koma,kanji2int(gote_mochi[koma]),result_json); }
     var sente_mochi = result_json['sente_mochi'];
     for (koma in sente_mochi) { result_json = disp_mochigoma_sub("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
 }

@@ -31,9 +31,12 @@
 }
 
 /*持ち駒用*/
+
 .mochigoma-list {
     display: table;
     width: 100%;
+    padding-inline-start: 10%;
+    padding-inline-end: 10%;
 }
 .mochigoma {/*親div*/
     display: table-cell;
@@ -50,6 +53,14 @@
 .mochigoma img {
     width: 100%;
     opacity: 0.5;
+}
+#gote_mochi{
+    position: absolute;
+    top: 2%;
+}
+#sente_mochi{
+    padding-top: 13%;
+    padding-bottom: 1%;
 }
 
 /*修正Interface用*/
