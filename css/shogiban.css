@@ -12,7 +12,7 @@
 }
 #board_koma {
     position: absolute;
-    top: 3%;
+    top: 10.5vw;
     left: 3%;
 }
 #board_koma tr{
@@ -31,9 +31,12 @@
 }
 
 /*持ち駒用*/
+
 .mochigoma-list {
     display: table;
     width: 100%;
+    padding-inline-start: 10%;
+    padding-inline-end: 10%;
 }
 .mochigoma {/*親div*/
     display: table-cell;
@@ -51,6 +54,15 @@
     width: 100%;
     opacity: 0.5;
 }
+#gote_mochi{
+    position: absolute;
+    top: 1vw;
+}
+#sente_mochi{
+    padding-top: 8vw;
+    padding-bottom: 0.5vw;
+    margin-bottom: 0px;
+}
 
 /*修正Interface用*/
 
@@ -58,6 +70,7 @@
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
+    padding-inline-start: 1vw;
 }
 
 .item {
@@ -66,8 +79,8 @@
     width: 9%;
 
     /* 見た目調整 */
-    margin: 16px;
-    background: rgba(255, 0, 0, 0.4);
+    margin: 1vw;
+    background: rgba(255, 70, 0, 0.4);
 }
 
 .item > div > img{
