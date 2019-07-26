@@ -70,12 +70,14 @@ function hide_result(){
     var result_img = document.getElementById('board_img');
     var copy_btn = document.getElementById('copy_btn');
     var kekka_text = document.getElementById('kekka_text');
-    var again = document.getElementById('again');
+    var again = document.getElementById('again');    
+    var reco_err = document.getElementById('reco_err_img');
     kekka_text.style.display="none";
     // result_place.style.display="none";
     result_img.style.display="none";
     copy_btn.style.display="none";
     again.style.display="none";
+    reco_err.style.display="none";
 }
 function disp_koma(string){
     var table = document.getElementById('board_koma');
@@ -198,4 +200,13 @@ function after_reco(){
     result_img.style.display="block";
     copy_btn.style.display="block";
     again.style.display="block";
+}
+
+function reco_err(){
+    var again = document.getElementById('again');
+    var guruguru = document.getElementById('guruguru');
+    var reco_err = document.getElementById('reco_err_img');
+    guruguru.style.display="none";
+    again.style.display="block";
+    reco_err.style.display="block";
 }

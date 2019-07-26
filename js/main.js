@@ -86,6 +86,8 @@ function file_upload(){
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
           console.log(textStatus)
+          // うまくいかなかった表示
+          reco_err();
         }
     })
 }
