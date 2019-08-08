@@ -122,6 +122,17 @@ function disp_mochigoma_sub(sengo,string,kazu,result_json){
     return result_json
 }
 
+function reset_mochigoma(){
+    var komas = ["歩","香","桂","銀","金","角","飛"];
+    for (var sengo_int=0;sengo_int<2;sengo_int++){
+        for (var string in komas){
+            var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
+            mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
+            mochigoma.children[0].style.opacity=0.5;
+        }
+    }
+}
+
 function disp_koma_json(result_json){
     var table = document.getElementById('board_koma');
     var ban_result = result_json['ban_result'];
@@ -134,6 +145,7 @@ function disp_koma_json(result_json){
             koma_place.src = koma_img;
         }
     }
+    reset_mochigoma();
     var gote_mochi = result_json['gote_mochi'];
     for (koma in gote_mochi) { result_json = disp_mochigoma_sub("gote_mochi",koma,kanji2int(gote_mochi[koma]),result_json); }
     var sente_mochi = result_json['sente_mochi'];
