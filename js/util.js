@@ -125,9 +125,9 @@ function disp_mochigoma_sub(sengo,string,kazu,result_json){
 function reset_mochigoma(){
     var komas = ["歩","香","桂","銀","金","角","飛"];
     for (var sengo_int=0;sengo_int<2;sengo_int++){
-        for (var string in komas){
+        for (var string of komas){
             var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
-            mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
+            mochigoma.children[1].innerHTML = String(0); // ここの1はimgタグの次のpってこと
             mochigoma.children[0].style.opacity=0.5;
         }
     }
