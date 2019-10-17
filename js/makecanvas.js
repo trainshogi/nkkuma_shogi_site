@@ -32,7 +32,8 @@ function loadLocalImage(e) {
     // reader.readAsDataURL(fileData);
 
     load(fileData, function(canvas) {
-      $('#pic1_parent').src = canvas.toDataURL();
+      var imgsrc = canvas.toDataURL();
+      $('#pic1').attr('src', imgsrc);
     });
 }
 
