@@ -32,8 +32,7 @@ function loadLocalImage(e) {
     // reader.readAsDataURL(fileData);
 
     load(fileData, function(canvas) {
-      $('#pic1_parent').empty();
-      $('#pic1_parent').append(canvas);
+      $('#pic1_parent').src = canvas.toDataURL();
     });
 }
 
@@ -41,7 +40,7 @@ function loadLocalImage(e) {
 file.addEventListener('change', loadLocalImage, false);
 
 function load(fileData, callback) {
-  var options = {};
+  var options = {canvas: true};
 
   loadImage.parseMetaData(fileData, function (data) {
     if (data.exif) {
