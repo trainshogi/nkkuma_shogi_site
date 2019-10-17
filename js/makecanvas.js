@@ -19,21 +19,44 @@ function loadLocalImage(e) {
         return;
     }
 
-    // FileReaderオブジェクトを使ってファイル読み込み
-    var reader = new FileReader();
-    // ファイル読み込みに成功したときの処理
-    reader.onload = function() {
-        // Canvas上に表示する
-        uploadImgSrc = reader.result;
-        // $('#pic1').attr('src',uploadImgSrc)
-        canvasDraw();
-    }
-    // ファイル読み込みを実行
-    reader.readAsDataURL(fileData);
+    // // FileReaderオブジェクトを使ってファイル読み込み
+    // var reader = new FileReader();
+    // // ファイル読み込みに成功したときの処理
+    // reader.onload = function() {
+    //     // Canvas上に表示する
+    //     uploadImgSrc = reader.result;
+    //     // $('#pic1').attr('src',uploadImgSrc)
+    //     canvasDraw();
+    // }
+    // // ファイル読み込みを実行
+    // reader.readAsDataURL(fileData);
+
+    load(file, function(canvas) {
+      $('#pic1_parent').empty();
+      $('#pic1_parent').appendChild(canvas);
+    });
 }
 
 // ファイルが指定された時にloadLocalImage()を実行
 file.addEventListener('change', loadLocalImage, false);
+
+function load(file, callback) {
+  // canvas: true にすると canvas に画像を描画する(回転させる場合は必須オプション)
+  var options = {canvas: true};
+
+  loadImage.parseMetaData(file, function (data) {
+    if (data.exif) {
+      // console.log("exifに格納されている情報:\n", data.exif.getAll());
+
+      // options の orientation は小文字。 exif.getの 'Orientation' は先頭大文字
+      // ここでcanvasの回転を指定している
+      options.orientation = data.exif.get('Orientation');
+      console.log('Orientation: ' + options.orientation);
+    }
+    // 画像の読み込み。完了時に callback が呼び出される
+    loadImage(file, callback, options);
+  });
+}
 
 // Canvas上に画像を表示する
 function canvasDraw() {    
