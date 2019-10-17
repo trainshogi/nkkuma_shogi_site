@@ -39,6 +39,6 @@ div#back {
     margin: 2vw;
 }
 div#pic1_parent img{
-    width: 100%;
-    height: auto;
+    width: 100% !important;
+    height: auto !important;
 }
