@@ -12,7 +12,7 @@
 }
 #board_koma {
     position: absolute;
-    top: 10.5vw;
+    top: 11%;
     left: 3%;
 }
 #board_koma tr{
@@ -59,7 +59,7 @@
     top: 1vw;
 }
 #sente_mochi{
-    padding-top: 8vw;
+    padding-top: calc(1vw + 7.5%);
     padding-bottom: 0.5vw;
     margin-bottom: 0px;
 }
