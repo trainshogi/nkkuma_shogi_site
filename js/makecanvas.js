@@ -31,20 +31,19 @@ function loadLocalImage(e) {
     // // ファイル読み込みを実行
     // reader.readAsDataURL(fileData);
 
-    load(file, function(canvas) {
+    load(fileData, function(canvas) {
       $('#pic1_parent').empty();
-      $('#pic1_parent').appendChild(canvas);
+      $('#pic1_parent').append(canvas);
     });
 }
 
 // ファイルが指定された時にloadLocalImage()を実行
 file.addEventListener('change', loadLocalImage, false);
 
-function load(file, callback) {
-  // canvas: true にすると canvas に画像を描画する(回転させる場合は必須オプション)
-  var options = {canvas: true};
+function load(fileData, callback) {
+  var options = {};
 
-  loadImage.parseMetaData(file, function (data) {
+  loadImage.parseMetaData(fileData, function (data) {
     if (data.exif) {
       // console.log("exifに格納されている情報:\n", data.exif.getAll());
 
@@ -54,7 +53,7 @@ function load(file, callback) {
       console.log('Orientation: ' + options.orientation);
     }
     // 画像の読み込み。完了時に callback が呼び出される
-    loadImage(file, callback, options);
+    loadImage(fileData, callback, options);
   });
 }
 

@@ -38,3 +38,7 @@ div#back {
 .faq{
     margin: 2vw;
 }
+div#pic1_parent img{
+    width: 100%;
+    height: auto;
+}
