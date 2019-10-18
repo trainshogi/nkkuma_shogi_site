@@ -200,6 +200,27 @@ function json_to_kif(result_json){
     return kif_text
 }
 
+// 結果編集用関数群
+function get_result_img(fix_place){
+    return document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[Number(fix_place.charAt(0))];
+}
+function set_color(fix_place){
+    var result_img = get_result_img(fix_place);
+    result_img.style.backgroundColor = 'skyblue';
+}
+function set_uncolor(fix_place){
+    var result_img = get_result_img(fix_place);
+    result_img.style.backgroundColor = 'transparent';
+}
+function disp_imglist(){
+    var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
+    fix_imglist.style.display = "block";
+}
+function close_imglist(){
+    var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
+    fix_imglist.style.display = "none";
+}
+
 function before_reco(){
     var guruguru = document.getElementById('guruguru');
     hide_result();

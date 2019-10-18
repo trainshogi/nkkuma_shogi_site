@@ -2,27 +2,26 @@ $(function(){
   $("#board_img").load("shogiban.html");
 });
 
-var fix_place = '00';
+var fix_place = 'done';
 
 function ban_click(string){
+  if (fix_place != 'done'){set_uncolor(fix_place);}
   fix_place = String(8-Number(string.charAt(0)))+String(Number(string.charAt(1)));
-  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[Number(fix_place.charAt(0))];
-  var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
-  result_img.style.backgroundColor = 'skyblue';
-  fix_imglist.style.display = "block"
+  set_color(fix_place);
+  disp_imglist();
 }
 
 function fix(string){
-  var result_img = document.getElementById('board_koma').children[0].rows[Number(fix_place.charAt(1))].cells[Number(fix_place.charAt(0))];
-  var fix_imglist = document.getElementsByClassName('horizontal-list')[0];
+  var result_img = get_result_img(fix_place);
   var result_place = document.getElementById('board');
   // fix
   result_json["ban_result"]["\""+fix_place+"\""] = string;
   result_img.children[0].src = "../img/koma/"+string.trim()+".png";
   result_place.textContent = json_to_kif(result_json);
 
-  result_img.style.backgroundColor = 'transparent';
-  fix_imglist.style.display = "none";
+  set_uncolor(fix_place);
+  close_imglist();
+  fix_place = 'done';
 }
 
 function fix_mochigoma(method,sengo,string){
