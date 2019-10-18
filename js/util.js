@@ -40,6 +40,13 @@ function splitByLength(str, length) {
 }
 
 // 自作関数
+function set_camera(){
+    $('#upfile').attr('capture','camera');
+}
+function set_library(){
+    $('#upfile').removeAttr('capture');
+}
+
 function clear_form_inner(){
     var form = document.getElementById('myform');
     var pic1_p = document.getElementById('pic1_parent');

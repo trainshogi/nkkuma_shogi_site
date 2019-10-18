@@ -50,10 +50,13 @@
         <div class="input-group .center-block" style="margin-left: auto; margin-right: auto;">
           <input type="file" name="upfile" id="upfile" style="display: none" accept="image/*" capture="camera" />
           <span class="input-group-btn"  style="margin-right: 1rem;" >
-            <button class="btn btn-primary" type="button" onclick="$('#upfile').click();">Camera</button>
+            <button class="btn btn-primary" type="button" onclick="set_camera();$('#upfile').click();"><i class="fa fa-camera" aria-hidden="true"></i></button>
+          </span>
+          <span class="input-group-btn"  style="margin-right: 1rem;" >
+            <button class="btn btn-primary" type="button" onclick="set_library();$('#upfile').click();"><i class="fa fa-image" aria-hidden="true"></i></button>
           </span>
           <input type="checkbox" id="sengo-event" checked data-toggle="toggle" data-on="先手番" data-off="後手番" data-onstyle="success" data-offstyle="warning"/>
-          <button type="button" class="btn btn-danger" style="margin-left: 1rem;" onclick="file_upload()">変換！</button>
+          <button type="button" class="btn btn-danger" style="margin-left: 1rem;" onclick="file_upload()">変換</button>
           <input type="hidden" name="hidden_rotate" value="" />
           <input type="hidden" name="hidden_sengo" value="" />
         </div>
