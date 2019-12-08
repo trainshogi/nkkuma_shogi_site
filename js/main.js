@@ -61,7 +61,8 @@ function file_upload(){
     before_reco();
     // フォームデータを取得
     var result_place = document.getElementById('board');
-    var formdata = new FormData($('#myform').get(0));        
+    var formdata = new FormData($('#myform').get(0));
+    formdata.set('upfile',blobdata)    
 
     // POSTでアップロード
     $.ajax({

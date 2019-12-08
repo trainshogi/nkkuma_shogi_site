@@ -6,15 +6,11 @@ var canvasWidth  = $('.contents').width();
 var canvasHeight = $('.contents').height();
 var img = new Image();
 var rotate = 0;
-var resized = false;
+var blobdata;
 
 var debug = false;
 
 function loadLocalImage(e) {
-    if(resized == true){
-      // リサイズ後にもう一回呼ばれただけ
-      return;
-    }
     // ファイル情報を取得
     var fileData = e.target.files[0];
 
@@ -41,10 +37,11 @@ function loadLocalImage(e) {
       maxWidth:2000,
       maxHeight:2000,
       success(result) {
-        resized = true;
-        var imgsrc = result.toDataURL();
-        $('#pic1').attr('src', imgsrc);
-        file.value = result;
+        load(result, function(canvas) {
+          var imgsrc = canvas.toDataURL();
+          $('#pic1').attr('src', imgsrc);
+          blobdata = result;
+        });
         return;
       },
       error(err) {
