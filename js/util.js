@@ -55,6 +55,7 @@ function clear_form_inner(){
     pic1.style.backgroundImage = "initial";
     pic1.style.height = "0px";
     pic1_p.style.height = "0px";
+    $('#pic1').attr('src','');
 }
 function hide_form_button(){
     var form = document.getElementById('myform');
