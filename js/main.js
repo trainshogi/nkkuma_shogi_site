@@ -1,5 +1,9 @@
 $(function(){
   $("#board_img").load("shogiban.html");
+  $('.dropdown-menu .dropdown-item').click(function(){
+    var visibleItem = $('.dropdown-toggle', $(this).closest('.dropdown'));
+    visibleItem.text($(this).attr('value'));
+  });
 });
 
 var fix_place = 'done';
@@ -41,6 +45,11 @@ function fix_mochigoma(method,sengo,string){
 
 function clip_text(){
   var result_txt = document.getElementById('board');
+  if(document.getElementById('format').value == "kif"){
+    clip_kif();
+  }else if(document.getElementById('format').value == "sfen"){
+    clip_sfen();
+  }
   if(execCopy(result_txt.value)){
     alert('コピーできました');
   }
@@ -50,11 +59,9 @@ function clip_text(){
 }
 function clip_kif(){
   document.getElementById('board').textContent = json_to_kif(result_json);
-  clip_text();
 }
 function clip_sfen(){
   document.getElementById('board').textContent = json_to_sfen(result_json);
-  clip_text();
 }
 function again(){
   display_form_button();
