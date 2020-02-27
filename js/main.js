@@ -1,8 +1,7 @@
 $(function(){
   $("#board_img").load("shogiban.html");
   $('.dropdown-menu .dropdown-item').click(function(){
-    var visibleItem = $('.dropdown-toggle', $(this).closest('.dropdown'));
-    visibleItem.text($(this).attr('value'));
+    $("#format").text($(this).attr('value'));
   });
 });
 
@@ -45,9 +44,9 @@ function fix_mochigoma(method,sengo,string){
 
 function clip_text(){
   var result_txt = document.getElementById('board');
-  if(document.getElementById('format').value == "kif"){
+  if($("#format").text() == "kif"){
     clip_kif();
-  }else if(document.getElementById('format').value == "sfen"){
+  }else if($("#format").text() == "sfen"){
     clip_sfen();
   }
   if(execCopy(result_txt.value)){
