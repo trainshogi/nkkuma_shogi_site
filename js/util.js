@@ -77,6 +77,7 @@ function hide_result(){
     // var result_place = document.getElementById('board');
     var result_img = document.getElementById('board_img');
     var copy_btn = document.getElementById('copy_btn');
+    var link_btn = document.getElementById('link_btn');
     var kekka_text = document.getElementById('kekka_text');
     var again = document.getElementById('again');    
     var reco_err = document.getElementById('reco_err_img');
@@ -84,6 +85,7 @@ function hide_result(){
     // result_place.style.display="none";
     result_img.style.display="none";
     copy_btn.style.display="none";
+    link_btn.style.display="none";
     again.style.display="none";
     reco_err.style.display="none";
 }
@@ -294,6 +296,7 @@ function after_reco(){
     // var result_place = document.getElementById('board');
     var result_img = document.getElementById('board_img');
     var copy_btn = document.getElementById('copy_btn');
+    var link_btn = document.getElementById('link_btn');
     var kekka_text = document.getElementById('kekka_text');
     var again = document.getElementById('again');
     var guruguru = document.getElementById('guruguru');
@@ -302,6 +305,7 @@ function after_reco(){
     // result_place.style.display="block";
     result_img.style.display="block";
     copy_btn.style.display="block";
+    link_btn.style.display="block";
     again.style.display="block";
 }
 

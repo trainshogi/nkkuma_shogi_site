@@ -62,6 +62,9 @@ function clip_kif(){
 function clip_sfen(){
   document.getElementById('board').textContent = json_to_sfen(result_json);
 }
+function jump_kento(){
+  location.href = "https://www.kento-shogi.com/?initpos=" + json_to_sfen(result_json);
+}
 function again(){
   display_form_button();
   clear_form_inner();
