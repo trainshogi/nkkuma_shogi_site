@@ -200,6 +200,68 @@ function json_to_kif(result_json){
     kif_text += teban
     return kif_text
 }
+function json_to_sfen(result_json){
+    var tebans      = {"先手番":"b", "後手番":"w"};
+    var kazus       = {};
+    var kansuuji    = ["","","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
+    for (i=0;i<19;i++) {kazus[kansuuji[i]] = String(i);}
+    var komas       = {};
+    var kifkomas    = [" ・"," 歩"," 香"," 桂"," 銀"," 金"," 角"," 飛"," 玉",
+                       " と"," 杏"," 圭"," 全"," 馬"," 龍",
+                       "v歩","v香","v桂","v銀","v金","v角","v飛","v玉",
+                       "vと","v杏","v圭","v全","v馬","v龍"];
+    var sfenkomas   = ["1","P","L","N","S","G","B","R","K",
+                       "+P","+L","+N","+S","+B","+R",
+                       "p","l","n","s","g","b","r","k",
+                       "+p","+l","+n","+s","+b","+r"];
+    for (i=0;i<29;i++) {komas[kifkomas[i]] = sfenkomas[i];}
+    var kif_text    = "";
+    var ban_result  = result_json['ban_result'];
+    var sente_mochi = sort_mochigoma(result_json['sente_mochi']);
+    var gote_mochi  = sort_mochigoma(result_json['gote_mochi']);
+    var teban       = result_json['teban'];
+
+    // i = 行番号 // j = 列番号
+    for(i=0;i<9;i++){
+        var before_koma = "";
+        for(j=0;j<9;j++){
+            koma = komas[ban_result["\""+String(j)+String(i)+"\""]];
+            if ((before_koma == "1") && (koma == "1")){
+                space = String(Number(kif_text.slice(-1)) + 1);
+                kif_text = kif_text.slice(0,-1);
+                kif_text += space;
+            }else{
+                kif_text += koma;
+            }
+            before_koma = koma;
+        }
+        kif_text += "/";
+    }
+    // 最後のスライスを消す
+    kif_text = kif_text.slice(0,-1);
+
+    // 手番
+    kif_text += " " + tebans[teban];
+
+    // 持ち駒
+    kif_text += " ";
+    for (koma in sente_mochi) {
+        koma_kazu = kazus[sente_mochi[koma]];
+        if (koma_kazu == "1"){koma_kazu = "";}
+        kif_text+=koma_kazu+komas[" "+koma];
+    }
+    for (koma in gote_mochi) {
+        koma_kazu = kazus[gote_mochi[koma]];
+        if (koma_kazu == "1"){koma_kazu = "";}
+        kif_text+=koma_kazu+komas[" "+koma];
+    }
+    if (kif_text.slice(-1) == " ")  {kif_text+="-"}
+
+    // 何手目
+    kif_text += " 1"
+    
+    return kif_text
+}
 
 // 結果編集用関数群
 function get_result_img(fix_place){
