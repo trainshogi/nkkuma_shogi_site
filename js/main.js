@@ -17,7 +17,7 @@ function fix(string){
   // fix
   result_json["ban_result"]["\""+fix_place+"\""] = string;
   result_img.children[0].src = "../img/koma/"+string.trim()+".png";
-  result_place.textContent = json_to_kif(result_json);
+  // result_place.textContent = json_to_kif(result_json);
 
   set_uncolor(fix_place);
   close_imglist();
@@ -36,7 +36,7 @@ function fix_mochigoma(method,sengo,string){
     }
   }
   result_json = disp_mochigoma_sub(sengo_str,string,kazu,result_json);
-  result_place.textContent = json_to_kif(result_json);
+  // result_place.textContent = json_to_kif(result_json);
 }
 
 function clip_text(){
@@ -47,6 +47,14 @@ function clip_text(){
   else {
     alert('このブラウザでは対応していません');
   }
+}
+function clip_kif(){
+  document.getElementById('board').textContent = json_to_kif(result_json);
+  clip_text();
+}
+function clip_sfen(){
+  document.getElementById('board').textContent = json_to_sfen(result_json);
+  clip_text();
 }
 function again(){
   display_form_button();
