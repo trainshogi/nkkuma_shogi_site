@@ -253,7 +253,7 @@ function json_to_sfen(result_json){
     for (koma in gote_mochi) {
         koma_kazu = kazus[gote_mochi[koma]];
         if (koma_kazu == "1"){koma_kazu = "";}
-        kif_text+=koma_kazu+komas[" "+koma];
+        kif_text+=koma_kazu+komas["v"+koma];
     }
     if (kif_text.slice(-1) == " ")  {kif_text+="-"}
 
