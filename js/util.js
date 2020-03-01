@@ -264,6 +264,9 @@ function json_to_sfen(result_json){
     
     return kif_text
 }
+function sfen_to_kento(sfen){
+    return sfen.split("+").join("%2B");
+}
 
 // 結果編集用関数群
 function get_result_img(fix_place){
