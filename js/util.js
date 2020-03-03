@@ -267,6 +267,14 @@ function json_to_sfen(result_json){
 function sfen_to_kento(sfen){
     return sfen.split("+").join("%2B");
 }
+function kif_to_url(kif){
+    // GETでアップロード
+    return $.ajax({
+        url : "https://us-central1-shogiban2kif.cloudfunctions.net/save_kif",
+        type : "GET",
+        data : {"message": kif}
+    });
+}
 
 // 結果編集用関数群
 function get_result_img(fix_place){

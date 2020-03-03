@@ -65,6 +65,14 @@ function clip_sfen(){
 function jump_kento(){
   location.href = "https://www.kento-shogi.com/?initpos=" + sfen_to_kento(json_to_sfen(result_json));
 }
+function jump_piyo(){
+  kif_to_url(json_to_kif(result_json)).done(function(data, textStatus, jqXHR) {
+    location.href = "piyoshogi://?url=" + data;
+  }).fail(function(jqXHR, textStatus, errorThrown) {
+    console.log(textStatus);
+    alert("連携に失敗しました。");
+  });
+}
 function again(){
   display_form_button();
   clear_form_inner();
