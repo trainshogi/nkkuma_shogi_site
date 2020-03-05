@@ -56,6 +56,30 @@ function clip_text(){
     alert('このブラウザでは対応していません');
   }
 }
+function save_text(){
+  var result_txt = document.getElementById('board');
+  if($("#format").text() == "kif"){
+    clip_kif();
+    filename = "kyokumen.kif";
+  }else if($("#format").text() == "sfen"){
+    clip_sfen();
+    filename = "kyokumen.txt";
+  }
+  var blob = new Blob([result_txt.value], {type: "text/plain"}); // バイナリデータを作ります。
+  // IEか他ブラウザかの判定
+  if(window.navigator.msSaveBlob){
+      // IEなら独自関数を使います。
+      window.navigator.msSaveBlob(blob, filename);
+  } else {
+      // それ以外はaタグを利用してイベントを発火させます
+      try {URL.revokeObjectURL();} catch (error) {}
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.target = '_blank';
+      a.download = filename;
+      a.click();
+  }
+}
 function clip_kif(){
   document.getElementById('board').textContent = json_to_kif(result_json);
 }
