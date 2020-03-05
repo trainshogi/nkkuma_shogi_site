@@ -37,19 +37,20 @@
         <!-- ▼▼shogiban.htmlの内容▼▼ -->
         <!-- ▲▲shogiban.htmlの内容▲▲ -->
       </div>
+      <div id="link_btn" style="text-align: center; margin: 10px 0px; display: none;">
+        <div class="text-muted">検討アプリ</div>
+        <button type="button" class="btn" onclick="jump_piyo()"><img src="img/piyo_link.png" alt="button" height="25" /></button>
+        <button type="button" class="btn" onclick="jump_kento()"><img src="img/kento.png" alt="button" height="25" /></button>
+      </div>
       <div id="copy_btn" style="text-align:center;margin: 10px 0px;display: none;">
-        <div class="text-muted">クリップボード</div>
+        <div class="text-muted">他アプリ用</div>
         <button id="format" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">kif</button>
         <ul class="dropdown-menu">
             <li><button class="dropdown-item" value="kif">kif</button></li>
             <li><button class="dropdown-item" value="sfen">sfen</button></li>
         </ul>
-        <button type="button" class="btn btn-primary" onclick="clip_text()">Copy!</button>
-      </div>
-      <div id="link_btn" style="text-align: center; margin: 10px 0px; display: none;">
-        <div class="text-muted">検討アプリ</div>
-        <button type="button" class="btn" onclick="jump_piyo()"><img src="img/piyo_link.png" alt="button" height="25" /></button>
-        <button type="button" class="btn" onclick="jump_kento()"><img src="img/kento.png" alt="button" height="25" /></button>
+        <button type="button" class="btn btn-primary" onclick="clip_text()"><i class="fa fa-copy" aria-hidden="true"></i></button>
+        <button type="button" class="btn btn-primary" onclick="save_text()"><i class="fa fa-save" aria-hidden="true"></i></button>
       </div>
       <div id="guruguru" class="loader" style="display: none">Loading...</div>
       <img id="reco_err_img" style="display: none; margin: auto;" src="img/reco_err.png" width="80%"></img>
