@@ -157,12 +157,11 @@ function reset_mochigoma(){
 function disp_koma_json(result_json){
     var table = document.getElementById('board_koma');
     var ban_result = result_json['ban_result'];
+    // i = 行番号 // j = 列番号
     for(i=0;i<9;i++){
-        // i = 行番号
         for(j=0;j<9;j++){
-            // j = 列番号
             var koma_place = table.rows[i].cells[j].children[0];
-            let koma = ban_result[String(j)+String(i)];
+            let koma = ban_result[String(i+1)+String(9-j)];
             let koma_img = "../img/koma/"+koma.charAt(0).trim()+alphabet2kanji(koma.substr(1))+".png";
             koma_place.src = koma_img;
         }
@@ -202,7 +201,7 @@ function json_to_kif(result_json){
     for(i=0;i<9;i++){
         kif_text += "|";
         for(j=0;j<9;j++){
-            let koma = ban_result[String(j)+String(i)];
+            let koma = ban_result[String(i+1)+String(9-j)];
             if(koma){kif_text += koma.charAt(0) + alphabet2kanji(koma.substr(1));}
             else    {kif_text += " ・";}
         }
@@ -240,10 +239,9 @@ function json_to_sfen(result_json){
     for(i=0;i<9;i++){
         var before_koma = "";
         for(j=0;j<9;j++){            
-            let tmpkoma = ban_result[String(j)+String(i)];
+            let tmpkoma = ban_result[String(i+1)+String(9-j)];
             if(tmpkoma){koma += komas[tmpkoma];}
             else       {koma += komas[" * "];}
-            koma = komas[ban_result[String(j)+String(i)]];
             if ((before_koma == "1") && (koma == "1")){
                 space = String(Number(kif_text.slice(-1)) + 1);
                 kif_text = kif_text.slice(0,-1);

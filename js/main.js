@@ -18,7 +18,8 @@ function fix(string){
   var result_img = get_result_img(fix_place);
   var result_place = document.getElementById('board');
   // fix
-  result_json["ban_result"][fix_place] = string;
+  let tmpplace = String((9-Number(fix_place.charAt(0)))*10+(Number(fix_place.charAt(1))+1));
+  result_json["ban_result"][tmpplace] = string;
   result_img.children[0].src = "../img/koma/"+string.charAt(0).trim()+alphabet2kanji(string.substr(1))+".png";
   // result_place.textContent = json_to_kif(result_json);
 
