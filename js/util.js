@@ -242,8 +242,8 @@ function json_to_sfen(result_json){
         var before_koma = "";
         for(j=0;j<9;j++){            
             let tmpkoma = ban_result[String(9-j)+String(i+1)];
-            if(tmpkoma){koma += komas[tmpkoma];}
-            else       {koma += komas[" * "];}
+            if(tmpkoma){koma = komas[tmpkoma];}
+            else       {koma = komas[" * "];}
             if ((before_koma == "1") && (koma == "1")){
                 space = String(Number(kif_text.slice(-1)) + 1);
                 kif_text = kif_text.slice(0,-1);
