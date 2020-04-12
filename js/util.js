@@ -111,6 +111,17 @@ function koma2index(string){
     return koma.indexOf(string)
 }
 
+function alphabet2index(string){
+    var koma = ["fu","ky","ke","gi","ki","ka","hi"];
+    return koma.indexOf(string)
+}
+
+function alphabet2kanji(koma){
+    var alphabet = ["* ","fu","ky","ke","gi","ki","ka","hi","ou","to","ny","nk","ng","um","ry"];
+    var kanji    = ["・","歩","香","桂","銀","金","角","飛","玉","と","杏","圭","全","馬","龍"];
+    return kanji[alphabet.indexOf(koma)];
+}
+
 function kanji2int(kanji){
     var kansuuji = ["","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
     return kansuuji.indexOf(kanji)+1
@@ -124,8 +135,8 @@ function int2kanji(kazu){
 function disp_mochigoma_sub(sengo,string,kazu,result_json){
     var sengo_int = 0;
     if (sengo == "sente_mochi"){sengo_int = 1;}
-    var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[koma2index(string)].children[0];
-    result_json[sengo][string] = int2kanji(kazu);
+    var mochigoma = document.getElementsByClassName('mochigoma-list')[sengo_int].children[alphabet2index(string)].children[0];
+    result_json[sengo][string] = kazu;
     mochigoma.children[1].innerHTML = String(kazu); // ここの1はimgタグの次のpってこと
     if (kazu == 0){mochigoma.children[0].style.opacity=0.5; delete result_json[sengo][string];}
     else {mochigoma.children[0].style.opacity=1;}
@@ -151,25 +162,26 @@ function disp_koma_json(result_json){
         for(j=0;j<9;j++){
             // j = 列番号
             var koma_place = table.rows[i].cells[j].children[0];
-            var koma_img = "../img/koma/"+ban_result["\""+String(j)+String(i)+"\""].trim()+".png";
+            let koma = ban_result[String(j)+String(i)];
+            let koma_img = "../img/koma/"+koma.charAt(0).trim()+alphabet2kanji(koma.substr(1))+".png";
             koma_place.src = koma_img;
         }
     }
     reset_mochigoma();
     var gote_mochi = result_json['gote_mochi'];
-    for (koma in gote_mochi) { result_json = disp_mochigoma_sub("gote_mochi",koma,kanji2int(gote_mochi[koma]),result_json); }
+    for (koma in gote_mochi) { result_json = disp_mochigoma_sub("gote_mochi",koma,gote_mochi[koma],result_json); }
     var sente_mochi = result_json['sente_mochi'];
-    for (koma in sente_mochi) { result_json = disp_mochigoma_sub("sente_mochi",koma,kanji2int(sente_mochi[koma]),result_json); }
+    for (koma in sente_mochi) { result_json = disp_mochigoma_sub("sente_mochi",koma,sente_mochi[koma],result_json); }
 }
 function sort_mochigoma(mochi){
     var sorted = {};
-    if('飛' in mochi){sorted['飛']=mochi['飛'];}
-    if('角' in mochi){sorted['角']=mochi['角'];}
-    if('金' in mochi){sorted['金']=mochi['金'];}
-    if('銀' in mochi){sorted['銀']=mochi['銀'];}
-    if('桂' in mochi){sorted['桂']=mochi['桂'];}
-    if('香' in mochi){sorted['香']=mochi['香'];}
-    if('歩' in mochi){sorted['歩']=mochi['歩'];}
+    if('hi' in mochi){sorted['hi']=mochi['hi'];}
+    if('ka' in mochi){sorted['ka']=mochi['ka'];}
+    if('ki' in mochi){sorted['ki']=mochi['ki'];}
+    if('gi' in mochi){sorted['gi']=mochi['gi'];}
+    if('ke' in mochi){sorted['ke']=mochi['ke'];}
+    if('ky' in mochi){sorted['ky']=mochi['ky'];}
+    if('fu' in mochi){sorted['fu']=mochi['fu'];}
     return sorted
 }
 function json_to_kif(result_json){
@@ -181,7 +193,7 @@ function json_to_kif(result_json){
     var teban       = result_json['teban'];
     
     kif_text += "後手の持駒：";
-    for (koma in gote_mochi)  {kif_text+=koma+gote_mochi[koma] +"　"};
+    for (koma in gote_mochi)  {kif_text+=alphabet2kanji(koma)+int2kanji(gote_mochi[koma])+"　"};
     kif_text += "\n";
     kif_text += "  ９ ８ ７ ６ ５ ４ ３ ２ １\n";
     kif_text += "+---------------------------+\n";
@@ -189,13 +201,17 @@ function json_to_kif(result_json){
     // i = 行番号 // j = 列番号
     for(i=0;i<9;i++){
         kif_text += "|";
-        for(j=0;j<9;j++){kif_text += ban_result["\""+String(j)+String(i)+"\""];}
+        for(j=0;j<9;j++){
+            let koma = ban_result[String(j)+String(i)];
+            if(koma){kif_text += koma.charAt(0) + alphabet2kanji(koma.substr(1));}
+            else    {kif_text += " ・";}
+        }
         kif_text += "|"+kansuuji[i]+"\n";
     }
 
     kif_text += "+---------------------------+\n"
     kif_text += "先手の持駒："
-    for (koma in sente_mochi) {kif_text+=koma+sente_mochi[koma]+"　"}
+    for (koma in sente_mochi) {kif_text+=alphabet2kanji(koma)+int2kanji(sente_mochi[koma])+"　"}
     kif_text += "\n"
     
     kif_text += "\n"
@@ -204,14 +220,11 @@ function json_to_kif(result_json){
 }
 function json_to_sfen(result_json){
     var tebans      = {"先手番":"b", "後手番":"w"};
-    var kazus       = {};
-    var kansuuji    = ["","","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八"];
-    for (i=0;i<19;i++) {kazus[kansuuji[i]] = String(i);}
     var komas       = {};
-    var kifkomas    = [" ・"," 歩"," 香"," 桂"," 銀"," 金"," 角"," 飛"," 玉",
-                       " と"," 杏"," 圭"," 全"," 馬"," 龍",
-                       "v歩","v香","v桂","v銀","v金","v角","v飛","v玉",
-                       "vと","v杏","v圭","v全","v馬","v龍"];
+    var kifkomas    = [" * "," fu"," ky"," ke"," gi"," ki"," ka"," hi"," ou",
+                       " to"," ny"," nk"," ng"," um"," ry",
+                       "vfu","vky","vke","vgi","vki","vka","vhi","vou",
+                       "vto","vny","vnk","vng","vum","vry"];
     var sfenkomas   = ["1","P","L","N","S","G","B","R","K",
                        "+P","+L","+N","+S","+B","+R",
                        "p","l","n","s","g","b","r","k",
@@ -226,8 +239,11 @@ function json_to_sfen(result_json){
     // i = 行番号 // j = 列番号
     for(i=0;i<9;i++){
         var before_koma = "";
-        for(j=0;j<9;j++){
-            koma = komas[ban_result["\""+String(j)+String(i)+"\""]];
+        for(j=0;j<9;j++){            
+            let tmpkoma = ban_result[String(j)+String(i)];
+            if(tmpkoma){koma += komas[tmpkoma];}
+            else       {koma += komas[" * "];}
+            koma = komas[ban_result[String(j)+String(i)]];
             if ((before_koma == "1") && (koma == "1")){
                 space = String(Number(kif_text.slice(-1)) + 1);
                 kif_text = kif_text.slice(0,-1);
@@ -248,12 +264,12 @@ function json_to_sfen(result_json){
     // 持ち駒
     kif_text += " ";
     for (koma in sente_mochi) {
-        koma_kazu = kazus[sente_mochi[koma]];
+        koma_kazu = String(sente_mochi[koma]);
         if (koma_kazu == "1"){koma_kazu = "";}
         kif_text+=koma_kazu+komas[" "+koma];
     }
     for (koma in gote_mochi) {
-        koma_kazu = kazus[gote_mochi[koma]];
+        koma_kazu = String(gote_mochi[koma]);
         if (koma_kazu == "1"){koma_kazu = "";}
         kif_text+=koma_kazu+komas["v"+koma];
     }

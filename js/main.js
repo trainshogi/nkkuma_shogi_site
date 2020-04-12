@@ -18,8 +18,8 @@ function fix(string){
   var result_img = get_result_img(fix_place);
   var result_place = document.getElementById('board');
   // fix
-  result_json["ban_result"]["\""+fix_place+"\""] = string;
-  result_img.children[0].src = "../img/koma/"+string.trim()+".png";
+  result_json["ban_result"][fix_place] = string;
+  result_img.children[0].src = "../img/koma/"+string.charAt(0).trim()+alphabet2kanji(string.substr(1))+".png";
   // result_place.textContent = json_to_kif(result_json);
 
   set_uncolor(fix_place);
@@ -35,7 +35,7 @@ function fix_mochigoma(method,sengo,string){
     sengo_str = sengo + "_mochi"
     if (string in result_json[sengo_str]){
       if (result_json[sengo_str][string] == ""){kazu = 2;}
-      else {kazu=(kanji2int(result_json[sengo_str][string])+1)%(max_koma[koma2index(string)]+1);}
+      else {kazu=(result_json[sengo_str][string]+1)%(max_koma[alphabet2index(string)]+1);}
     }
   }
   result_json = disp_mochigoma_sub(sengo_str,string,kazu,result_json);
