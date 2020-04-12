@@ -161,7 +161,8 @@ function disp_koma_json(result_json){
     for(i=0;i<9;i++){
         for(j=0;j<9;j++){
             var koma_place = table.rows[i].cells[j].children[0];
-            let koma = ban_result[String(i+1)+String(9-j)];
+            let koma = ban_result[String(9-j)+String(i+1)];
+            if(typeof koma === "undefined"){koma = " * ";}
             let koma_img = "../img/koma/"+koma.charAt(0).trim()+alphabet2kanji(koma.substr(1))+".png";
             koma_place.src = koma_img;
         }
@@ -185,6 +186,7 @@ function sort_mochigoma(mochi){
 }
 function json_to_kif(result_json){
     var kansuuji    = ["一","二","三","四","五","六","七","八","九"];
+    var tebans      = {"sente":"先手番", "gote":"後手番"};
     var kif_text    = "";
     var ban_result  = result_json['ban_result'];
     var sente_mochi = sort_mochigoma(result_json['sente_mochi']);
@@ -201,7 +203,7 @@ function json_to_kif(result_json){
     for(i=0;i<9;i++){
         kif_text += "|";
         for(j=0;j<9;j++){
-            let koma = ban_result[String(i+1)+String(9-j)];
+            let koma = ban_result[String(9-j)+String(i+1)];
             if(koma){kif_text += koma.charAt(0) + alphabet2kanji(koma.substr(1));}
             else    {kif_text += " ・";}
         }
@@ -214,11 +216,11 @@ function json_to_kif(result_json){
     kif_text += "\n"
     
     kif_text += "\n"
-    kif_text += teban
+    kif_text += tebans[teban];
     return kif_text
 }
 function json_to_sfen(result_json){
-    var tebans      = {"先手番":"b", "後手番":"w"};
+    var tebans      = {"sente":"b", "gote":"w"};
     var komas       = {};
     var kifkomas    = [" * "," fu"," ky"," ke"," gi"," ki"," ka"," hi"," ou",
                        " to"," ny"," nk"," ng"," um"," ry",
@@ -239,7 +241,7 @@ function json_to_sfen(result_json){
     for(i=0;i<9;i++){
         var before_koma = "";
         for(j=0;j<9;j++){            
-            let tmpkoma = ban_result[String(i+1)+String(9-j)];
+            let tmpkoma = ban_result[String(9-j)+String(i+1)];
             if(tmpkoma){koma += komas[tmpkoma];}
             else       {koma += komas[" * "];}
             if ((before_koma == "1") && (koma == "1")){
