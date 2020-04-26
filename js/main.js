@@ -3,6 +3,12 @@ $(function(){
   $('.dropdown-menu .dropdown-item').click(function(){
     $("#format").text($(this).attr('value'));
   });
+  
+  // サーバーのWarmUp
+  fetch('https://shogiapi.nkkuma.tokyo/warmup')
+  .then(function(response) {
+    console.log('Success', response.text);
+  });
 });
 
 var fix_place = 'done';
