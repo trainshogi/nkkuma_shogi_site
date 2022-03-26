@@ -5,7 +5,7 @@ $(function(){
   });
   
   // サーバーのWarmUp
-  fetch('https://shogiapi.nkkuma.tokyo/warmup')
+  fetch('https://mxgnhndhfb.ap-northeast-1.awsapprunner.com/warmup')
   .then(function(response) {
     console.log('Success', response.text);
   });
@@ -122,7 +122,7 @@ function file_upload(){
 
     // POSTでアップロード
     $.ajax({
-        url : "https://shogiapi.nkkuma.tokyo/recognize",
+        url : "https://mxgnhndhfb.ap-northeast-1.awsapprunner.com/recognize",
         type : "POST",
         data : formdata,
         cache       : false,
