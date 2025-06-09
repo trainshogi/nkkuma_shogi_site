@@ -4,11 +4,7 @@ $(function(){
     $("#format").text($(this).attr('value'));
   });
   
-  // サーバーのWarmUp
-  fetch('https://mxgnhndhfb.ap-northeast-1.awsapprunner.com/warmup')
-  .then(function(response) {
-    console.log('Success', response.text);
-  });
+  // サーバーのWarmUp -> deleted
 });
 
 var fix_place = 'done';
@@ -122,7 +118,7 @@ function file_upload(){
 
     // POSTでアップロード
     $.ajax({
-        url : "https://mxgnhndhfb.ap-northeast-1.awsapprunner.com/recognize",
+        url : "https://modern-logical-mastiff.ngrok-free.app/recognize",
         type : "POST",
         data : formdata,
         cache       : false,
