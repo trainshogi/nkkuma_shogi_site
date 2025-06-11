@@ -1,5 +1,8 @@
 import Head from 'next/head';
 import Script from 'next/script';
+import dynamic from 'next/dynamic';
+
+const FC2Counter = dynamic(() => import('../components/FC2Counter'), { ssr: false });
 
 export default function Home() {
   return (
@@ -18,7 +21,7 @@ export default function Home() {
       </Head>
 
       {/* Main content basically copied from old index.html */}
-      <p className="lead">
+      <div className="lead">
         <div style={{display: 'none', textAlign: 'center'}}>Shogiban to Kif developed by えぬっくま</div>
         <div style={{display: 'none', textAlign: 'center'}}>将棋盤の画像認識サイトです。写真を撮ってKIF形式局面を作成しよう！</div>
         <img src="/img/SHOGIWEB_TITLE.png" width="100%" alt="title" />
@@ -46,7 +49,7 @@ export default function Home() {
         <div id="guruguru" className="loader" style={{display: 'none'}}>Loading...</div>
         <img id="reco_err_img" style={{display: 'none', margin: 'auto'}} src="/img/reco_err.png" width="80%" alt="error" />
         <div id="again" style={{textAlign: 'center', display: 'none'}}><button type="button" className="btn btn-primary" onClick={() => again()}>Again?</button></div>
-      </p>
+      </div>
 
       <form id="myform" className="form-inline" style={{textAlign: 'center', marginBottom: '1rem'}} method="post" encType="multipart/form-data" name="input_form" onSubmit={() => get_js_variable()}>
         <div className="form-group" style={{margin: '0px auto'}}>
@@ -76,8 +79,7 @@ export default function Home() {
       <div id="tmpfoot">
         <br />
         {/* FC2 counter */}
-        <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script>
-        <noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" alt="counter" /></noscript>
+        <FC2Counter />
         {/* FC2 counter end */}
         人目の訪問です。<br />
         <button className="btn btn-default faq" onClick={() => location.href='./faq.html'}>FAQ</button>

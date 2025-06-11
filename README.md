@@ -19,10 +19,10 @@ This project contains the frontend for the shogi board recognition service.  The
 
 ## Building a Static Site
 
-To build the production files and export a fully static site use:
+To build the production files and output a fully static site use:
 
 ```bash
-npm run export
+npm run build
 ```
 
 The generated files will be placed in the `out/` directory and can be uploaded to S3 or any other static hosting provider.
