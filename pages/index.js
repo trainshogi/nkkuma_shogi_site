@@ -95,7 +95,7 @@ export default function Home() {
 
       {/* External library scripts */}
       <Script src="https://code.jquery.com/jquery-3.6.0.min.js" strategy="beforeInteractive" />
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossOrigin="anonymous" strategy="beforeInteractive" />
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" strategy="beforeInteractive" />
       <Script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.1/dist/js/bootstrap.min.js" strategy="beforeInteractive" />
       <Script src="https://cdn.jsdelivr.net/npm/exif-js" strategy="afterInteractive" />
       <Script src="/js/megapix-image.js" strategy="afterInteractive" />
