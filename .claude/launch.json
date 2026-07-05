@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "shogi-static",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["/private/tmp/claude-501/-Users-akirasato-Documents-GitHub-nkkuma-shogi-site/59606502-20c4-4c59-b914-5e4705675621/scratchpad/preview_server.py"],
+      "port": 8123
+    }
+  ]
+}
