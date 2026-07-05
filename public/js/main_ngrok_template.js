@@ -118,7 +118,7 @@ function file_upload(){
 
     // POSTでアップロード
     $.ajax({
-        url : "https://modern-logical-mastiff.ngrok-free.app/recognize",
+        url : "https://modern-logical-mastiff.ngrok-free.app/recognize/template",
         type : "POST",
         data : formdata,
         cache       : false,

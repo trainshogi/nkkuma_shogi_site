@@ -1,0 +1,183 @@
+{
+  "definitions": {},
+  "info": {
+    "title": "えぬっくま 将棋盤画像認識API",
+    "version": "1.0.0"
+  },
+  "host": "api.nkkuma.tokyo",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/recognize": {
+      "post": {
+        "parameters": [
+          {
+            "description": "将棋盤と持ち駒が写っている画像 (Supported formats: jpeg, jpg, png)",
+            "in": "formData",
+            "name": "upfile",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "default": "all",
+            "description": "認識モード",
+            "enum": [
+              "waku",
+              "koma",
+              "koma-ban",
+              "koma-mochi",
+              "all"
+            ],
+            "in": "formData",
+            "name": "mode",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "iPhone撮影等で画像が回転している場合の角度 (e.g., \"0\", \"90\", \"180\", \"270\").",
+            "in": "formData",
+            "name": "hidden_rotate",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "先手後手の情報(sente/gote)",
+            "in": "formData",
+            "name": "hidden_sengo",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "特定のモード (koma, koma-ban, koma-mochi)の場合に入力する事前認識済みの将棋盤の角4点のlist文字列",
+            "in": "formData",
+            "name": "points",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recognition result",
+            "schema": {
+              "properties": {
+                "ban_result": {
+                  "additionalProperties": {
+                    "description": "Piece code (e.g., \" fu\", \"vfu\", \" ou\", etc.)",
+                    "type": "string"
+                  },
+                  "description": "Board configuration (coordinate -> piece). keys are \"XY\" (X=1-9, Y=1-9).",
+                  "type": "object"
+                },
+                "gote_mochi": {
+                  "description": "Gote's hand pieces.",
+                  "properties": {
+                    "fu": {
+                      "type": "integer"
+                    },
+                    "gi": {
+                      "type": "integer"
+                    },
+                    "hi": {
+                      "type": "integer"
+                    },
+                    "ka": {
+                      "type": "integer"
+                    },
+                    "ke": {
+                      "type": "integer"
+                    },
+                    "ki": {
+                      "type": "integer"
+                    },
+                    "ky": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "points": {
+                  "description": "Points information returned as passed or processed.",
+                  "type": "string"
+                },
+                "sente_mochi": {
+                  "description": "Sente's hand pieces.",
+                  "properties": {
+                    "fu": {
+                      "type": "integer"
+                    },
+                    "gi": {
+                      "type": "integer"
+                    },
+                    "hi": {
+                      "type": "integer"
+                    },
+                    "ka": {
+                      "type": "integer"
+                    },
+                    "ke": {
+                      "type": "integer"
+                    },
+                    "ki": {
+                      "type": "integer"
+                    },
+                    "ky": {
+                      "type": "integer"
+                    }
+                  },
+                  "type": "object"
+                },
+                "teban": {
+                  "description": "Turn of the game (\"sente\" or \"gote\").",
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad Request Body / Parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Access Denied / Invalid API Key / WAF Filtered"
+          },
+          "404": {
+            "description": "Resource Not Found"
+          },
+          "413": {
+            "description": "Payload Too Large"
+          },
+          "415": {
+            "description": "Unsupported Media Type"
+          },
+          "429": {
+            "description": "Quota Exceeded / Throttled"
+          },
+          "500": {
+            "description": "Internal Server Error / Configuration Error"
+          },
+          "504": {
+            "description": "Integration Timeout / Failure"
+          }
+        },
+        "summary": "Shogi board recognition endpoint."
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "in": "header",
+      "name": "x-api-key",
+      "type": "apiKey"
+    }
+  },
+  "swagger": "2.0"
+}

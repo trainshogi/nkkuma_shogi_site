@@ -2,28 +2,8 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-BG7XXMB0B1');
-    </script>
-
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <meta property="og:title" content="将棋盤認識サイト | ShogiBan to Kif">
-    <meta property="og:description" content="将棋盤の写真から自動で盤面を認識してKIFに変換します。無料・登録不要。">
-    <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
-    <meta property="og:url" content="https://shogi.nkkuma.tokyo/">
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="将棋盤認識サイト">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@nkkuma_service">
 
     <title>Shogiban to Kif developed by えぬっくま</title>
     <meta name="descriotion" content="将棋盤画像認識サイト。写真を撮ってKIF形式局面を作成しよう！">
@@ -32,7 +12,6 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/loader.css" rel="stylesheet">
     <link href="css/faq.css" rel="stylesheet">
@@ -111,60 +90,12 @@
       <!-- FC2カウンター ここまで -->
       人目の訪問です。<br>
       <button class="btn btn-default faq" onclick="location.href='./faq.html'">FAQ</button>
-      <div id="share-wrap" style="text-align:center; margin-top:12px;">
-        <div class="share-row" style="display:flex; gap:8px; justify-content:center;">
-          
-          <!-- Xポスト -->
-          <a id="share-x" href="#" aria-label="Xでポストする"
-             style="display:inline-flex; align-items:center; gap:4px;
-                    background:#000; color:#fff;
-                    padding:4px 10px;  /* ←余白を広げた */
-                    border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-            <i class="bi bi-twitter-x" style="font-size:14px;"></i>
-            ポスト
-          </a>
-          
-          <!-- Facebookシェア -->
-          <a id="share-fb" href="#" aria-label="Facebookでシェアする"
-             style="display:inline-flex; align-items:center; gap:4px;
-                    background:#1877f2; color:#fff;
-                    padding:4px 10px;  /* ←余白を広げた */
-                    border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-            <i class="bi bi-facebook" style="font-size:14px;"></i>
-            シェア
-          </a>
-          
-        </div>
-      </div>      
-      <br>
-      <p><font size="1">このサービスを利用することで、
-        <a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>
-        に同意したものとみなされます。</font>
-      </p>
-      
+      <br><a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="写真1枚で簡単KIF作成！" data-url="https://shogi.nkkuma.tokyo" data-hashtags="えぬっくま" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      <p><font size="1">このサービスで撮影頂いた画像は認識率向上を<br>目的としてサーバに保存されます。ご了承下さい。</font></p>
       <br>開発：nkkuma　twitter始めました<br>
-      <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
-      class="twitter-follow-button" data-show-count="false">
-      Follow @nkkuma_service
-      </a>
-      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      
+      <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      <a class="twitter-timeline" height="400px" href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw">Tweets by nkkuma_service</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
       <!--<a href="//af.moshimo.com/af/c/click?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733&guid=ON" target="_blank" rel="nofollow"><img src="//image.moshimo.com/af-img/0866/000000022733.jpg" width="234" height="60" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733" width="1" height="1" style="border:none;">-->
-      <div style="margin-top:16px; text-align:center; font-size:14px; color:#555;">
-        <p style="margin-bottom:8px;">
-          このサービスが役立ったら<br>
-          コーヒーで応援していただけると嬉しいです ☕
-        </p>
-        <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
-          <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" 
-               alt="Buy Me A Coffee" height="36" width="150" 
-               style="opacity:0.9;">
-        </a>
-      </div>
-      <p>
-        &copy; 2025 Shogiban to Kif |
-        <a href="/privacy.html">プライバシーポリシー・利用規約</a>
-      </p>
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -190,8 +121,6 @@
     <!-- js source for util func -->
     <script src="js/util.js"></script>
     <!-- js source for init html -->
-    <script src="js/main_apigw.js"></script>
-    <!-- js source for share buttons -->
-    <script src="js/share.js"></script>
+    <script src="js/main_ngrok_template.js"></script>
   </body>
 </html>

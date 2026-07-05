@@ -2,8 +2,8 @@
     position: relative;
     background-image: url(../img/ban.png);
     background-size: contain;
-    margin-left: 14.5%;
-    margin-right: 14.5%;
+    /* margin-left: 14.5%; */
+    /* margin-right: 14.5%; */
 }
 #board_img:before {
     content:"";
@@ -12,7 +12,7 @@
 }
 #board_koma {
     position: absolute;
-    top: 11%;
+    top: 13%;
     left: 3%;
 }
 #board_koma tr{
@@ -56,7 +56,7 @@
 }
 #gote_mochi{
     position: absolute;
-    top: 1vw;
+    top: 0vw;
 }
 #sente_mochi{
     padding-top: calc(1vw + 7.5%);

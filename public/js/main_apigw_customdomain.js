@@ -90,13 +90,17 @@ function clip_sfen(){
   document.getElementById('board').textContent = json_to_sfen(result_json);
 }
 function jump_kento(){
-  location.href = "https://www.kento-shogi.com/?initpos=" + sfen_to_kento(json_to_sfen(result_json));
+  const url = "https://www.kento-shogi.com/?initpos=" + sfen_to_kento(json_to_sfen(result_json));
+  window.open(url, "_blank"); // 別タブで開く
 }
+
 function jump_piyo(){
-  kif_to_url(json_to_kif(result_json)).done(function(data, textStatus, jqXHR) {
-    location.href = "piyoshogi://?url=" + data;
+  kif_to_url(json_to_kif(result_json)).done(function(data) {
+    const url = "piyoshogi://?url=" + data;
+    // アプリスキームは window.open でも location.href でも挙動は同じだが、明示的に別タブ指定
+    window.open(url, "_blank");
   }).fail(function(jqXHR, textStatus, errorThrown) {
-    console.log(textStatus);
+    console.error(textStatus, errorThrown);
     alert("連携に失敗しました。");
   });
 }
@@ -118,8 +122,11 @@ function file_upload(){
 
     // POSTでアップロード
     $.ajax({
-        url : "https://modern-logical-mastiff.ngrok-free.app/recognize",
+        url : "https://api.nkkuma.tokyo/prod/recognize",
         type : "POST",
+        headers: {
+          "x-api-key": "0ulg7fN2RbuuX6GI3QLlaie66YCKVN4av50wMgO5"
+        },
         data : formdata,
         cache       : false,
         contentType : false,

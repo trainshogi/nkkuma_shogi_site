@@ -1,0 +1,122 @@
+:root{
+    --space: 24px;
+    --gap: 12px;
+    --border:#e9ecef;
+    --text:#111;
+    --muted:#6b7280;
+    --brand:#000;
+    --fb:#1877f2;
+    --primary:#0f766e;
+    --bg:#fff;
+  }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; padding:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif; color:var(--text); background:var(--bg); }
+  
+  /* コンテナ：スマホはフル幅、タブレット〜PCは中央寄せ */
+  .wrap{
+    margin: 0 auto;
+    padding: 0 16px 20px;
+    max-width: 100%;
+  }
+  @media (min-width:600px){ .wrap{ max-width:720px; } }
+  @media (min-width:834px){ .wrap{ max-width:860px; } }
+  
+  /* ステップ */
+  .step{ padding:var(--space) 0; border-top:1px solid var(--border); }
+  .step:first-of-type{ border-top:none; padding-top:var(--space); }
+  .step-title{ display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; margin:0 0 10px; }
+  .badge{ width:24px; height:24px; border-radius:999px; display:inline-grid; place-items:center; background:#000; color:#fff; font-size:12px; }
+  
+  .row{ display:flex; gap:var(--gap); flex-wrap:wrap; align-items:center }
+  .btn{
+    appearance:none; border:none; cursor:pointer;
+    padding:10px 14px; border-radius:8px; font-weight:700; font-size:14px;
+    background:#f3f4f6; color:#111; text-decoration:none;
+  }
+  .btn:hover{ filter:brightness(.98) }
+  .btn.primary{ background:var(--primary); color:#fff }
+  .btn.secondary{ background:#eef2f7; color:#111; border:1px solid var(--border) }
+  .btn.clean{ background:transparent; border:1px dashed var(--border); color:#444 }
+  
+  .drop{ border:2px dashed var(--border); border-radius:12px; padding:18px; text-align:center; color:#444 }
+  .drop small{ color:var(--muted) }
+  .card{ border:1px solid var(--border); border-radius:12px; padding:14px; background:#fff }
+  .muted{ color:var(--muted) }
+  .meta{ color:var(--muted); font-size:12px }
+  
+  /* プレビュー */
+  .image-preview .preview-row{ display:block; }
+  .image-preview img{
+    width:100%; height:auto; display:block; border-radius:8px;
+    background:#f8fafc; object-fit:contain;
+    cursor: zoom-in;
+  }
+  
+  /* シェア */
+  .share-row{ display:flex; gap:8px; justify-content:center; }
+  .share-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:6px; font-size:13px; line-height:1;
+    text-decoration:none; color:#fff;
+  }
+  .share-x{ background:var(--brand); }
+  .share-fb{ background:var(--fb); }
+  
+  footer{ border-top:1px solid var(--border); margin-top:var(--space); padding:16px 0; font-size:13px; color:var(--muted); text-align:center }
+  footer a{ color:inherit }
+  
+  /* コピー形式トグル（KIF/SFEN） */
+  .format { display:flex; gap:8px; align-items:center; }
+  .fmt {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 10px; border:1px solid var(--border); border-radius:999px;
+    font-size:13px; cursor:pointer; user-select:none; background:#fff;
+  }
+  .fmt input { appearance:none; width:12px; height:12px; border:1px solid #999; border-radius:50%; margin:0; display:inline-block; position:relative; }
+  .fmt input:checked { border-color:var(--primary); }
+  .fmt input:checked::after { content:""; position:absolute; inset:2px; background:var(--primary); border-radius:50%; }
+  .fmt.active { border-color:var(--primary); background:#f0fdfa; }
+  
+  /* フローティングの?ボタン */
+  #helpFab{
+    position: fixed; right: 16px; bottom: 16px; z-index: 1000;
+    width: 44px; height: 44px; border-radius: 999px;
+    border: 1px solid var(--border); background:#fff; color:#111;
+    font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  }
+  
+  /* コーチマーク一式 */
+  #coachOverlay{ position: fixed; inset: 0; z-index: 999; display: none; }
+  #coachOverlay.show{ display: block; }
+  .coach-backdrop{ position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+  .coach-card{
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: clamp(16px, 6vh, 48px);
+    width: min(90%, 560px);
+    background:#fff; color:#111; border-radius: 12px; border:1px solid var(--border);
+    padding: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  }
+  .coach-step{ font-size: 14px; line-height: 1.6; }
+  .coach-step strong{ font-weight: 800; }
+  .coach-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+  
+  /* 注目ターゲットのハイライト枠 */
+  .__coach-target{
+    position: relative; z-index: 1001; outline: 3px solid rgba(15,118,110,.65); border-radius: 10px;
+    transition: outline-color .2s;
+  }
+  
+  /* ライトボックス */
+  .lightbox{ position:fixed; inset:0; z-index:1200; display:none; }
+  .lightbox.show{ display:block; }
+  .lb-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.8); }
+  .lightbox img{
+    position:absolute; max-width:95vw; max-height:85vh;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+    box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:10px;
+  }
+  .lb-close{
+    position:absolute; top:16px; right:16px;
+    background:#fff;
+  }
+  
