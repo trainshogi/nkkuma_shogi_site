@@ -24,17 +24,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fail fast if API key secret is missing
-        if: ${{ secrets.SHOGI_API_KEY == '' }}
-        run: |
-          echo "::error::secrets.SHOGI_API_KEY が未設定です。"
-          echo "SHOGI_API_KEY を Settings → Secrets and variables → Actions → Secrets に追加してください。"
-          exit 1
-
       - name: Inject API key (replace __API_KEY__ in public/)
+        # secrets コンテキストは if: 条件式では使えない（GitHub Actionsの仕様上の制限）ため、
+        # 未設定チェックもこのステップの bash 内で行う
         env:
           SHOGI_API_KEY: ${{ secrets.SHOGI_API_KEY }}
         run: |
+          if [ -z "$SHOGI_API_KEY" ]; then
+            echo "::error::secrets.SHOGI_API_KEY が未設定です。Settings → Secrets and variables → Actions → Secrets に追加してください。"
+            exit 1
+          fi
           hits=$(grep -rl "__API_KEY__" public/ || true)
           if [ -z "$hits" ]; then
             echo "::error::__API_KEY__ プレースホルダが public/ に見つかりません"
