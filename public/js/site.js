@@ -625,6 +625,19 @@
 
     setupShare();
 
+    // 使い方オーバーレイ（自動では出さない。ボタンでのみ開閉）
+    var howto = $('howto-modal');
+    function openHowto() { howto.hidden = false; $('btn-howto-close').focus(); }
+    function closeHowto() { howto.hidden = true; $('btn-howto').focus(); }
+    $('btn-howto').addEventListener('click', openHowto);
+    $('btn-howto-close').addEventListener('click', closeHowto);
+    howto.addEventListener('click', function (e) {
+      if (e.target.getAttribute('data-close')) { closeHowto(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !howto.hidden) { closeHowto(); }
+    });
+
     // デバッグフック（本番でも無害）
     window.__debugSetResult = function (json) { applyResult(json); };
   }

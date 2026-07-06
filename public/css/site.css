@@ -378,3 +378,51 @@ body[data-state="error"] [data-role="reset"] { display: flex; }
   .spinner { animation: none; }
   .toast { animation: none; }
 }
+
+/* ---------- 使い方（手動で開くオーバーレイ） ---------- */
+[data-role="help"] { display: none; margin-top: 8px; }
+body[data-state="empty"] [data-role="help"] { display: flex; }
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 40px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.btn-ghost:hover { color: var(--text); }
+
+.howto-modal { position: fixed; inset: 0; z-index: 1100; }
+.howto-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.howto-card {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 420px);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.howto-kuma { display: block; width: 78%; margin: 0 auto 8px; }
+.howto-steps { list-style: none; margin: 0 0 14px; padding: 0; }
+.howto-steps li {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--line);
+  font-size: 14px; line-height: 1.55; text-align: left;
+}
+.howto-steps b { font-size: 15px; }
+.step-no {
+  flex: none;
+  width: 26px; height: 26px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 700;
+  margin-top: 2px;
+}
+.howto-close { width: 100%; }

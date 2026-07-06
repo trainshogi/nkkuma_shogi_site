@@ -48,6 +48,11 @@
         <button type="button" class="btn" id="btn-library">🖼 画像を選ぶ</button>
       </div>
 
+      <!-- 使い方（押した人だけに表示。自動では出さない） -->
+      <div class="actions" data-role="help">
+        <button type="button" class="btn btn-ghost" id="btn-howto">❓ はじめての方へ：使い方をみる</button>
+      </div>
+
       <!-- 4. 結果カード（photo以降） -->
       <section class="card" data-role="card">
         <div class="card-label">元の写真</div>
@@ -186,6 +191,20 @@
         </p>
       </footer>
     </main>
+
+    <!-- 使い方オーバーレイ（btn-howto でのみ開く） -->
+    <div class="howto-modal" id="howto-modal" role="dialog" aria-modal="true" aria-label="使い方" hidden>
+      <div class="howto-backdrop" data-close="1"></div>
+      <div class="howto-card">
+        <img class="howto-kuma" src="img/shogi_intro.png" alt="えぬっくま">
+        <ol class="howto-steps">
+          <li><span class="step-no">1</span><div><b>将棋盤を撮る</b><br>盤全体がまっすぐ入るように、真上ぎみに撮影</div></li>
+          <li><span class="step-no">2</span><div><b>「変換する」を押す</b><br>数秒で盤面を読み取って将棋盤に表示します</div></li>
+          <li><span class="step-no">3</span><div><b>直して、渡す</b><br>違う駒はタップで修正。コピーやぴよ将棋・KENTOで検討へ</div></li>
+        </ol>
+        <button type="button" class="btn btn-cta howto-close" id="btn-howto-close">はじめる</button>
+      </div>
+    </div>
 
     <!-- トースト -->
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
