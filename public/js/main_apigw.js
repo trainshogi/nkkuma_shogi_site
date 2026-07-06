@@ -125,7 +125,7 @@ function file_upload(){
         url : "https://api.nkkuma.tokyo/recognize",
         type : "POST",
         headers: {
-          "x-api-key": "0ulg7fN2RbuuX6GI3QLlaie66YCKVN4av50wMgO5"
+          "x-api-key": "__API_KEY__"
         },
         data : formdata,
         cache       : false,

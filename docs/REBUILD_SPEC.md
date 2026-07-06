@@ -19,7 +19,7 @@
 ### 2.1 認識API
 ```
 POST https://api.nkkuma.tokyo/recognize
-Header: x-api-key: 0ulg7fN2RbuuX6GI3QLlaie66YCKVN4av50wMgO5
+Header: x-api-key: <APIキー・秘匿。デプロイ時に置換される。site.js内では '__API_KEY__' プレースホルダ>
 Body: multipart/form-data
   - upfile: 画像Blob（Compressor.jsで quality:0.9, maxWidth:2000, maxHeight:2000 に圧縮したもの）
   - hidden_rotate: "0"（固定。EXIF回転はCompressorが吸収する）

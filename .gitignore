@@ -67,3 +67,6 @@ node_modules/
 
 # 本番デプロイ前バックアップ
 shogi_prod_backups/
+
+# APIキー
+.shogi_api_key

@@ -5,7 +5,7 @@
 
   // ===== 定数 =====
   var API_URL = 'https://api.nkkuma.tokyo/recognize';
-  var API_KEY = '0ulg7fN2RbuuX6GI3QLlaie66YCKVN4av50wMgO5';
+  var API_KEY = '__API_KEY__';
   var PIYO_SAVE_URL = 'https://us-central1-shogiban2kif.cloudfunctions.net/save_kif';
   var KENTO_URL = 'https://www.kento-shogi.com/?initpos=';
 
