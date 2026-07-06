@@ -1,0 +1,40 @@
+# 本番デプロイ: master への push（public/ 配下の変更時）で S3 + CloudFront へ反映
+# 認証は OIDC（長期キー不要）。リポジトリ変数 AWS_ROLE_ARN 未設定の間は何もしない。
+# 初期設定手順: docs/CICD_SETUP.md
+name: Deploy to S3
+
+on:
+  push:
+    branches: [master]
+    paths: ['public/**']
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ vars.AWS_ROLE_ARN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Sync to S3
+        # deploy.sh と同一の除外リスト。ACLを付けないと CloudFront が AccessDenied になる
+        run: |
+          aws s3 sync public/ s3://shogi.nkkuma.tokyo \
+            --exclude "firebase.json" --exclude "404.html" \
+            --exclude "mentenanse/*" --exclude "*.DS_Store" \
+            --acl public-read
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ECK0AXFXSKK8W --paths '/*'
