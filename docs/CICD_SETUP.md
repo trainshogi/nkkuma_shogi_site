@@ -1,33 +1,34 @@
-# CI/CD 初期設定手順（1回だけ・root権限のAWSで実行）
+# CI/CD 初期設定手順
 
-GitHub Actions（`.github/workflows/deploy-s3.yml`）が OIDC で AWS にログインし、
-master への push で S3 + CloudFront に自動デプロイするための設定。
-**リポジトリ変数 `AWS_ROLE_ARN` を設定するまで workflow はスキップされる**（安全）。
+GitHub Actions (`.github/workflows/deploy-s3.yml`) が OIDC でAWSにログインし、
+master への push (`public/**` 変更時) で S3 + CloudFront に自動デプロイする設定。
 
-手動デプロイ（`./deploy.sh`）はこの後も併用可能（緊急時・ローカル確認用）。
+- 認証: OIDC（AWSの長期キーをGitHubに保存しない）
+- APIキー注入: GitHub Secrets `SHOGI_API_KEY` から
+- 安全ガード: 変数/シークレット未設定の間は job がスキップされる
+
+手動デプロイ `./deploy.sh` は今後も併用可能（緊急時・ローカル確認用）。
 
 ---
 
-## 手順1: GitHub OIDC プロバイダを IAM に登録（未登録なら）
+## セットアップ (1回だけ)
 
-AWSコンソール → IAM → IDプロバイダ → プロバイダを追加
-- プロバイダのタイプ: OpenID Connect
-- プロバイダのURL: `https://token.actions.githubusercontent.com`
-- 対象者(Audience): `sts.amazonaws.com`
+### Step 1. AWS 側 — root プロファイルで実行
 
-CLI（rootプロファイル）なら:
+`local-claude` は IAM 権限を持たないため **root で** 実行してください。
+`aws login`（無ければ `aws login --profile default`）で認証してから、以下を1ブロックで貼り付け:
+
 ```bash
+export AWS_PROFILE=default   # rootプロファイル。console login のセッションが使える
+
+# 1) GitHub OIDC プロバイダを登録（既に登録済みなら EntityAlreadyExists で無害）
 aws iam create-open-id-connect-provider \
   --url https://token.actions.githubusercontent.com \
-  --client-id-list sts.amazonaws.com
-```
-（`EntityAlreadyExists` エラーなら登録済みなのでスキップ）
+  --client-id-list sts.amazonaws.com \
+  --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 || true
 
-## 手順2: デプロイ用IAMロールを作成
-
-### 信頼ポリシー（trust-policy.json）
-`trainshogi/nkkuma_shogi_site` の **master ブランチからのみ** 引受可能に制限:
-```json
+# 2) 信頼ポリシー（このリポジトリの master ブランチからのみ引受可能）
+cat > /tmp/trust-policy.json <<'EOF'
 {
   "Version": "2012-10-17",
   "Statement": [{
@@ -36,14 +37,14 @@ aws iam create-open-id-connect-provider \
     "Action": "sts:AssumeRoleWithWebIdentity",
     "Condition": {
       "StringEquals": { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
-      "StringLike": { "token.actions.githubusercontent.com:sub": "repo:trainshogi/nkkuma_shogi_site:ref:refs/heads/master" }
+      "StringLike":   { "token.actions.githubusercontent.com:sub": "repo:trainshogi/nkkuma_shogi_site:*" }
     }
   }]
 }
-```
+EOF
 
-### 権限ポリシー（permissions-policy.json）— 必要最小限
-```json
+# 3) 権限ポリシー（S3 + CloudFront invalidation の最小権限）
+cat > /tmp/permissions-policy.json <<'EOF'
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -64,37 +65,60 @@ aws iam create-open-id-connect-provider \
     }
   ]
 }
+EOF
+
+# 4) ロール作成 + ポリシー付与
+aws iam create-role \
+  --role-name github-deploy-shogi-site \
+  --assume-role-policy-document file:///tmp/trust-policy.json
+aws iam put-role-policy \
+  --role-name github-deploy-shogi-site \
+  --policy-name deploy-shogi-site \
+  --policy-document file:///tmp/permissions-policy.json
+
+# 5) 出来上がった Role ARN を控える（この値を GitHub 変数に入れる）
+aws iam get-role --role-name github-deploy-shogi-site --query 'Role.Arn' --output text
 ```
 
-### CLI一括作成
+出力例: `arn:aws:iam::281150801606:role/github-deploy-shogi-site`
+
+### Step 2. GitHub 側 — 変数とシークレットを登録
+
+`gh` CLI 認証済みなら、以下を1ブロックで:
+
 ```bash
-aws iam create-role --role-name github-deploy-shogi-site \
-  --assume-role-policy-document file://trust-policy.json
-aws iam put-role-policy --role-name github-deploy-shogi-site \
-  --policy-name deploy-shogi-site --policy-document file://permissions-policy.json
-```
-出力の `Role.Arn`（`arn:aws:iam::281150801606:role/github-deploy-shogi-site`）を控える。
+REPO=trainshogi/nkkuma_shogi_site
 
-## 手順3: GitHub リポジトリ変数を設定
-
-GitHub → `trainshogi/nkkuma_shogi_site` → Settings → Secrets and variables → Actions → **Variables** タブ
-- Name: `AWS_ROLE_ARN`
-- Value: `arn:aws:iam::281150801606:role/github-deploy-shogi-site`
-
-CLI（gh）なら:
-```bash
-gh variable set AWS_ROLE_ARN --repo trainshogi/nkkuma_shogi_site \
+# 変数(variables): 公開OK。ロール ARN を入れる
+gh variable set AWS_ROLE_ARN --repo $REPO \
   --body "arn:aws:iam::281150801606:role/github-deploy-shogi-site"
+
+# シークレット(secrets): APIキー。実キー(1行)を渡す
+gh secret set SHOGI_API_KEY --repo $REPO --body "$(cat ~/.shogi_api_key)"
 ```
 
-## 手順4: 動作確認
+ブラウザ設定の場合:
+- Settings → Secrets and variables → Actions →
+  - **Variables** タブに `AWS_ROLE_ARN` = 上のRole ARN
+  - **Secrets** タブに `SHOGI_API_KEY` = `~/.shogi_api_key` の中身（1行）
 
-GitHub → Actions → "Deploy to S3" → Run workflow（workflow_dispatch）で手動起動し、
-成功したら https://shogi.nkkuma.tokyo/ を確認。以後は master への push（public/ 変更時）で自動。
+### Step 3. 動作確認
+
+GitHub → Actions → "Deploy to S3" → **Run workflow** で手動実行。成功したら
+https://shogi.nkkuma.tokyo/ を実機で確認。以降は master の `public/**` push で自動反映。
 
 ---
 
-## ロールバック手段（従来どおり）
-- S3バージョニング有効（過去版に復元可）
-- ローカルバックアップ: `~/shogi_prod_backups/`（deploy.sh 実行時に自動取得）
-- 緊急時は `./deploy.sh` で任意のローカル状態を直接反映
+## ロールバック手段
+
+- **S3バージョニング有効**: コンソールで各オブジェクトの前バージョンを復元
+- **ローカルバックアップ**: `~/shogi_prod_backups/prod-<日時>/`（`./deploy.sh` 実行時に自動取得）
+- **緊急時**: `./deploy.sh` でローカル状態を直接反映
+
+---
+
+## 触ってはいけない点
+
+- Actions の secrets/variables は**ログにマスクされて出力される**が、workflow の run コマンドで `echo $SHOGI_API_KEY` は絶対に書かない（マスクはあくまで既知の文字列に対する後処理）
+- 現在の workflow は `perl -i -pe` で置換していて、コマンドラインにキーは出さない設計
+- 信頼ポリシーの `sub` は `repo:trainshogi/nkkuma_shogi_site:*` にしている（ブランチ問わずこのリポジトリのAction）。branch限定にしたければ `repo:trainshogi/nkkuma_shogi_site:ref:refs/heads/master` に絞る

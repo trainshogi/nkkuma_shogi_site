@@ -1,6 +1,6 @@
 # 本番デプロイ: master への push（public/ 配下の変更時）で S3 + CloudFront へ反映
-# 認証は OIDC（長期キー不要）。リポジトリ変数 AWS_ROLE_ARN 未設定の間は何もしない。
-# 初期設定手順: docs/CICD_SETUP.md
+# 認証は OIDC（長期キー不要）。SHOGI_API_KEY は GitHub Secrets から注入。
+# 変数/シークレット未設定の間はスキップ（安全）。初期設定手順: docs/CICD_SETUP.md
 name: Deploy to S3
 
 on:
@@ -13,12 +13,39 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-s3
+  cancel-in-progress: false
+
 jobs:
   deploy:
     if: ${{ vars.AWS_ROLE_ARN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Fail fast if API key secret is missing
+        if: ${{ secrets.SHOGI_API_KEY == '' }}
+        run: |
+          echo "::error::secrets.SHOGI_API_KEY が未設定です。"
+          echo "SHOGI_API_KEY を Settings → Secrets and variables → Actions → Secrets に追加してください。"
+          exit 1
+
+      - name: Inject API key (replace __API_KEY__ in public/)
+        env:
+          SHOGI_API_KEY: ${{ secrets.SHOGI_API_KEY }}
+        run: |
+          hits=$(grep -rl "__API_KEY__" public/ || true)
+          if [ -z "$hits" ]; then
+            echo "::error::__API_KEY__ プレースホルダが public/ に見つかりません"
+            exit 1
+          fi
+          count=$(echo "$hits" | wc -l | tr -d ' ')
+          echo "Injecting key into $count file(s)"
+          echo "$hits" | while read -r f; do
+            # ログにキーを絶対に出さない（sed の -e パターンは env 変数展開のみ）
+            perl -i -pe 's/__API_KEY__/$ENV{SHOGI_API_KEY}/g' "$f"
+          done
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -27,11 +54,14 @@ jobs:
           aws-region: ap-northeast-1
 
       - name: Sync to S3
-        # deploy.sh と同一の除外リスト。ACLを付けないと CloudFront が AccessDenied になる
+        # deploy.sh と同一の除外リスト。ACL 無しは CloudFront が AccessDenied になるので必須
         run: |
           aws s3 sync public/ s3://shogi.nkkuma.tokyo \
-            --exclude "firebase.json" --exclude "404.html" \
-            --exclude "mentenanse/*" --exclude "*.DS_Store" \
+            --exclude "firebase.json" \
+            --exclude "404.html" \
+            --exclude "mentenanse/*" \
+            --exclude "*.DS_Store" \
+            --exclude ".git/*" \
             --acl public-read
 
       - name: Invalidate CloudFront
