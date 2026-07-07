@@ -24,27 +24,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Inject API key (replace __API_KEY__ in public/)
+      - name: Inject API keys (replace placeholders in public/)
         # secrets コンテキストは if: 条件式では使えない（GitHub Actionsの仕様上の制限）ため、
         # 未設定チェックもこのステップの bash 内で行う
         env:
           SHOGI_API_KEY: ${{ secrets.SHOGI_API_KEY }}
+          SHOGI_ALPHA_API_KEY: ${{ secrets.SHOGI_ALPHA_API_KEY }}
         run: |
           if [ -z "$SHOGI_API_KEY" ]; then
             echo "::error::secrets.SHOGI_API_KEY が未設定です。Settings → Secrets and variables → Actions → Secrets に追加してください。"
             exit 1
           fi
+          # ※ "__API_KEY__" は "__ALPHA_API_KEY__" の部分文字列ではないため独立に置換できる
           hits=$(grep -rl "__API_KEY__" public/ || true)
           if [ -z "$hits" ]; then
             echo "::error::__API_KEY__ プレースホルダが public/ に見つかりません"
             exit 1
           fi
-          count=$(echo "$hits" | wc -l | tr -d ' ')
-          echo "Injecting key into $count file(s)"
+          echo "Injecting main key into $(echo "$hits" | wc -l | tr -d ' ') file(s)"
+          # ログにキーを絶対に出さない（perl の置換は env 変数参照のみ）
           echo "$hits" | while read -r f; do
-            # ログにキーを絶対に出さない（sed の -e パターンは env 変数展開のみ）
             perl -i -pe 's/__API_KEY__/$ENV{SHOGI_API_KEY}/g' "$f"
           done
+          alpha_hits=$(grep -rl "__ALPHA_API_KEY__" public/ || true)
+          if [ -n "$alpha_hits" ]; then
+            if [ -z "$SHOGI_ALPHA_API_KEY" ]; then
+              echo "::error::α版ページが __ALPHA_API_KEY__ を要求していますが secrets.SHOGI_ALPHA_API_KEY が未設定です。"
+              exit 1
+            fi
+            echo "Injecting alpha key into $(echo "$alpha_hits" | wc -l | tr -d ' ') file(s)"
+            echo "$alpha_hits" | while read -r f; do
+              perl -i -pe 's/__ALPHA_API_KEY__/$ENV{SHOGI_ALPHA_API_KEY}/g' "$f"
+            done
+          fi
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4

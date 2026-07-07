@@ -35,29 +35,36 @@ EXCLUDES=(
 )
 
 # ---- ステージング: プレースホルダを実キーに置換した一時 public/ を作る ----
-prepare_stage() {
-  if [ ! -f "$KEY_FILE" ]; then
-    echo "!! $KEY_FILE がありません。APIキーを1行だけ入れてください:"
-    echo "   printf '<key>\\n' > $KEY_FILE && chmod 600 $KEY_FILE"
+# __API_KEY__       <- ~/.shogi_api_key       （本番 recognize API）
+# __ALPHA_API_KEY__ <- ~/.shogi_alpha_api_key （α版 shogiapi-green）
+inject_key() { # $1=placeholder $2=keyfile $3=required(1/0)
+  local ph="$1" kf="$2" required="$3" key hits
+  hits=$(grep -rl "$ph" "$STAGE" || true)
+  if [ -z "$hits" ]; then
+    if [ "$required" = "1" ]; then
+      echo "!! $ph プレースホルダが見つかりません。site.jsを確認してください"; exit 1
+    fi
+    return 0
+  fi
+  if [ ! -f "$kf" ]; then
+    echo "!! $kf がありません（$ph を使うファイルがあるのに注入できない）:"
+    echo "   printf '<key>\\n' > $kf && chmod 600 $kf"
     exit 1
   fi
-  API_KEY=$(head -1 "$KEY_FILE" | tr -d '\r\n ')
-  if [ -z "$API_KEY" ]; then echo "!! $KEY_FILE が空です"; exit 1; fi
+  key=$(head -1 "$kf" | tr -d '\r\n ')
+  if [ -z "$key" ]; then echo "!! $kf が空です"; exit 1; fi
+  echo "$hits" | while read -r f; do
+    sed -i '' "s|$ph|$key|g" "$f"
+  done
+  echo "   $ph injected into $(echo "$hits" | wc -l | tr -d ' ') file(s)"
+}
 
+prepare_stage() {
   STAGE=$(mktemp -d -t shogi-deploy)
   # ドットファイル含めコピー
   (cd "$SRC" && tar cf - .) | (cd "$STAGE" && tar xf -)
-
-  # __API_KEY__ を含むファイルだけ置換（macOS/BSD sed 対応で -i '' を使う）
-  local hits
-  hits=$(grep -rl "__API_KEY__" "$STAGE" || true)
-  if [ -z "$hits" ]; then
-    echo "!! __API_KEY__ プレースホルダが見つかりません。site.jsを確認してください"; exit 1
-  fi
-  echo "$hits" | while read -r f; do
-    sed -i '' "s|__API_KEY__|$API_KEY|g" "$f"
-  done
-  echo "   key injected into $(echo "$hits" | wc -l | tr -d ' ') file(s)"
+  inject_key "__API_KEY__"       "$KEY_FILE"                    1
+  inject_key "__ALPHA_API_KEY__" "$HOME/.shogi_alpha_api_key"   0
 }
 
 cleanup_stage() { [ -n "${STAGE:-}" ] && rm -rf "$STAGE"; }
