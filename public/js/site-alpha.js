@@ -156,7 +156,8 @@
     photoUrl: null,      // objectURL
     blob: null,          // 圧縮後Blob
     selectedPos: null,   // 編集中のマス "<筋><段>"
-    points: null         // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
+    points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
+    wakuVersion: 'v2'    // α: 枠認識エンジンのバージョン切替（v1=旧UNet / v2=新エンジン）
   };
 
   var els = {};
@@ -546,6 +547,7 @@
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
     fd.append('hidden_sengo', 'true');
+    fd.append('waku', state.wakuVersion);
 
     fetch(API_URL, {
       method: 'POST',
@@ -618,6 +620,18 @@
 
     $('btn-convert').addEventListener('click', recognize);
     $('btn-retry').addEventListener('click', recognize);
+
+    // α: 枠認識エンジン v1/v2 トグル
+    var wakuBtns = document.querySelectorAll('.waku-toggle .seg-btn');
+    for (var w = 0; w < wakuBtns.length; w++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state.wakuVersion = btn.getAttribute('data-waku');
+          for (var k = 0; k < wakuBtns.length; k++) { wakuBtns[k].classList.remove('active'); }
+          btn.classList.add('active');
+        });
+      })(wakuBtns[w]);
+    }
 
     function reselect() {
       els.fileInput.removeAttribute('capture');
