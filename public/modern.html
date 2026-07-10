@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!-- 新デザイン版。旧デザインは index.html（css/js/imgを共有しない独立実装） -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-BG7XXMB0B1');
+    </script>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="将棋盤認識サイト | ShogiBan to Kif">
+    <meta property="og:description" content="将棋盤の写真から自動で盤面を認識してKIFに変換します。無料・登録不要。">
+    <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+    <meta property="og:url" content="https://shogi.nkkuma.tokyo/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="将棋盤認識サイト">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@nkkuma_service">
+
+    <title>【新デザイン】Shogiban to Kif developed by えぬっくま</title>
+    <meta name="description" content="将棋盤画像認識サイト。写真を撮ってKIF形式局面を作成しよう！">
+
+    <link href="css/site.css" rel="stylesheet">
+  </head>
+  <body data-state="empty">
+    <main class="app">
+      <!-- 1. ロゴ -->
+      <img class="logo" src="img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif" width="100%">
+
+      <!-- 2. くま使い方画像（常時表示） -->
+      <img class="howto" src="img/shogi_intro.png" alt="使い方" width="100%">
+
+      <!-- hidden file input（単一） -->
+      <input type="file" id="file-input" accept="image/*" hidden>
+
+      <!-- 使い方（押した人だけに表示。自動では出さない。初見が上から読んで最初に目に入る位置） -->
+      <div class="actions" data-role="help">
+        <button type="button" class="btn btn-ghost" id="btn-howto">❓ はじめての方へ：使い方をみる</button>
+        <a class="btn btn-ghost" href="./index.html">↩ 元のデザインに戻す</a>
+      </div>
+
+      <!-- 3. 操作列（empty / photo） -->
+      <div class="actions" data-role="pick">
+        <button type="button" class="btn" id="btn-camera">📷 撮影する</button>
+        <button type="button" class="btn" id="btn-library">🖼 画像を選ぶ</button>
+      </div>
+
+      <!-- 4. 結果カード（photo以降） -->
+      <section class="card" data-role="card">
+        <div class="card-label">元の写真</div>
+        <div class="photo-wrap">
+          <img class="photo" id="photo" alt="選択した写真">
+          <div class="overlay" data-role="overlay" aria-hidden="true">
+            <div class="spinner"></div>
+            <div class="overlay-text">盤面を認識しています…</div>
+          </div>
+        </div>
+
+        <!-- photo状態: 変換 / 選び直す -->
+        <div class="actions" data-role="convert">
+          <button type="button" class="btn btn-cta" id="btn-convert">変換する</button>
+          <button type="button" class="btn" id="btn-reselect">選び直す</button>
+        </div>
+
+        <!-- error状態 -->
+        <div class="result-error" data-role="err">
+          <p class="err-msg">認識できませんでした。盤全体が写るように撮り直してみてください</p>
+          <div class="actions">
+            <button type="button" class="btn btn-cta" id="btn-retry">もう一度変換</button>
+            <button type="button" class="btn" id="btn-reselect-err">選び直す</button>
+          </div>
+        </div>
+
+        <!-- done状態: 盤・編集・出力 -->
+        <div class="result-done" data-role="done">
+          <div class="card-label">認識結果（駒をタップで修正）</div>
+
+          <div class="board-unit" id="board-unit">
+            <div class="hand hand--gote" data-hand="gote"></div>
+            <div class="board-frame">
+              <div class="file-nums" aria-hidden="true"></div>
+              <div class="board-row">
+                <div class="board" id="board"></div>
+                <div class="rank-nums" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="hand hand--sente" data-hand="sente"></div>
+          </div>
+
+          <!-- 盤マス編集パレット -->
+          <div class="palette" id="palette" hidden></div>
+
+          <!-- 手番セグメント -->
+          <div class="segment" role="group" aria-label="手番">
+            <button type="button" class="seg-btn" data-teban="sente">先手番</button>
+            <button type="button" class="seg-btn" data-teban="gote">後手番</button>
+          </div>
+
+          <!-- 5. 出力ボタン群 -->
+          <div class="output">
+            <div class="output-label">検討アプリ</div>
+            <div class="app-links">
+              <button type="button" class="linkbtn" id="btn-piyo"><img src="img/piyo_link.png" alt="ぴよ将棋" height="25"></button>
+              <button type="button" class="linkbtn" id="btn-kento"><img src="img/kento.png" alt="KENTO" height="25"></button>
+            </div>
+
+            <div class="output-label">他アプリ用</div>
+            <div class="copy-row">
+              <select id="format" class="format-select" aria-label="出力形式">
+                <option value="kif">KIF</option>
+                <option value="sfen">SFEN</option>
+              </select>
+              <button type="button" class="btn" id="btn-copy">コピー</button>
+              <button type="button" class="btn" id="btn-save">ファイル保存</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. 最初からやり直す（done / error） -->
+      <div class="actions" data-role="reset">
+        <button type="button" class="btn" id="btn-reset">最初からやり直す</button>
+      </div>
+
+      <!-- 7. フッター -->
+      <footer class="site-foot">
+        <br>
+
+        <!-- FC2カウンター ここから -->
+        <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" /></noscript>
+        <!-- FC2カウンター ここまで -->
+        人目の訪問です。<br>
+        <button class="btn faq" id="btn-faq">FAQ</button>
+        <div id="share-wrap" style="text-align:center; margin-top:12px;">
+          <div class="share-row" style="display:flex; gap:8px; justify-content:center;">
+            <!-- Xポスト -->
+            <a id="share-x" href="#" aria-label="Xでポストする"
+               style="display:inline-flex; align-items:center; gap:4px;
+                      background:#000; color:#fff;
+                      padding:4px 10px;
+                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
+              <span aria-hidden="true">𝕏</span>
+              ポスト
+            </a>
+            <!-- Facebookシェア -->
+            <a id="share-fb" href="#" aria-label="Facebookでシェアする"
+               style="display:inline-flex; align-items:center; gap:4px;
+                      background:#1877f2; color:#fff;
+                      padding:4px 10px;
+                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
+              <span aria-hidden="true">f</span>
+              シェア
+            </a>
+          </div>
+        </div>
+        <br>
+        <p><font size="1">このサービスを利用することで、
+          <a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>
+          に同意したものとみなされます。</font>
+        </p>
+
+        <br>開発：nkkuma　twitter始めました<br>
+        <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
+        class="twitter-follow-button" data-show-count="false">
+        Follow @nkkuma_service
+        </a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+        <div style="margin-top:16px; text-align:center; font-size:14px; color:#555;">
+          <p style="margin-bottom:8px;">
+            このサービスが役立ったら<br>
+            コーヒーで応援していただけると嬉しいです ☕
+          </p>
+          <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
+            <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
+                 alt="Buy Me A Coffee" height="36" width="150"
+                 style="opacity:0.9;">
+          </a>
+        </div>
+        <p>
+          &copy; 2025 Shogiban to Kif |
+          <a href="/privacy.html">プライバシーポリシー・利用規約</a>
+        </p>
+      </footer>
+    </main>
+
+    <!-- 使い方オーバーレイ（btn-howto でのみ開く） -->
+    <div class="howto-modal" id="howto-modal" role="dialog" aria-modal="true" aria-label="使い方" hidden>
+      <div class="howto-backdrop" data-close="1"></div>
+      <div class="howto-card">
+        <img class="howto-kuma" src="img/shogi_intro.png" alt="えぬっくま">
+        <ol class="howto-steps">
+          <li><span class="step-no">1</span><div><b>将棋盤を撮る</b><br>盤全体がまっすぐ入るように、真上ぎみに撮影</div></li>
+          <li><span class="step-no">2</span><div><b>「変換する」を押す</b><br>数秒で盤面を読み取って将棋盤に表示します</div></li>
+          <li><span class="step-no">3</span><div><b>直して、渡す</b><br>違う駒はタップで修正。コピーやぴよ将棋・KENTOで検討へ</div></li>
+        </ol>
+        <button type="button" class="btn btn-cta howto-close" id="btn-howto-close">はじめる</button>
+      </div>
+    </div>
+
+    <!-- トースト -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- 唯一の外部依存: Compressor.js -->
+    <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
+    <script src="js/site.js"></script>
+  </body>
+</html>
