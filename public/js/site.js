@@ -623,6 +623,24 @@
     $('btn-kento').addEventListener('click', jumpKento);
     $('btn-faq').addEventListener('click', function () { location.href = './faq.html'; });
 
+    // テーマ切替(classic=旧デザイン風がデフォルト。行橋支部の使い方動画が旧UIで
+    // 撮影されているため見た目を揃えている。選択は端末のlocalStorageに記憶)
+    var themeBtn = $('btn-theme');
+    if (themeBtn) {
+      var applyTheme = function (t) {
+        document.body.setAttribute('data-theme', t);
+        themeBtn.textContent = (t === 'classic') ? '✨ 新デザインで表示' : '↩ 元のデザインに戻す';
+      };
+      var savedTheme = null;
+      try { savedTheme = localStorage.getItem('theme'); } catch (e) {}
+      applyTheme(savedTheme === 'modern' ? 'modern' : 'classic');
+      themeBtn.addEventListener('click', function () {
+        var next = document.body.getAttribute('data-theme') === 'classic' ? 'modern' : 'classic';
+        applyTheme(next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+    }
+
     setupShare();
 
     // 使い方オーバーレイ（自動では出さない。ボタンでのみ開閉）

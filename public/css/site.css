@@ -426,3 +426,30 @@ body[data-state="empty"] [data-role="help"] { display: flex; }
   margin-top: 2px;
 }
 .howto-close { width: 100%; }
+
+/* ---------- クラシックテーマ（旧デザイン風・デフォルト） ---------- */
+/* 行橋支部の使い方動画が旧UIで撮影されているため、動画と見た目が揃う
+   旧Bootstrap配色(青#007bff/赤#dc3545)をデフォルトにしている。
+   構造・状態機械・盤コンポーネントは新実装のまま(見た目のみの差し替え)。
+   切替は #btn-theme。選択は localStorage("theme") に記憶される */
+body[data-theme="classic"] .btn {
+  background: #007bff;
+  border-color: #007bff;
+  color: #fff;
+  border-radius: 4px;
+}
+body[data-theme="classic"] .btn:active { background: #0069d9; }
+body[data-theme="classic"] .btn-cta {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+body[data-theme="classic"] .btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+}
+body[data-theme="classic"] .card {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
