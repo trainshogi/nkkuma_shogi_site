@@ -581,6 +581,16 @@
     });
 
     $('btn-convert').addEventListener('click', recognize);
+
+    // classicテーマ専用の「変換」ボタン（旧UIと同じく操作列に常時並ぶ）。
+    // 実処理は本来の recognize() に転送するだけで、状態機械には手を入れない。
+    var convertClassic = $('btn-convert-classic');
+    if (convertClassic) {
+      convertClassic.addEventListener('click', function () {
+        if (!state.blob) { toast('先に写真を撮るか選んでください'); return; }
+        recognize();
+      });
+    }
     $('btn-retry').addEventListener('click', recognize);
 
     function reselect() {

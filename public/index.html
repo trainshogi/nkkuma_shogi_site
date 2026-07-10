@@ -48,10 +48,13 @@
         <button type="button" class="btn btn-ghost" id="btn-theme">✨ 新デザインで表示</button>
       </div>
 
-      <!-- 3. 操作列（empty / photo） -->
+      <!-- 3. 操作列（empty / photo）
+           btn-convert-classic は classic テーマ専用。旧UIと同じく「撮影・画像・変換」を
+           1行に並べるためのもので、押すと本来の #btn-convert に転送する。 -->
       <div class="actions" data-role="pick">
         <button type="button" class="btn" id="btn-camera">📷 撮影する</button>
         <button type="button" class="btn" id="btn-library">🖼 画像を選ぶ</button>
+        <button type="button" class="btn btn-cta" id="btn-convert-classic">変換</button>
       </div>
 
       <!-- 4. 結果カード（photo以降） -->
