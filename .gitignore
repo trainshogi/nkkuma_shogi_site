@@ -70,3 +70,13 @@ shogi_prod_backups/
 
 # APIキー
 .shogi_api_key
+
+# 動画生成の出力（AI生成画像・合成動画）
+output/
+
+# Claude Code のセッションログ・作業副産物（リポジトリには入れない）
+claude_logs/
+scripts/
+
+# Claude Code のローカル設定（.claude/launch.json と preview_server.py は共有するので個別に無視）
+.claude/settings.local.json
