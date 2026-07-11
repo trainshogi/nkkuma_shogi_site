@@ -57,6 +57,10 @@
         vector-effect:non-scaling-stroke;
       }
       #frame-overlay circle{ fill:#7c3aed; }
+      /* モデル/枠トグルのボタン内2段表示（v3 / 新v4 の副ラベル） */
+      .seg-btn{ flex-direction:column; line-height:1.15; padding:6px 4px; }
+      .seg-btn small{ display:block; font-size:10px; font-weight:400; color:var(--muted); }
+      .seg-btn.active small{ color:rgba(255,255,255,.85); }
     </style>
   </head>
   <body data-state="empty">
@@ -84,9 +88,17 @@
         <button type="button" class="btn btn-ghost" id="btn-howto">❓ はじめての方へ：使い方をみる</button>
       </div>
 
-      <!-- α: 枠認識エンジン v1/v2 切替（デフォルトv2＝新エンジン） -->
-      <div class="card-label" style="margin-top:10px;">枠認識エンジン</div>
-      <div class="segment waku-toggle" role="group" aria-label="枠認識エンジン">
+      <!-- α: 駒認識モデル v1/v2/v3 切替（デフォルトv3＝新v4・難しい盤に強い） -->
+      <div class="card-label" style="margin-top:10px;">駒認識モデル</div>
+      <div class="segment model-toggle" role="group" aria-label="駒認識モデル">
+        <button type="button" class="seg-btn" data-model="v1">v1<small>TF</small></button>
+        <button type="button" class="seg-btn" data-model="v2">v2<small>TF+後処理</small></button>
+        <button type="button" class="seg-btn active" data-model="v3">v3<small>新v4</small></button>
+      </div>
+
+      <!-- α: 枠検出 v1/v2 切替（デフォルトv2＝新エンジン） -->
+      <div class="card-label" style="margin-top:10px;">枠検出</div>
+      <div class="segment waku-toggle" role="group" aria-label="枠検出">
         <button type="button" class="seg-btn" data-waku="v1">v1（旧）</button>
         <button type="button" class="seg-btn active" data-waku="v2">v2（新）</button>
       </div>

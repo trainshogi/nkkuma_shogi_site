@@ -157,7 +157,8 @@
     blob: null,          // 圧縮後Blob
     selectedPos: null,   // 編集中のマス "<筋><段>"
     points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
-    wakuVersion: 'v2'    // α: 枠認識エンジンのバージョン切替（v1=旧UNet / v2=新エンジン）
+    wakuVersion: 'v2',   // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
+    modelVersion: 'v3'   // α: 駒認識モデル切替（v1=本番TF / v2=TF+後処理 / v3=新v4）
   };
 
   var els = {};
@@ -540,25 +541,52 @@
   }
 
   // ===== API 呼び出し =====
-  function recognize() {
-    if (!state.blob) { return; }
-    setState('busy');
+  // multipartを毎回作り直す(FormData/Blobは1リクエストで消費されるため、
+  // リトライ時に使い回すと空ボディになる)
+  function buildFormData() {
     var fd = new FormData();
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
-    fd.append('hidden_sengo', 'true');
-    fd.append('waku', state.wakuVersion);
+    fd.append('hidden_sengo', '0');       // API仕様更新: 手番は0固定(先手基準)
+    fd.append('mode', 'all');             // API仕様更新: mode 必須
+    fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替
+    fd.append('waku', state.wakuVersion);   // 枠検出 v1/v2
+    return fd;
+  }
 
-    fetch(API_URL, {
+  // コールドスタート時、初回が最大30秒→API Gatewayの30sタイムアウトで503になり得る。
+  // その場合のみ1回だけ自動リトライする(2回目はウォーム済で通る想定)。
+  function postRecognize(attempt) {
+    // ブラウザ側でも30sで打ち切ってやり直せるようAbortControllerで制御
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 32000) : null;
+
+    return fetch(API_URL, {
       method: 'POST',
       headers: { 'x-api-key': API_KEY },
-      body: fd,
-      cache: 'no-store'
-    })
-      .then(function (res) {
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        return res.json();
-      })
+      body: buildFormData(),
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      if (timer) { clearTimeout(timer); }
+      // 503(コールドスタート起因のタイムアウト)は1回だけリトライ
+      if (res.status === 503 && attempt === 0) {
+        return postRecognize(1);
+      }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    }).catch(function (err) {
+      if (timer) { clearTimeout(timer); }
+      // ネットワーク中断/タイムアウト(abort)も初回のみリトライ
+      if (attempt === 0) { return postRecognize(1); }
+      throw err;
+    });
+  }
+
+  function recognize() {
+    if (!state.blob) { return; }
+    setState('busy');
+    postRecognize(0)
       .then(function (data) {
         applyResult(data);
       })
@@ -621,7 +649,7 @@
     $('btn-convert').addEventListener('click', recognize);
     $('btn-retry').addEventListener('click', recognize);
 
-    // α: 枠認識エンジン v1/v2 トグル
+    // α: 枠検出 v1/v2 トグル
     var wakuBtns = document.querySelectorAll('.waku-toggle .seg-btn');
     for (var w = 0; w < wakuBtns.length; w++) {
       (function (btn) {
@@ -631,6 +659,18 @@
           btn.classList.add('active');
         });
       })(wakuBtns[w]);
+    }
+
+    // α: 駒認識モデル v1/v2/v3 トグル
+    var modelBtns = document.querySelectorAll('.model-toggle .seg-btn');
+    for (var m = 0; m < modelBtns.length; m++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state.modelVersion = btn.getAttribute('data-model');
+          for (var k = 0; k < modelBtns.length; k++) { modelBtns[k].classList.remove('active'); }
+          btn.classList.add('active');
+        });
+      })(modelBtns[m]);
     }
 
     function reselect() {
