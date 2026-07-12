@@ -61,7 +61,12 @@
     a { color: #0b67c2; }
     pre {
       background: #f6f6f4; border: 1px solid #e8e8e4; border-radius: 6px;
-      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.7;
+      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    }
+    /* 和文等幅フォントを指定して、KIFの盤面図（全角の漢字と半角のv・記号）の桝を揃える */
+    pre, pre code {
+      font-family: "ＭＳ ゴシック", "MS Gothic", "Osaka-等幅", Osaka-mono,
+                   "Hiragino Kaku Gothic ProN", Menlo, Consolas, monospace;
     }
     code { font-family: Menlo, Consolas, monospace; font-size: 0.92em; }
     p code, li code { background: #f2f2ef; padding: 1px 5px; border-radius: 4px; }
