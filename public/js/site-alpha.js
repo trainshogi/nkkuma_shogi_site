@@ -158,7 +158,8 @@
     selectedPos: null,   // 編集中のマス "<筋><段>"
     points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
     wakuVersion: 'v2',   // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
-    modelVersion: 'v3'   // α: 駒認識モデル切替（v1=本番TF / v2=TF+後処理 / v3=新v4）
+    modelVersion: 'v3',  // α: 駒認識モデル切替（v1=本番TF / v2=TF+後処理 / v3=新v4）
+    mochiPostproc: true  // α: 持ち駒を駒数保存則で補正（実験的・既定ON）
   };
 
   var els = {};
@@ -551,6 +552,7 @@
     fd.append('mode', 'all');             // API仕様更新: mode 必須
     fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替
     fd.append('waku', state.wakuVersion);   // 枠検出 v1/v2
+    fd.append('mochi_postproc', state.mochiPostproc ? '1' : '0'); // 持ち駒の駒数保存則補正(実験的)
     return fd;
   }
 
@@ -671,6 +673,15 @@
           btn.classList.add('active');
         });
       })(modelBtns[m]);
+    }
+
+    // α: 持ち駒補正（mochi_postproc）チェックボックス
+    var mochiChk = $('mochi-postproc');
+    if (mochiChk) {
+      mochiChk.checked = state.mochiPostproc;
+      mochiChk.addEventListener('change', function () {
+        state.mochiPostproc = mochiChk.checked;
+      });
     }
 
     function reselect() {

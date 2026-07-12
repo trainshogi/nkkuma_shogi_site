@@ -61,6 +61,10 @@
       .seg-btn{ flex-direction:column; line-height:1.15; padding:6px 4px; }
       .seg-btn small{ display:block; font-size:10px; font-weight:400; color:var(--muted); }
       .seg-btn.active small{ color:rgba(255,255,255,.85); }
+      /* 持ち駒補正チェックボックス */
+      .mochi-postproc-row{ display:flex; align-items:center; gap:8px; margin-top:12px; cursor:pointer; font-size:14px; }
+      .mochi-postproc-row input{ width:18px; height:18px; flex:none; }
+      .mochi-postproc-row small{ color:var(--muted); font-size:12px; font-weight:400; }
     </style>
   </head>
   <body data-state="empty">
@@ -102,6 +106,12 @@
         <button type="button" class="seg-btn" data-waku="v1">v1（旧）</button>
         <button type="button" class="seg-btn active" data-waku="v2">v2（新）</button>
       </div>
+
+      <!-- α: 持ち駒補正（mochi_postproc・実験的） -->
+      <label class="mochi-postproc-row">
+        <input type="checkbox" id="mochi-postproc" checked>
+        <span>持ち駒を補正する<small>（実験中・精度改善中）</small></span>
+      </label>
 
       <!-- 3. 操作列（empty / photo） -->
       <div class="actions" data-role="pick">
