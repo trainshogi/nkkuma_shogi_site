@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<!-- このファイルは blog/build.py が生成しました。直接編集せず articles/*.md を編集してください -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KIFファイルとは？開き方・作り方・変換方法まとめ【将棋の棋譜形式】 | Shogiban to Kif ブログ</title>
+  <meta name="description" content="将棋の棋譜ファイル「KIF形式」の中身と開き方、対応アプリ、SFEN等との違い、変換方法までまとめて解説します。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog/kif-guide/">
+
+  <meta property="og:title" content="KIFファイルとは？開き方・作り方・変換方法まとめ【将棋の棋譜形式】">
+  <meta property="og:description" content="将棋の棋譜ファイル「KIF形式」の中身と開き方、対応アプリ、SFEN等との違い、変換方法までまとめて解説します。">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog/kif-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@nkkuma_service">
+
+  <!-- AdSense: 審査通過後、ここに広告コードを貼る -->
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      color: #222; background: #fff;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.9;
+      -webkit-text-size-adjust: 100%;
+    }
+    .site-head {
+      border-bottom: 1px solid #e5e5e5;
+      padding: 10px 16px;
+    }
+    .site-head a { display: inline-block; }
+    .site-head img { height: 34px; width: auto; vertical-align: middle; }
+    .site-head .blog-name {
+      font-size: 13px; color: #888; margin-left: 10px; text-decoration: none;
+    }
+    main {
+      max-width: 720px; margin: 0 auto; padding: 24px 18px 48px;
+    }
+    h1 { font-size: 26px; line-height: 1.5; margin: 8px 0 4px; }
+    .meta { color: #999; font-size: 13px; margin-bottom: 28px; }
+    h2 {
+      font-size: 21px; margin: 44px 0 12px;
+      padding-bottom: 6px; border-bottom: 2px solid #eee;
+    }
+    h3 { font-size: 17px; margin: 32px 0 8px; }
+    p { margin: 0 0 1.2em; }
+    a { color: #0b67c2; }
+    pre {
+      background: #f6f6f4; border: 1px solid #e8e8e4; border-radius: 6px;
+      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    }
+    /* 和文等幅フォントを指定して、KIFの盤面図（全角の漢字と半角のv・記号）の桝を揃える */
+    pre, pre code {
+      font-family: "ＭＳ ゴシック", "MS Gothic", "Osaka-等幅", Osaka-mono,
+                   "Hiragino Kaku Gothic ProN", Menlo, Consolas, monospace;
+    }
+    code { font-family: Menlo, Consolas, monospace; font-size: 0.92em; }
+    p code, li code { background: #f2f2ef; padding: 1px 5px; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14.5px; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #f7f7f5; }
+    blockquote { margin: 1em 0; padding: 2px 16px; border-left: 4px solid #ddd; color: #555; }
+    img { max-width: 100%; height: auto; }
+    .tool-cta {
+      margin: 40px 0 8px; padding: 18px 16px;
+      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
+      font-size: 15px;
+    }
+    .tool-cta a.btn {
+      display: inline-block; margin-top: 10px;
+      background: #dc3545; color: #fff; text-decoration: none;
+      padding: 10px 18px; border-radius: 6px; font-weight: bold;
+    }
+    .site-foot {
+      border-top: 1px solid #e5e5e5; margin-top: 24px;
+      padding: 18px 16px; text-align: center; color: #888; font-size: 13px;
+    }
+    .site-foot a { color: #0b67c2; }
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <a href="/"><img src="/img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif"></a>
+    <a class="blog-name" href="/blog/">ブログ</a>
+  </header>
+
+  <main>
+    <article>
+      <h1>KIFファイルとは？開き方・作り方・変換方法まとめ【将棋の棋譜形式】</h1>
+      <div class="meta">2026-07-13　Shogiban to Kif 運営</div>
+      <p>対局アプリからダウンロードした「.kif」というファイル、ダブルクリックしても開けずに放置していないでしょうか。KIF形式について調べると柿木義一氏の公式仕様書にたどり着きますが、あれは開発者向けの文書で、普通に将棋を指す人が読むにはだいぶ骨が折れます。</p>
+<p>盤面写真をKIFに変換するツールを7年ほど運営してきて、KIFまわりの質問はたびたび受けてきました。この記事では、KIFファイルの中身から開き方、他の棋譜形式との違い、作り方までを一通り説明します。</p>
+<h2>KIFファイルとは</h2>
+<p>KIF形式は、将棋ソフト「柿木将棋」の作者である柿木義一氏が考案した棋譜のファイル形式です。拡張子は「.kif」（環境によっては「.kifu」）で、中身はただのテキストファイルです。特別なバイナリ形式ではないので、極端な話メモ帳やテキストエディタでも開いて読むことができます。</p>
+<p>将棋の棋譜フォーマットにはいくつか種類がありますが、KIF形式は対応ソフトの多さと、日本語表記で人間にも読みやすいという理由から、事実上の標準として長年使われてきました。プロ棋戦の棋譜配信サイトから個人の将棋ソフト、スマホアプリまで、幅広く読み書きに対応しています。</p>
+<h2>実際に中身を見てみる</h2>
+<p>先に実物を見たほうが早いので、平手の序盤6手だけのKIFファイルを載せます。</p>
+<pre><code>開始日時：2026/07/12 10:00:00
+棋戦：練習対局
+先手：山田太郎
+後手：鈴木次郎
+手合割：平手
+手数----指手---------消費時間--
+   1 ７六歩(77)   ( 0:00/00:00:00)
+   2 ３四歩(33)   ( 0:00/00:00:00)
+   3 ２六歩(27)   ( 0:00/00:00:00)
+   4 ８四歩(83)   ( 0:00/00:00:00)
+   5 ２五歩(26)   ( 0:00/00:00:00)
+   6 ８五歩(84)   ( 0:00/00:00:00)
+</code></pre>
+<p>前半はヘッダ部です。「開始日時」「棋戦」「先手」「後手」「手合割」のように、項目名と値を全角コロンでつないだ行が並びます。手合割が「平手」以外（駒落ちなど）の場合は、先手・後手の代わりに「下手」「上手」という表記になることもあります。</p>
+<p>「手数----指手---------消費時間--」という飾り線から下が指し手部です。各行は「手数　指し手　消費時間」の3つで構成されています。</p>
+<p>指し手の表記は「移動先の筋（全角数字）＋移動先の段（漢数字）＋駒名＋（移動元のマス）」です。1行目の「７六歩(77)」なら、77の地点にあった歩を76に動かしたという意味になります。KIF形式では▲や△の記号は指し手には付きません。奇数手目が先手、偶数手目が後手と決まっているので、記号がなくても手番がわかる仕組みです。</p>
+<p>このほか知っておくと読みやすくなる表記がいくつかあります。</p>
+<ul>
+<li>直前の相手の指し手と同じマスに動く場合は、マス目を書かず「同　歩(84)」のように書きます（「同」の後ろに全角スペースが入るのが柿木仕様の癖です）</li>
+<li>成れる位置で成った場合は駒名の後ろに「成」を付けます（例：２二角成(88)）</li>
+<li>成れるのにあえて成らなかった場合は「不成」と書きます</li>
+<li>持ち駒を打った場合は移動元がないので「打」になります（例：５五角打）</li>
+</ul>
+<p>消費時間の欄「( 0:00/00:00:00)」は、その手にかけた時間と、それまでの合計消費時間を表しています。対局が終局した場合は、指し手部の最後に「まで76手で先手の勝ち」のように、決着までの手数と結果を示す行が加わります。</p>
+<h2>指し手ではなく「盤面図」を表すKIF</h2>
+<p>ここまでは対局の指し手を1手目から並べたKIFを見てきました。ただ、KIF形式が表せるのはこの「手順」だけではありません。<strong>ある一瞬の盤面（局面）そのもの</strong>を、盤の図として書き表す形式もあります。詰将棋の問題図や、対局の途中図を保存・共有したいときに使われるものです。</p>
+<p>盤面をスマホで撮って変換するうちのツールが出力するのも、実はこちらです。写真は対局中の一場面ですから、そこから作れるのは「この局面はこうなっている」という盤面図であって、そこに至るまでの手順ではありません。</p>
+<p>たとえば ▲7六歩 △3四歩 ▲2二角成 △同銀 と進んだ（双方が角を持ち合った）局面を盤面図で表すと、次のようになります。</p>
+<pre><code>後手の持駒：角　
+  ９ ８ ７ ６ ５ ４ ３ ２ １
++---------------------------+
+|v香v桂v銀v金v玉v金 ・v桂v香|一
+| ・v飛 ・ ・ ・ ・ ・v銀 ・|二
+|v歩v歩v歩v歩v歩v歩 ・v歩v歩|三
+| ・ ・ ・ ・ ・ ・v歩 ・ ・|四
+| ・ ・ ・ ・ ・ ・ ・ ・ ・|五
+| ・ ・ 歩 ・ ・ ・ ・ ・ ・|六
+| 歩 歩 ・ 歩 歩 歩 歩 歩 歩|七
+| ・ ・ ・ ・ ・ ・ ・ 飛 ・|八
+| 香 桂 銀 金 玉 金 銀 桂 香|九
++---------------------------+
+先手の持駒：角　
+
+先手番
+</code></pre>
+<p>読み方はそのまま見た目のとおりです。上の行が後手の持ち駒、真ん中の枠内が9×9の盤面で、先頭に「v」が付いているのが後手の駒、付いていないのが先手の駒、「・」が空きマスです。右端の漢数字が段（一〜九）、いちばん上の全角数字が筋（９〜１）を表します。枠の下が先手の持ち駒で、最後の「先手番」がこの局面の手番です。</p>
+<p>指し手の並びを持ったKIFと、この盤面図のKIFは、同じ「.kif」でも中身の役割が違います。前者は「どう指したか」、後者は「いまどうなっているか」を表す、と覚えておくと混乱しません。どちらの形式も、次に紹介する対応ソフトでそのまま開けます。</p>
+<h2>KIFファイルの開き方</h2>
+<p>中身がテキストなのでメモ帳でも「読む」ことはできますが、正直なところ盤面をイメージしながら追うのはかなり大変です。実用的には、KIF形式を読み込める将棋ソフトやアプリで開くのがおすすめです。代表的なものを挙げます。</p>
+<ul>
+<li><strong>Kifu for Windows</strong>：KIF形式の記録・再生に特化したWindows用フリーソフト。棋譜を盤面付きで再生できます</li>
+<li><strong>ShogiGUI</strong>：将棋エンジンとの対局・検討用GUIソフト。KIF・KI2・CSA・SFENなど主要な形式を幅広く扱えます</li>
+<li><strong>ぴよ将棋</strong>：スマホ向けの将棋アプリで、KIFファイルの読み込みにも対応しています</li>
+<li><strong>将棋DB2</strong>：棋譜を検索・閲覧・共有できるWebサービス／スマホアプリ。KIF形式の棋譜の読み込みに対応しています</li>
+</ul>
+<p>いずれも無料で使えます。PCでじっくり検討するならShogiGUI、スマホで手軽に並べ直すならぴよ将棋、という使い分けが定番です。</p>
+<h2>文字コードの罠</h2>
+<p>KIFファイルを開いたら文字化けしていた、というのは将棋ソフト界隈ではあるあるらしく、原因のほとんどは文字コードです。</p>
+<p>KIF形式はもともとShift_JIS（Windowsの日本語環境で長く標準だった文字コード）で保存されてきました。拡張子でいうと「.kif」がShift_JIS、「.kifu」がUTF-8、という使い分けをするツールもあります。ただしこれは絶対のルールではなく、最近のツールやWeb系のソフトは拡張子が「.kif」でもUTF-8で書き出すことがあります。この食い違いが文字化けの正体です。</p>
+<p>たとえば、UTF-8で書き出したKIFが古い将棋ソフトで開けないというのは以前から知られた問題です（<a href="https://yaneuraou.yaneu.com/2018/08/31/%E3%80%8E%E5%B0%86%E6%A3%8B%E7%A5%9E%E3%82%84%E3%81%AD%E3%81%86%E3%82%89%E7%8E%8B%E3%80%8F%E3%81%A7%E6%9B%B8%E3%81%8D%E5%87%BA%E3%81%97%E3%81%9Fkif%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%81%8C/">やねうら王の記事</a>が詳しいです）。対応するソフトも増えていて、Kifu for WindowsはV7以降でUTF-8を読めるようになっています。</p>
+<p>対処法はいくつかあります。手軽なのは、VS Codeやサクラエディタなど文字コードを指定して開けるエディタで、「Shift_JIS」と「UTF-8」を切り替えて開き直すことです。元のソフトが手元にあるなら、そこから棋譜をコピーして貼り付け直せば、文字コードを気にせず移せます。文字化けに頻繁に困るなら、文字コードを自動判定してくれるビューアソフトに乗り換えるのも手です。</p>
+<h2>KI2・CSA・SFENとの違い</h2>
+<p>KIFと混同されやすい他の形式についても簡単に触れておきます。</p>
+<p><strong>KI2形式</strong>は見た目がKIFに近い派生形式です。最大の違いは、移動元のマス目を書かない代わりに指し手に▲△を付ける点です。「７六歩(77)」ではなく「▲７六歩」のように、一行に指し手を続けて書くスタイルで、新聞や雑誌の棋譜欄に近い見た目になります。</p>
+<p><strong>CSA形式</strong>は主にコンピュータ将棋の分野で使われる形式です。指し手を「+7776FU」のようにアルファベットと数字だけで表すため、人間には読みにくいですが機械的な処理はしやすく、将棋エンジン同士の対局やサーバー間のやり取りでよく使われます。</p>
+<p><strong>SFEN</strong>は他の3つとは性質が異なり、対局の指し手の履歴ではなく「ある瞬間の盤面」を1行の文字列で表す形式です。駒の配置・手番・持ち駒・手数を凝縮して表現できるため、Web上の将棋盤ツールでは局面をURLのパラメータに埋め込んで共有する用途によく使われます。うちのツールでも、認識した局面を検討サイトのKENTOに渡すときはSFENをURLに埋め込んで飛ばしています。棋譜全体を保存したいならKIFやCSA、特定の局面だけを手軽に共有したいならSFEN、という使い分けです。</p>
+<h2>KIFファイルを作る方法</h2>
+<p>KIFファイルを新しく作る方法は大きく3つあります。</p>
+<p>1つ目は、対局アプリやソフトで記録する方法です。オンライン対局アプリやぴよ将棋のようなAI対局アプリは、対局後に棋譜をKIF形式で書き出したりコピーしたりする機能を持っているものがほとんどです。一番手軽で間違いも起きにくい方法です。</p>
+<p>2つ目は、手入力する方法です。対局中に記録用紙へ手書きした棋譜を、後からKifu for Windowsなどのソフトでポチポチ入力していくやり方です。上で説明した表記ルールさえわかっていれば、テキストエディタで直接打ち込むこともできます。</p>
+<p>3つ目は、盤面の写真から作る方法です。記録係を立てない練習対局や、道場で指した一局などは、途中図や終局図の写真だけが残っていて棋譜がない、ということがよくあります。私たちが運営している「Shogiban to Kif」は、まさにこの場面向けに作ったツールで、盤面を撮影した写真をアップロードすると、先ほどの盤面図の形（KIF）やSFENに変換できます。1手ずつの手順ではなく「その一手の局面」を残す使い方だと考えてください。手入力の手間を省きたいときの選択肢として覚えておいてもらえると嬉しいです。</p>
+<h2>よくある質問</h2>
+<p><strong>スマホでKIFファイルを開くには？</strong>
+ぴよ将棋のようなKIF対応のスマホアプリにファイルを読み込ませるのが確実です。メールやクラウドストレージからアプリに直接開かせる形で共有できる場合も多いので、お使いのアプリの読み込み方法を確認してみてください。</p>
+<p><strong>途中の局面から始まる棋譜はどう書くの？</strong>
+駒落ちのように決まった手合割であれば「手合割」の項目にその名称を書くだけで済みます。それ以外の任意の局面から始めたい場合は、上で紹介した盤面図をヘッダに置き、その続きとして指し手を並べます。詰将棋の問題集や、途中図からの検討でよく使われる書き方です。</p>
+<p><strong>KIFとKI2、どちらで保存すればいいですか？</strong>
+迷ったらKIFで問題ありません。対応ソフトが多く、移動元のマス目まで明示されているぶん、あとから別のソフトで読み込んだときの解釈のブレも少なくて済みます。</p>
+<h2>参考リンク</h2>
+<ul>
+<li><a href="http://kakinoki.o.oo7.jp/kif_format.html">棋譜ファイル KIF形式（柿木義一氏による公式仕様）</a> … 形式の考案者による一次資料。この記事で触れていない細かな表記もすべて載っています</li>
+<li><a href="https://ja.wikipedia.org/wiki/%E6%9F%BF%E6%9C%A8%E5%B0%86%E6%A3%8B">柿木将棋（Wikipedia）</a> … KIF形式を生んだ将棋ソフトの歴史や背景</li>
+<li><a href="https://qiita.com/sunfish-shogi/items/964e139ef3bfd8f738d4">将棋の棋譜や局面のフォーマット（Qiita）</a> … KIF/KI2/CSA/SFEN/USIなどを開発者目線で整理した記事</li>
+<li><a href="/">Shogiban to Kif（当サイトの変換ツール）</a> … 盤面の写真からKIF・SFENを作る無料ツール</li>
+</ul>
+    </article>
+
+    <div class="tool-cta">
+      <b>将棋盤の写真から棋譜を作れます</b><br>
+      盤面をスマホで撮るだけで、KIF・SFEN形式に変換できる無料ツールを運営しています。登録不要です。
+      <br><a class="btn" href="/">盤面写真をKIFに変換する</a>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/blog/">ブログ一覧</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+</body>
+</html>
