@@ -58,6 +58,7 @@ def render(template, meta, content_html):
     out = template
     for k in ("title", "description", "slug", "date"):
         out = out.replace("{{" + k + "}}", html.escape(meta[k]) if k != "date" else meta[k])
+    out = out.replace("{{canonical}}", f"{SITE}/blog/{meta['slug']}.html")
     return out.replace("{{content}}", content_html)
 
 
@@ -74,19 +75,21 @@ def main():
             meta, body = parse_front_matter(f.read(), path)
         content = markdown.markdown(body, extensions=["extra", "sane_lists"])
         page = render(template, meta, content)
-        out_dir = os.path.join(OUT_DIR, meta["slug"])
-        os.makedirs(out_dir, exist_ok=True)
-        with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
+        # このサイトのCloudFront構成はサブディレクトリのindex自動配信をしない
+        # (ルートのDefaultRootObjectのみ)。既存(faq.html等)と同じフラットな
+        # .html ファイルで出す。記事URLは /blog/<slug>.html
+        os.makedirs(OUT_DIR, exist_ok=True)
+        with open(os.path.join(OUT_DIR, meta["slug"] + ".html"), "w", encoding="utf-8") as f:
             f.write(page)
         articles.append(meta)
-        print(f"  built: /blog/{meta['slug']}/  ({meta['title']})")
+        print(f"  built: /blog/{meta['slug']}.html  ({meta['title']})")
 
     # 新しい日付順に並べる
     articles.sort(key=lambda a: a["date"], reverse=True)
 
-    # 記事一覧ページ
+    # 記事一覧ページ（/blog.html）
     items = "\n".join(
-        f'      <li><a href="/blog/{a["slug"]}/">{html.escape(a["title"])}</a>'
+        f'      <li><a href="/blog/{a["slug"]}.html">{html.escape(a["title"])}</a>'
         f'<span class="d">{a["date"]}</span></li>'
         for a in articles
     )
@@ -95,6 +98,7 @@ def main():
         .replace("{{title}}", "記事一覧")
         .replace("{{description}}", "将棋の棋譜・KIF形式・盤面認識に関する解説記事")
         .replace("{{slug}}", "")
+        .replace("{{canonical}}", f"{SITE}/blog.html")
         .replace("{{date}}", "")
         .replace(
             "{{content}}",
@@ -104,12 +108,12 @@ def main():
             f'    <ul class="post-list">\n{items}\n    </ul>',
         )
     )
-    with open(os.path.join(OUT_DIR, "index.html"), "w", encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "public", "blog.html"), "w", encoding="utf-8") as f:
         f.write(index_html)
-    print("  built: /blog/  (一覧)")
+    print("  built: /blog.html  (一覧)")
 
     # sitemap.xml（トップ・ブログ一覧・各記事）
-    urls = [f"{SITE}/", f"{SITE}/blog/"] + [f"{SITE}/blog/{a['slug']}/" for a in articles]
+    urls = [f"{SITE}/", f"{SITE}/blog.html"] + [f"{SITE}/blog/{a['slug']}.html" for a in articles]
     body = "\n".join(f"  <url><loc>{u}</loc></url>" for u in urls)
     sitemap = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
