@@ -157,9 +157,11 @@
     blob: null,          // 圧縮後Blob
     selectedPos: null,   // 編集中のマス "<筋><段>"
     points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
-    wakuVersion: 'v2',   // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
-    modelVersion: 'v3',  // α: 駒認識モデル切替（v1=本番TF / v2=TF+後処理 / v3=新v4）
-    mochiPostproc: true  // α: 持ち駒を駒数保存則で補正（実験的・既定ON）
+    wakuVersion: 'v2',      // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
+    modelVersion: 'v2',     // α: 駒認識モデル切替（v1/v2/v3。API推奨はv2）
+    mochiCropVersion: 'v2', // α: 持ち駒認識エンジン（v1=旧 / v2=新・盤周囲タイル検出。API推奨はv2）
+    mochiOcr: true,         // α: 持ち駒の個数数字OCR（アプリ画面向け。API推奨は1）
+    mochiPostproc: false    // α: 持ち駒を駒数保存則で補正（実験的・実物写真では既定OFF推奨）
   };
 
   var els = {};
@@ -550,8 +552,10 @@
     fd.append('hidden_rotate', '0');
     fd.append('hidden_sengo', '0');       // API仕様更新: 手番は0固定(先手基準)
     fd.append('mode', 'all');             // API仕様更新: mode 必須
-    fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替
+    fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替(API推奨v2)
     fd.append('waku', state.wakuVersion);   // 枠検出 v1/v2
+    fd.append('mochi_crop', state.mochiCropVersion); // 持ち駒認識エンジン v1/v2(API推奨v2)
+    fd.append('mochi_ocr', state.mochiOcr ? '1' : '0'); // 持ち駒個数OCR(API推奨1)
     fd.append('mochi_postproc', state.mochiPostproc ? '1' : '0'); // 持ち駒の駒数保存則補正(実験的)
     return fd;
   }
@@ -673,6 +677,27 @@
           btn.classList.add('active');
         });
       })(modelBtns[m]);
+    }
+
+    // α: 持ち駒認識エンジン v1/v2 トグル
+    var mochiCropBtns = document.querySelectorAll('.mochi-crop-toggle .seg-btn');
+    for (var mc = 0; mc < mochiCropBtns.length; mc++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          state.mochiCropVersion = btn.getAttribute('data-mochi-crop');
+          for (var k = 0; k < mochiCropBtns.length; k++) { mochiCropBtns[k].classList.remove('active'); }
+          btn.classList.add('active');
+        });
+      })(mochiCropBtns[mc]);
+    }
+
+    // α: 持ち駒OCR（mochi_ocr）チェックボックス
+    var mochiOcrChk = $('mochi-ocr');
+    if (mochiOcrChk) {
+      mochiOcrChk.checked = state.mochiOcr;
+      mochiOcrChk.addEventListener('change', function () {
+        state.mochiOcr = mochiOcrChk.checked;
+      });
     }
 
     // α: 持ち駒補正（mochi_postproc）チェックボックス
