@@ -92,12 +92,12 @@
         <button type="button" class="btn btn-ghost" id="btn-howto">❓ はじめての方へ：使い方をみる</button>
       </div>
 
-      <!-- α: 駒認識モデル v1/v2/v3 切替（デフォルトv3。モデル詳細は非公開） -->
+      <!-- α: 駒認識モデル v1/v2/v3 切替（デフォルトv2＝推奨。モデル詳細は非公開） -->
       <div class="card-label" style="margin-top:10px;">駒認識モデル</div>
       <div class="segment model-toggle" role="group" aria-label="駒認識モデル">
         <button type="button" class="seg-btn" data-model="v1">v1</button>
-        <button type="button" class="seg-btn" data-model="v2">v2</button>
-        <button type="button" class="seg-btn active" data-model="v3">v3</button>
+        <button type="button" class="seg-btn active" data-model="v2">v2</button>
+        <button type="button" class="seg-btn" data-model="v3">v3</button>
       </div>
 
       <!-- α: 枠検出 v1/v2 切替（デフォルトv2＝新エンジン） -->
@@ -107,10 +107,23 @@
         <button type="button" class="seg-btn active" data-waku="v2">v2（新）</button>
       </div>
 
-      <!-- α: 持ち駒補正（mochi_postproc・実験的） -->
+      <!-- α: 持ち駒認識エンジン v1/v2 切替（デフォルトv2＝新エンジン・盤周囲タイル検出） -->
+      <div class="card-label" style="margin-top:10px;">持ち駒認識エンジン</div>
+      <div class="segment mochi-crop-toggle" role="group" aria-label="持ち駒認識エンジン">
+        <button type="button" class="seg-btn" data-mochi-crop="v1">v1（旧）</button>
+        <button type="button" class="seg-btn active" data-mochi-crop="v2">v2（新）</button>
+      </div>
+
+      <!-- α: 持ち駒OCR（mochi_ocr・アプリ画面の「歩 6」等の個数表示を読む） -->
       <label class="mochi-postproc-row">
-        <input type="checkbox" id="mochi-postproc" checked>
-        <span>持ち駒を補正する<small>（実験中・精度改善中）</small></span>
+        <input type="checkbox" id="mochi-ocr" checked>
+        <span>持ち駒の個数をOCRで読む<small>（アプリ画面のスクショ向け）</small></span>
+      </label>
+
+      <!-- α: 持ち駒補正（mochi_postproc・実験的。実物写真では既定OFF推奨） -->
+      <label class="mochi-postproc-row">
+        <input type="checkbox" id="mochi-postproc">
+        <span>持ち駒を駒数保存則で補正する<small>（実験的・実物写真では非推奨）</small></span>
       </label>
 
       <!-- 3. 操作列（empty / photo） -->
