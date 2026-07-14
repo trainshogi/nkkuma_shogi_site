@@ -24,6 +24,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Pre-deploy safety check (現本番の状態を確認)
+        # 本番バケットは S3 バージョニング有効(Enabled)。上書きされる各オブジェクトの
+        # 旧バージョンは S3 側に自動保持されるので、実体としてのバックアップは既にある
+        # (復元手順: docs/CICD_SETUP.md のロールバック手段を参照。復元には
+        #  s3:ListBucketVersions 等の追加権限が要るため、このCIロールには持たせず
+        #  人が local-claude プロファイルで手動実施する設計)。
+        # ここではデプロイ直前の本番オブジェクト数を記録し、想定外に少ない
+        # (=何かの理由で本番が壊れている)場合はデプロイを中断する
+        run: |
+          count=$(aws s3api list-objects-v2 --bucket shogi.nkkuma.tokyo --query 'KeyCount' --output text)
+          echo "現本番: $count 件のオブジェクト"
+          if [ "$count" -lt 80 ]; then
+            echo "::error::本番のオブジェクト数が少なすぎます($count件)。想定外の状態のためデプロイを中断します"
+            exit 1
+          fi
+
       - name: Inject API keys (replace placeholders in public/)
         # secrets コンテキストは if: 条件式では使えない（GitHub Actionsの仕様上の制限）ため、
         # 未設定チェックもこのステップの bash 内で行う
@@ -57,12 +79,6 @@ jobs:
               perl -i -pe 's/__ALPHA_API_KEY__/$ENV{SHOGI_ALPHA_API_KEY}/g' "$f"
             done
           fi
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ap-northeast-1
 
       - name: Sync to S3
         # deploy.sh と同一の除外リスト。ACL 無しは CloudFront が AccessDenied になるので必須

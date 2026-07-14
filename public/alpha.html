@@ -126,6 +126,12 @@
         <span>持ち駒を駒数保存則で補正する<small>（実験的・実物写真では非推奨）</small></span>
       </label>
 
+      <!-- α: 統合整合ソルバ（joint・持ち駒情報で盤面9×9も補正。model=v1/v2のみ有効） -->
+      <label class="mochi-postproc-row" id="joint-solver-row">
+        <input type="checkbox" id="joint-solver">
+        <span>持ち駒情報で盤面も補正する（joint）<small>（実験的・model=v1/v2のみ有効）</small></span>
+      </label>
+
       <!-- 3. 操作列（empty / photo） -->
       <div class="actions" data-role="pick">
         <button type="button" class="btn" id="btn-camera">📷 撮影する</button>
