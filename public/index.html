@@ -72,6 +72,10 @@
         </ul>
         <button type="button" class="btn btn-primary" onclick="clip_text()"><i class="fa fa-copy" aria-hidden="true"></i></button>
         <button type="button" class="btn btn-primary" onclick="save_text()"><i class="fa fa-save" aria-hidden="true"></i></button>
+        <!-- 局面画像（js/kyokumen.js）: このブロック内に置くことで既存の表示切替に相乗りする -->
+        <div class="text-muted" style="margin-top:8px;">局面画像</div>
+        <button type="button" class="btn btn-dark" style="background:#000;color:#fff;" onclick="Kyokumen.share(window.result_json)">𝕏 画像でポスト</button>
+        <button type="button" class="btn btn-primary" onclick="Kyokumen.save(window.result_json)"><i class="fa fa-picture-o" aria-hidden="true"></i> 保存</button>
       </div>
       <div id="guruguru" class="loader" style="display: none">Loading...</div>
       <img id="reco_err_img" style="display: none; margin: auto;" src="img/reco_err.png" width="80%"></img>
@@ -192,6 +196,8 @@
     <script src="js/util.js"></script>
     <!-- js source for init html -->
     <script src="js/main_apigw.js"></script>
+    <!-- 局面画像の生成・シェア -->
+    <script src="js/kyokumen.js"></script>
     <!-- js source for share buttons -->
     <script src="js/share.js"></script>
   </body>

@@ -621,6 +621,10 @@
     $('btn-save').addEventListener('click', doSave);
     $('btn-piyo').addEventListener('click', jumpPiyo);
     $('btn-kento').addEventListener('click', jumpKento);
+
+    // 局面画像（js/kyokumen.js）: 透かし入り盤面図PNGのシェア・保存
+    $('btn-img-share').addEventListener('click', function () { window.Kyokumen.share(state.result); });
+    $('btn-img-save').addEventListener('click', function () { window.Kyokumen.save(state.result); });
     $('btn-faq').addEventListener('click', function () { location.href = './faq.html'; });
 
     setupShare();
