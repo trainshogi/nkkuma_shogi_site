@@ -161,7 +161,8 @@
     modelVersion: 'v2',     // α: 駒認識モデル切替（v1/v2/v3。API推奨はv2）
     mochiCropVersion: 'v2', // α: 持ち駒認識エンジン（v1=旧 / v2=新・盤周囲タイル検出。API推奨はv2）
     mochiOcr: true,         // α: 持ち駒の個数数字OCR（アプリ画面向け。API推奨は1）
-    mochiPostproc: false    // α: 持ち駒を駒数保存則で補正（実験的・実物写真では既定OFF推奨）
+    mochiPostproc: false,   // α: 持ち駒を駒数保存則で補正（実験的・実物写真では既定OFF推奨）
+    joint: false            // α: 統合整合ソルバ（持ち駒×保存則で盤面も補正。model=v1/v2のみ有効・既定OFF）
   };
 
   var els = {};
@@ -557,6 +558,7 @@
     fd.append('mochi_crop', state.mochiCropVersion); // 持ち駒認識エンジン v1/v2(API推奨v2)
     fd.append('mochi_ocr', state.mochiOcr ? '1' : '0'); // 持ち駒個数OCR(API推奨1)
     fd.append('mochi_postproc', state.mochiPostproc ? '1' : '0'); // 持ち駒の駒数保存則補正(実験的)
+    fd.append('joint', state.joint ? '1' : '0'); // 統合整合ソルバ(持ち駒で盤面も補正。model=v3では無視される)
     return fd;
   }
 
@@ -667,6 +669,16 @@
       })(wakuBtns[w]);
     }
 
+    // α: joint（統合整合ソルバ）はmodel=v1/v2でのみ有効なため、v3選択中は操作不能にする
+    function updateJointAvailability() {
+      var row = $('joint-solver-row');
+      var chk = $('joint-solver');
+      if (!row || !chk) { return; }
+      var disabled = state.modelVersion === 'v3';
+      chk.disabled = disabled;
+      row.style.opacity = disabled ? 0.45 : '';
+    }
+
     // α: 駒認識モデル v1/v2/v3 トグル
     var modelBtns = document.querySelectorAll('.model-toggle .seg-btn');
     for (var m = 0; m < modelBtns.length; m++) {
@@ -675,9 +687,11 @@
           state.modelVersion = btn.getAttribute('data-model');
           for (var k = 0; k < modelBtns.length; k++) { modelBtns[k].classList.remove('active'); }
           btn.classList.add('active');
+          updateJointAvailability();
         });
       })(modelBtns[m]);
     }
+    updateJointAvailability();
 
     // α: 持ち駒認識エンジン v1/v2 トグル
     var mochiCropBtns = document.querySelectorAll('.mochi-crop-toggle .seg-btn');
@@ -706,6 +720,15 @@
       mochiChk.checked = state.mochiPostproc;
       mochiChk.addEventListener('change', function () {
         state.mochiPostproc = mochiChk.checked;
+      });
+    }
+
+    // α: 統合整合ソルバ（joint）チェックボックス
+    var jointChk = $('joint-solver');
+    if (jointChk) {
+      jointChk.checked = state.joint;
+      jointChk.addEventListener('change', function () {
+        state.joint = jointChk.checked;
       });
     }
 
