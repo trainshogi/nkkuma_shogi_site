@@ -5,7 +5,7 @@
   'use strict';
 
   // ===== 定数 =====
-  var API_URL = 'https://waxpodihgi.execute-api.ap-northeast-1.amazonaws.com/recognize';
+  var API_URL = 'https://scv8fb0ca0.execute-api.ap-northeast-1.amazonaws.com/alpha/recognize';
   var API_KEY = '__ALPHA_API_KEY__';
   var PIYO_SAVE_URL = 'https://us-central1-shogiban2kif.cloudfunctions.net/save_kif';
   var KENTO_URL = 'https://www.kento-shogi.com/?initpos=';
