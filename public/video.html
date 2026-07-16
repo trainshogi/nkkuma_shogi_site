@@ -42,6 +42,13 @@
     #warnings { font-size: 13px; color:#b26a00; background:#fff8ec; border:1px solid #f3e3bd;
                 border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
     .note { font-size: 12.5px; color: #888; }
+    .howto { padding-left: 1.3em; margin: 4px 0; }
+    .howto li { margin: 10px 0; }
+    .tips { padding-left: 1.3em; margin: 4px 0; }
+    .tips li { margin: 6px 0; }
+    .example { margin: 10px 0 4px; text-align: center; }
+    .example img { max-width: 220px; width: 100%; border-radius: 8px; border: 1px solid #e5e1d8; }
+    .example figcaption { font-size: 12px; color: #888; margin-top: 4px; }
   </style>
 </head>
 <body data-step="1">
@@ -62,6 +69,34 @@
     </div>
     <div id="file-info"></div>
     <p class="note">対応: mp4 / mov、目安2GBまで。音声は処理後すみやかに削除されます。映像と棋譜は認識精度向上・学習のため保存されます（詳細：<a href="privacy.html">プライバシーポリシー</a>）。対局相手など他の方が映る場合は同意を得てご利用ください。アップロードをもって上記に同意したものとみなします。</p>
+  </section>
+
+  <!-- 使い方ガイド -->
+  <section class="card only-1">
+    <div class="card-label">使い方（3ステップ）</div>
+    <ol class="howto">
+      <li><b>対局前</b>：盤全体と駒台が映る位置にスマホを固定します。スタンドや三脚がなければ、コップや本に立てかけるだけでも大丈夫です。
+        <figure class="example">
+          <img src="img/video-example.jpg" alt="構図の例：盤全体と両方の駒台が画面に収まっている" loading="lazy">
+          <figcaption>構図の例：盤の四隅と駒台がすべて画面に入るように</figcaption>
+        </figure>
+      </li>
+      <li><b>対局中</b>：撮りっぱなしにして、カメラは動かさないでください。1局まるごと1本の動画でOKです。</li>
+      <li><b>対局後</b>：このページで動画を選んで「変換スタート」。動画の長さに応じて数分待つと、指し手と消費時間つきの棋譜（KIF）が表示されます。</li>
+    </ol>
+  </section>
+
+  <section class="card only-1">
+    <div class="card-label">うまく撮るコツ</div>
+    <ul class="tips">
+      <li>盤の四隅が欠けずに映っていること。まわりに少し余白があるくらいがちょうどいいです</li>
+      <li>明るい場所で。強い逆光や、盤面へのライトの映り込みは認識ミスのもとになります</li>
+      <li>途中で撮影を止めたり、スマホの位置を変えたりしない</li>
+      <li>指したあと、手や腕を盤の上に置きっぱなしにしない（盤が見えている間に局面を読み取ります）</li>
+    </ul>
+    <p class="note">うまくいかなかったときは、撮影環境（角度・照明・盤の種類）と一緒に
+      <a href="https://twitter.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a>
+      まで教えてもらえると、精度改善の材料になります。</p>
   </section>
 
   <!-- STEP 2: アップロード + 変換中 -->
