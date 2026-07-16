@@ -60,6 +60,13 @@
   <!-- STEP 1: 動画選択 -->
   <section class="card only-1">
     <div class="card-label">1. 対局動画を選ぶ</div>
+    <div id="resume-box" hidden>
+      前回の変換（<span id="resume-name"></span>）の結果を確認できます。
+      <div class="row" style="margin:6px 0 10px">
+        <button class="btn" id="btn-resume">結果を確認する</button>
+        <button class="btn" id="btn-resume-dismiss">消す</button>
+      </div>
+    </div>
     <div class="row">
       <label class="btn btn-primary">
         動画を選ぶ
@@ -75,7 +82,7 @@
   <section class="card only-1">
     <div class="card-label">使い方（3ステップ）</div>
     <ol class="howto">
-      <li><b>対局前</b>：盤全体と駒台が映る位置にスマホを固定します。スタンドや三脚がなければ、コップや本に立てかけるだけでも大丈夫です。
+      <li><b>対局前</b>：スマホスタンドを使って、盤全体と駒台が映る位置にスマホを固定します（スタンドがなければ、コップや本に立てかけても構いません）。
         <figure class="example">
           <img src="img/video-example.jpg" alt="構図の例：盤全体と両方の駒台が画面に収まっている" loading="lazy">
           <figcaption>構図の例：盤の四隅と駒台がすべて画面に入るように</figcaption>
@@ -93,6 +100,7 @@
       <li>明るい場所で。強い逆光や、盤面へのライトの映り込みは認識ミスのもとになります</li>
       <li>途中で撮影を止めたり、スマホの位置を変えたりしない</li>
       <li>指したあと、手や腕を盤の上に置きっぱなしにしない（盤が見えている間に局面を読み取ります）</li>
+      <li>一手指すごとに、盤から手を引いて1〜2秒そのまま見せる意識で。極端な早指しは指し手を読み飛ばすことがあります（1手分の飛ばしは自動で補いますが、確実なのは映っている時間です）</li>
     </ul>
     <p class="note">うまくいかなかったときは、撮影環境（角度・照明・盤の種類）と一緒に
       <a href="https://twitter.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a>
@@ -104,7 +112,9 @@
     <div class="card-label">2. 変換中</div>
     <div id="progress-label">準備中…</div>
     <div class="progress-track"><div id="progress-bar"></div></div>
-    <p class="note">動画の長さにより数分かかることがあります。この画面のまましばらくお待ちください。</p>
+    <p class="note">動画の長さにより数分かかることがあります。<b>アップロード中はこのページを閉じないでください。</b>
+      「局面を解析中…」に変わったら、変換はサーバー側で進むので、ページを閉じても大丈夫です。
+      あとでこのページを開き直すと、結果を確認できます。</p>
   </section>
 
   <!-- STEP 3: 結果 -->
@@ -132,6 +142,20 @@
 
   var state = { file: null, jobId: null };
   function $(id) { return document.getElementById(id); }
+
+  // ---- ジョブの記憶（ページを閉じても結果を取りに戻れるように） ----
+  // アップロード完了後の変換はサーバー側で進むため、jobIdさえ覚えていれば
+  // 後から GET /jobs/{jobId} で結果を取得できる。
+  var JOB_KEY = 'videoKifuJob';
+  function saveJob(jobId, name) {
+    try { localStorage.setItem(JOB_KEY, JSON.stringify({ jobId: jobId, name: name, startedAt: Date.now() })); } catch (e) {}
+  }
+  function loadJob() {
+    try { return JSON.parse(localStorage.getItem(JOB_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function clearJob() {
+    try { localStorage.removeItem(JOB_KEY); } catch (e) {}
+  }
   function setStep(n) { document.body.setAttribute('data-step', String(n)); }
   function setProgress(label, pct) {
     $('progress-label').textContent = label;
@@ -200,7 +224,11 @@
       });
       return chain.then(function () {
         setProgress('アップロード完了。変換を開始しています…', 50);
-        return completeUpload(up.jobId, up.uploadId, etags);
+        return completeUpload(up.jobId, up.uploadId, etags).then(function (res) {
+          // ここから先はサーバー側で進む。閉じても戻れるようにjobIdを記憶する
+          saveJob(up.jobId, file.name);
+          return res;
+        });
       });
     });
   }
@@ -292,11 +320,38 @@
   });
   $('btn-retry').addEventListener('click', function () {
     state.file = null; state.jobId = null;
+    clearJob();
+    $('resume-box').hidden = true;
     $('file-input').value = '';
     $('file-info').textContent = '';
     $('btn-start').disabled = true;
     $('progress-bar').style.width = '0%';
     setStep(1);
+  });
+
+  // ---- 前回ジョブの復帰 ----
+  var saved = loadJob();
+  if (saved && saved.jobId) {
+    $('resume-name').textContent = saved.name || '前回の動画';
+    $('resume-box').hidden = false;
+  }
+  $('btn-resume').addEventListener('click', function () {
+    setStep(2);
+    setProgress('前回の変換結果を確認しています…', 60);
+    state.jobId = saved.jobId;
+    pollJob(saved.jobId)
+      .then(showResult)
+      .catch(function (err) {
+        console.error(err);
+        alert(err.message || '結果を取得できませんでした');
+        clearJob();
+        $('resume-box').hidden = true;
+        setStep(1);
+      });
+  });
+  $('btn-resume-dismiss').addEventListener('click', function () {
+    clearJob();
+    $('resume-box').hidden = true;
   });
 })();
 </script>
