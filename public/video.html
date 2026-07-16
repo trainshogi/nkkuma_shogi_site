@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>【β版】動画まるごと棋譜化 — 対局動画から手順付きKIFを作る</title>
+  <meta name="description" content="対局を撮った動画1本から、指し手と消費時間つきの棋譜（KIF）を自動で復元する実験機能です。">
+  <meta name="robots" content="noindex">
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: #222; background: #faf8f4;
+      font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.7; -webkit-text-size-adjust: 100%;
+    }
+    main { max-width: 560px; margin: 0 auto; padding: 16px 14px 60px; }
+    h1 { font-size: 20px; margin: 10px 0 2px; }
+    .beta { display:inline-block; background:#7c4dff; color:#fff; font-size:11px;
+            padding:2px 8px; border-radius: 10px; vertical-align: middle; }
+    .lead { color: #555; font-size: 13.5px; margin: 6px 0 18px; }
+    .card { background:#fff; border:1px solid #e5e1d8; border-radius: 12px;
+            padding: 14px; margin: 0 0 14px; }
+    .card-label { font-size: 12.5px; color: #888; margin-bottom: 8px; font-weight: bold; }
+    .btn {
+      display:inline-block; border:1px solid #d8d3c8; border-radius: 8px; background:#fff;
+      padding: 10px 14px; font-size: 15px; cursor: pointer; font-family: inherit;
+    }
+    .btn-primary { background:#c62828; border-color:#c62828; color:#fff; font-weight:bold; }
+    .btn:disabled { opacity:.4; cursor: default; }
+    .row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
+    /* step切替 */
+    [data-step="1"] .only-2, [data-step="1"] .only-3 { display:none; }
+    [data-step="2"] .only-1, [data-step="2"] .only-3 { display:none; }
+    [data-step="3"] .only-1, [data-step="3"] .only-2 { display:none; }
+    .progress-track { height: 10px; background:#eee; border-radius: 6px; overflow:hidden; }
+    #progress-bar { height: 100%; width: 0%; background:#c62828; transition: width .3s; }
+    #progress-label { font-size: 13.5px; color:#555; margin-bottom: 6px; }
+    #file-info { font-size: 13.5px; color:#555; margin-top: 8px; }
+    #kif-out { width: 100%; height: 240px; font-family: ui-monospace, Menlo, monospace;
+               font-size: 12.5px; border:1px solid #ddd; border-radius: 8px; padding: 8px; }
+    #warnings { font-size: 13px; color:#b26a00; background:#fff8ec; border:1px solid #f3e3bd;
+                border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+    .note { font-size: 12.5px; color: #888; }
+  </style>
+</head>
+<body data-step="1">
+<main>
+  <h1>動画まるごと棋譜化 <span class="beta">β版</span></h1>
+  <p class="lead">対局を撮った動画1本から、指し手つきの棋譜（KIF）を自動で復元します。
+    盤全体が映る位置にスマホを固定して撮影した動画をお使いください。</p>
+
+  <!-- STEP 1: 動画選択 -->
+  <section class="card only-1">
+    <div class="card-label">1. 対局動画を選ぶ</div>
+    <div class="row">
+      <label class="btn btn-primary">
+        動画を選ぶ
+        <input type="file" id="file-input" accept="video/mp4,video/quicktime" hidden>
+      </label>
+      <button class="btn" id="btn-start" disabled>変換スタート</button>
+    </div>
+    <div id="file-info"></div>
+    <p class="note">対応: mp4 / mov、目安2GBまで。動画は処理後30日で自動削除されます。</p>
+  </section>
+
+  <!-- STEP 2: アップロード + 変換中 -->
+  <section class="card only-2">
+    <div class="card-label">2. 変換中</div>
+    <div id="progress-label">準備中…</div>
+    <div class="progress-track"><div id="progress-bar"></div></div>
+    <p class="note">動画の長さにより数分かかることがあります。この画面のまましばらくお待ちください。</p>
+  </section>
+
+  <!-- STEP 3: 結果 -->
+  <section class="card only-3">
+    <div class="card-label">3. できあがった棋譜</div>
+    <div id="warnings" hidden></div>
+    <textarea id="kif-out" readonly></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-primary" id="btn-copy">KIFをコピー</button>
+      <button class="btn" id="btn-save">KIFを保存</button>
+      <button class="btn" id="btn-retry">別の動画で試す</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // 動画→棋譜化API (aws-nkkuma VideoKifuStack)。
+  // TODO: 本番昇格時に独自ドメインへ差し替える
+  var API_BASE = 'https://p02rzz43dl.execute-api.ap-northeast-1.amazonaws.com';
+  var POLL_INTERVAL_MS = 3000;
+  var POLL_MAX_MS = 30 * 60 * 1000; // 30分(ステートマシンのタイムアウトと同じ)
+
+  var state = { file: null, jobId: null };
+  function $(id) { return document.getElementById(id); }
+  function setStep(n) { document.body.setAttribute('data-step', String(n)); }
+  function setProgress(label, pct) {
+    $('progress-label').textContent = label;
+    if (pct != null) { $('progress-bar').style.width = pct + '%'; }
+  }
+
+  function fmtSize(bytes) {
+    if (bytes > 1024 * 1024 * 1024) { return (bytes / 1073741824).toFixed(2) + ' GB'; }
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  // ---- アップロード: presign → 各パートPUT → complete ----
+  function createUpload(file) {
+    return fetch(API_BASE + '/uploads', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: file.type || 'video/mp4',
+        fileSizeBytes: file.size
+      })
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロード準備に失敗しました (HTTP ' + res.status + ')'); }
+      return res.json();
+    });
+  }
+
+  function putPart(url, blob) {
+    return fetch(url, { method: 'PUT', body: blob }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロードに失敗しました (HTTP ' + res.status + ')'); }
+      var etag = res.headers.get('ETag');
+      if (!etag) { throw new Error('アップロード応答からETagを取得できませんでした'); }
+      return etag;
+    });
+  }
+
+  function completeUpload(jobId, uploadId, parts) {
+    return fetch(API_BASE + '/uploads/complete', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jobId: jobId, uploadId: uploadId, parts: parts })
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロード完了処理に失敗しました (HTTP ' + res.status + ')'); }
+      return res.json();
+    });
+  }
+
+  function uploadFile(file) {
+    return createUpload(file).then(function (up) {
+      state.jobId = up.jobId;
+      var partSize = up.partSizeBytes;
+      var done = 0;
+      var etags = [];
+      // パートを順番にPUT(回線を圧迫しないよう直列。必要なら並列2〜3に)
+      var chain = Promise.resolve();
+      up.parts.forEach(function (part, i) {
+        chain = chain.then(function () {
+          var blob = file.slice(i * partSize, Math.min((i + 1) * partSize, file.size));
+          setProgress('アップロード中… ' + (i + 1) + ' / ' + up.parts.length,
+                      Math.round(i / up.parts.length * 50));
+          return putPart(part.url, blob).then(function (etag) {
+            etags.push({ partNumber: part.partNumber, etag: etag });
+            done++;
+          });
+        });
+      });
+      return chain.then(function () {
+        setProgress('アップロード完了。変換を開始しています…', 50);
+        return completeUpload(up.jobId, up.uploadId, etags);
+      });
+    });
+  }
+
+  // ---- 変換状況ポーリング ----
+  function pollJob(jobId) {
+    var startedAt = Date.now();
+    return new Promise(function (resolve, reject) {
+      function tick() {
+        if (Date.now() - startedAt > POLL_MAX_MS) {
+          return reject(new Error('タイムアウトしました。時間をおいてもう一度お試しください'));
+        }
+        fetch(API_BASE + '/jobs/' + encodeURIComponent(jobId), { cache: 'no-store' })
+          .then(function (res) {
+            if (res.status === 404) { return { status: 'STARTING' }; } // 実行開始前
+            if (!res.ok) { throw new Error('状態確認に失敗しました (HTTP ' + res.status + ')'); }
+            return res.json();
+          })
+          .then(function (job) {
+            if (job.status === 'SUCCEEDED') { return resolve(job); }
+            if (job.status === 'FAILED' || job.status === 'TIMED_OUT' || job.status === 'ABORTED') {
+              return reject(new Error('変換に失敗しました。盤全体が映っているかご確認のうえ、もう一度お試しください'));
+            }
+            var elapsed = Math.round((Date.now() - startedAt) / 1000);
+            setProgress('局面を解析中… (' + elapsed + '秒経過)',
+                        Math.min(95, 50 + elapsed / 3));
+            setTimeout(tick, POLL_INTERVAL_MS);
+          })
+          .catch(reject);
+      }
+      tick();
+    });
+  }
+
+  // ---- 結果表示 ----
+  function showResult(job) {
+    var result = job.result || {};
+    $('kif-out').value = result.kif || '';
+    var warns = result.warnings || [];
+    var box = $('warnings');
+    box.innerHTML = '';
+    warns.forEach(function (w) {
+      var d = document.createElement('div');
+      d.textContent = '⚠️ ' + w;
+      box.appendChild(d);
+    });
+    box.hidden = warns.length === 0;
+    setStep(3);
+  }
+
+  function run() {
+    if (!state.file) { return; }
+    setStep(2);
+    setProgress('アップロードを準備中…', 2);
+    uploadFile(state.file)
+      .then(function () { return pollJob(state.jobId); })
+      .then(showResult)
+      .catch(function (err) {
+        console.error(err);
+        alert(err.message || '処理に失敗しました');
+        setStep(1);
+      });
+  }
+
+  // ---- UI ----
+  $('file-input').addEventListener('change', function (e) {
+    state.file = e.target.files[0] || null;
+    $('btn-start').disabled = !state.file;
+    $('file-info').textContent = state.file
+      ? state.file.name + '（' + fmtSize(state.file.size) + '）'
+      : '';
+  });
+  $('btn-start').addEventListener('click', run);
+  $('btn-copy').addEventListener('click', function () {
+    var ta = $('kif-out');
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    if (navigator.clipboard) { navigator.clipboard.writeText(ta.value).catch(function () {}); }
+    $('btn-copy').textContent = 'コピーしました';
+    setTimeout(function () { $('btn-copy').textContent = 'KIFをコピー'; }, 1500);
+  });
+  $('btn-save').addEventListener('click', function () {
+    var blob = new Blob([$('kif-out').value], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'kifu_' + Date.now() + '.kif';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  $('btn-retry').addEventListener('click', function () {
+    state.file = null; state.jobId = null;
+    $('file-input').value = '';
+    $('file-info').textContent = '';
+    $('btn-start').disabled = true;
+    $('progress-bar').style.width = '0%';
+    setStep(1);
+  });
+})();
+</script>
+</body>
+</html>
