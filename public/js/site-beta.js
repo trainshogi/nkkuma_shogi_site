@@ -151,6 +151,89 @@
     return sfen.split('+').join('%2B');
   }
 
+  // ===== 形勢判断（β） =====
+  // video-kifuスタックの POST /eval (sunfish4/USI) を叩く。スコアは先手視点cp
+  var EVAL_URL = 'https://p02rzz43dl.execute-api.ap-northeast-1.amazonaws.com/eval';
+
+  function hideEval() {
+    var out = document.getElementById('eval-out');
+    if (out) { out.hidden = true; }
+  }
+
+  // USI表記の指し手(7g7f / B*4e / 8h2b+)を日本語表記へ
+  function usiToJp(usi, banResult, senteToMove) {
+    var zen = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
+    var kan = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+    var names = { fu: '歩', ky: '香', ke: '桂', gi: '銀', ki: '金', ka: '角', hi: '飛', ou: '玉',
+                  to: 'と', ny: '成香', nk: '成桂', ng: '成銀', um: '馬', ry: '龍' };
+    var drops = { P: '歩', L: '香', N: '桂', S: '銀', G: '金', B: '角', R: '飛' };
+    var mark = senteToMove ? '▲' : '△';
+    if (!usi || usi === 'resign' || usi === 'win') { return ''; }
+    if (usi.charAt(1) === '*') {
+      return mark + zen[Number(usi.charAt(2))] + kan[usi.charCodeAt(3) - 96] + drops[usi.charAt(0)] + '打';
+    }
+    var fs = usi.charAt(0), fd = usi.charCodeAt(1) - 96;
+    var ts = Number(usi.charAt(2)), td = usi.charCodeAt(3) - 96;
+    var prom = usi.charAt(4) === '+';
+    var code = (banResult || {})[String(fs) + String(fd)];
+    var kind = code ? code.substr(1) : '';
+    return mark + zen[ts] + kan[td] + (names[kind] || '') + (prom ? '成' : '');
+  }
+
+  function evalJudgeText(cp, mate, senteToMove) {
+    if (mate != null) { return (mate > 0 ? '先手' : '後手') + 'に詰みがあります'; }
+    if (cp == null) { return '評価できませんでした'; }
+    var a = Math.abs(cp);
+    var side = cp >= 0 ? '先手' : '後手';
+    var grade = a < 200 ? '互角' : a < 500 ? side + 'がやや有利' :
+                a < 1200 ? side + 'が有利' : a < 2500 ? side + 'が優勢' : side + 'が勝勢';
+    return grade + '（' + side + (cp >= 0 ? '+' : '') + cp + '）';
+  }
+
+  function showEval(r) {
+    var out = document.getElementById('eval-out');
+    var sfen = json_to_sfen(state.result);
+    var senteToMove = sfen.indexOf(' b ') >= 0;
+    // バー: シグモイドで先手側の割合に変換
+    var cp = r.cp == null ? 0 : r.cp;
+    var p = 1 / (1 + Math.exp(-cp / 600));
+    document.getElementById('eval-bar-sente').style.width = Math.round(p * 100) + '%';
+    var best = usiToJp(r.bestmove, state.result.ban_result, senteToMove);
+    document.getElementById('eval-text').innerHTML =
+      '<b>' + evalJudgeText(r.cp, r.mate, senteToMove) + '</b>' +
+      (best ? '<br>次の一手の候補: ' + best : '') +
+      '<br><small style="color:#888">エンジン: Sunfish4 / 深さ' + (r.depth || '-') + '（β）</small>';
+    out.hidden = false;
+  }
+
+  function requestEval() {
+    var btn = document.getElementById('btn-eval');
+    btn.disabled = true;
+    var orig = btn.textContent;
+    btn.textContent = '🧠 考え中…';
+    function restore() { btn.disabled = false; btn.textContent = orig; }
+    fetch(EVAL_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sfen: json_to_sfen(state.result) }),
+      cache: 'no-store'
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    }).then(function (r) {
+      restore();
+      showEval(r);
+    }).catch(function (err) {
+      console.error(err);
+      restore();
+      var out = document.getElementById('eval-out');
+      document.getElementById('eval-text').textContent =
+        'ごめんなさい、いま形勢を計算できませんでした。少し待ってもう一度お試しください。';
+      document.getElementById('eval-bar-sente').style.width = '50%';
+      out.hidden = false;
+    });
+  }
+
   // ===== 状態 =====
   var state = {
     result: null,        // APIレスポンスと同形 { ban_result, sente_mochi, gote_mochi, teban }
@@ -347,6 +430,7 @@
   }
 
   function applyPiece(code) {
+    hideEval();
     var pos = state.selectedPos;
     if (code === ' * ') {
       delete state.result.ban_result[pos];
@@ -364,6 +448,7 @@
 
   // ===== 持駒編集 =====
   function bumpMochi(side, code) {
+    hideEval();
     var key = side === 'sente' ? 'sente_mochi' : 'gote_mochi';
     var mochi = state.result[key];
     var cur = 0;
@@ -382,6 +467,7 @@
 
   // ===== 手番 =====
   function setTeban(t) {
+    hideEval();
     state.result.teban = t;
     renderTeban();
   }
@@ -655,8 +741,10 @@
       els.fileInput.click();
     });
 
-    $('btn-convert').addEventListener('click', recognize);
-    $('btn-retry').addEventListener('click', recognize);
+    $('btn-convert').addEventListener('click', function () { hideEval(); recognize(); });
+    $('btn-retry').addEventListener('click', function () { hideEval(); recognize(); });
+    var evalBtn = document.getElementById('btn-eval');
+    if (evalBtn) { evalBtn.addEventListener('click', requestEval); }
 
     function reselect() {
       els.fileInput.removeAttribute('capture');
