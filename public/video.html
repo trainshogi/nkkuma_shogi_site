@@ -177,6 +177,11 @@
         <button class="btn btn-sm" id="btn-last">▶|</button>
       </div>
       <ol id="move-list"></ol>
+      <div id="eval-wrap" hidden>
+        <div style="font-size:12.5px;color:#888;margin:10px auto 4px;max-width:342px">形勢グラフ（上＝先手有利。点をタップでその局面へ）</div>
+        <svg id="eval-graph" viewBox="0 0 342 110"
+             style="width:100%;max-width:342px;display:block;margin:0 auto;background:#fcfbf8;border:1px solid #eee;border-radius:8px"></svg>
+      </div>
       <div class="row" style="margin:10px 0 14px">
         <button class="btn btn-sm" id="btn-sfen">この局面のSFENをコピー</button>
         <a class="btn btn-sm" id="btn-kento" href="#" target="_blank" rel="noopener">KENTOで開く</a>
@@ -387,7 +392,59 @@
            (hands || '-') + ' ' + moveNo;
   }
 
-  var viewer = { positions: null, plies: [], idx: 0 };
+  var viewer = { positions: null, plies: [], idx: 0, evals: null };
+
+  // ---- 形勢グラフ (先手視点cp。±1500でクランプ、詰み級は端に張り付く) ----
+  var GRAPH = { W: 342, H: 110, PAD: 10, MAX: 1500 };
+  function gx(i, n) { return GRAPH.PAD + (GRAPH.W - 2 * GRAPH.PAD) * (n <= 1 ? 0 : i / (n - 1)); }
+  function gy(cp) {
+    var v = Math.max(-GRAPH.MAX, Math.min(GRAPH.MAX, cp == null ? 0 : cp));
+    return GRAPH.H / 2 - (GRAPH.H / 2 - GRAPH.PAD) * v / GRAPH.MAX;
+  }
+  function renderEvalGraph() {
+    var evals = viewer.evals;
+    var wrap = $('eval-wrap');
+    if (!evals || evals.length < 2) { wrap.hidden = true; return; }
+    var n = evals.length;
+    var d = '';
+    for (var i = 0; i < n; i++) {
+      d += (i ? 'L' : 'M') + gx(i, n).toFixed(1) + ' ' + gy(evals[i].cp).toFixed(1) + ' ';
+    }
+    var parts = [
+      '<line x1="0" y1="' + (GRAPH.H / 2) + '" x2="' + GRAPH.W + '" y2="' + (GRAPH.H / 2) + '" stroke="#ddd"/>',
+      '<path d="' + d + '" fill="none" stroke="#c62828" stroke-width="1.5"/>'
+    ];
+    for (var k = 0; k < n; k++) {
+      parts.push('<circle data-i="' + k + '" cx="' + gx(k, n).toFixed(1) + '" cy="' + gy(evals[k].cp).toFixed(1) +
+                 '" r="4" fill="#c62828" opacity="0.8" style="cursor:pointer"/>');
+    }
+    parts.push('<circle id="eval-marker" r="6" fill="none" stroke="#222" stroke-width="1.6"/>');
+    var svg = $('eval-graph');
+    svg.innerHTML = parts.join('');
+    svg.onclick = function (ev) {
+      var t = ev.target;
+      if (t && t.getAttribute && t.getAttribute('data-i') !== null) {
+        showPosition(Number(t.getAttribute('data-i')));
+      }
+    };
+    wrap.hidden = false;
+    updateEvalMarker();
+  }
+  function updateEvalMarker() {
+    var m = document.getElementById('eval-marker');
+    if (!m || !viewer.evals) { return; }
+    var n = viewer.evals.length;
+    var i = Math.min(viewer.idx, n - 1);
+    m.setAttribute('cx', gx(i, n).toFixed(1));
+    m.setAttribute('cy', gy(viewer.evals[i].cp).toFixed(1));
+  }
+  function evalLabel(e) {
+    if (!e || e.cp == null) { return ''; }
+    if (e.mate != null) { return e.mate > 0 ? '（▲詰みあり）' : '（△詰みあり）'; }
+    var cp = e.cp;
+    var side = cp >= 0 ? '先手' : '後手';
+    return '（' + side + (cp >= 0 ? '+' : '') + cp + '）';
+  }
 
   var HIRATE_SFEN = 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1';
 
@@ -447,7 +504,10 @@
     var pos = viewer.positions[viewer.idx];
     var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
     renderBoard(pos, lastTo);
-    $('ply-label').textContent = viewer.idx === 0 ? '開始局面' : viewer.idx + '手目';
+    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
+    $('ply-label').textContent =
+      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') + evalLabel(ev);
+    updateEvalMarker();
     var items = document.querySelectorAll('#move-list li');
     for (var k = 0; k < items.length; k++) {
       items[k].classList.toggle('active', k === viewer.idx - 1);
@@ -464,10 +524,12 @@
                 teban: result.startPos.teban || 'sente' };
     viewer.positions = [cur];
     viewer.plies = result.plies;
+    viewer.evals = (Array.isArray(result.evals) && result.evals.length) ? result.evals : null;
     result.plies.forEach(function (p) {
       cur = applyMoveLocal(cur, p.move);
       viewer.positions.push(cur);
     });
+    renderEvalGraph();
 
     // 指し手リスト(ラベルはKIF本文の行から拝借し、表記の一貫性を保つ)
     var list = $('move-list');
