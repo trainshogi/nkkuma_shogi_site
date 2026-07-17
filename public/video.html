@@ -377,6 +377,29 @@
 
   var viewer = { positions: null, plies: [], idx: 0 };
 
+  var HIRATE_SFEN = 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1';
+
+  // USI形式の指し手 (例: 7g7f, 8h2b+, B*4e)。KENTOの moves= はこれをドット区切りで受け取る
+  function plyToUsi(m) {
+    function rankChar(d) { return String.fromCharCode(96 + d); } // 1→a ... 9→i
+    if (!m.from) { return SFEN_LETTER[m.kind] + '*' + m.to[0] + rankChar(m.to[1]); }
+    return String(m.from[0]) + rankChar(m.from[1]) +
+           String(m.to[0]) + rankChar(m.to[1]) + (m.promote ? '+' : '');
+  }
+
+  // 棋譜まるごとKENTOへ(現在表示中の手数から再生開始)。
+  // 開始局面が平手なら initpos は省略する(KENTO自身の共有URLと同じ流儀)
+  function kentoGameUrl(turnIdx) {
+    var movesStr = viewer.plies.map(function (p) { return plyToUsi(p.move); }).join('.');
+    var url = 'https://www.kento-shogi.com/?moves=' + encodeURIComponent(movesStr) +
+              '&turn=' + turnIdx;
+    var startSfen = toSfen(viewer.positions[0], 1);
+    if (startSfen !== HIRATE_SFEN) {
+      url += '&initpos=' + encodeURIComponent(startSfen);
+    }
+    return url;
+  }
+
   function handLineText(hand, mark) {
     var parts = [];
     HAND_ORDER.forEach(function (k) {
@@ -419,8 +442,7 @@
     }
     var active = document.querySelector('#move-list li.active');
     if (active) { active.scrollIntoView({ block: 'nearest' }); }
-    $('btn-kento').href = 'https://www.kento-shogi.com/?initpos=' +
-      encodeURIComponent(toSfen(pos, viewer.idx + 1));
+    $('btn-kento').href = kentoGameUrl(viewer.idx);
   }
 
   function initViewer(result) {
