@@ -42,6 +42,8 @@
     #warnings { font-size: 13px; color:#b26a00; background:#fff8ec; border:1px solid #f3e3bd;
                 border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
     .note { font-size: 12.5px; color: #888; }
+    #error-box { background:#fdf2f0; border:1px solid #ecc8c0; border-radius:10px;
+                 padding:10px 14px; margin-bottom:12px; font-size:14px; }
     .howto { padding-left: 1.3em; margin: 4px 0; }
     .howto li { margin: 10px 0; }
     .tips { padding-left: 1.3em; margin: 4px 0; }
@@ -67,12 +69,20 @@
         <button class="btn" id="btn-resume-dismiss">消す</button>
       </div>
     </div>
+    <div id="error-box" hidden>
+      <p style="margin:4px 0 6px"><b>ごめんなさい、うまく読み取れませんでした。</b></p>
+      <p class="note" style="margin:0 0 10px">盤の四隅と駒台が画面に入っているか、明るさが十分かをご確認のうえ、もう一度お試しください。
+        何度も失敗する場合は、撮影環境（角度・照明・盤の種類）と一緒に
+        <a href="https://twitter.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a>
+        へ教えてもらえると、次の改善につながります。</p>
+    </div>
     <div class="row">
       <label class="btn btn-primary">
         動画を選ぶ
         <input type="file" id="file-input" accept="video/mp4,video/quicktime" hidden>
       </label>
       <button class="btn" id="btn-start" disabled>変換スタート</button>
+      <button class="btn" id="btn-sample">サンプル動画で試す</button>
     </div>
     <div id="file-info"></div>
     <p class="note">対応: mp4 / mov、目安2GBまで。音声は処理後すみやかに削除されます。映像と棋譜は認識精度向上・学習のため保存されます（詳細：<a href="privacy.html">プライバシーポリシー</a>）。対局相手など他の方が映る場合は同意を得てご利用ください。アップロードをもって上記に同意したものとみなします。</p>
@@ -279,18 +289,21 @@
     setStep(3);
   }
 
+  function showError(err) {
+    console.error(err);
+    $('error-box').hidden = false;
+    setStep(1);
+  }
+
   function run() {
     if (!state.file) { return; }
+    $('error-box').hidden = true;
     setStep(2);
     setProgress('アップロードを準備中…', 2);
     uploadFile(state.file)
       .then(function () { return pollJob(state.jobId); })
       .then(showResult)
-      .catch(function (err) {
-        console.error(err);
-        alert(err.message || '処理に失敗しました');
-        setStep(1);
-      });
+      .catch(showError);
   }
 
   // ---- UI ----
@@ -302,6 +315,25 @@
       : '';
   });
   $('btn-start').addEventListener('click', run);
+  // サンプル動画(サイト同梱・約0.6MB)でその場で体験できるように
+  $('btn-sample').addEventListener('click', function () {
+    var btn = $('btn-sample');
+    btn.disabled = true;
+    btn.textContent = 'サンプルを読み込み中…';
+    function restore() { btn.disabled = false; btn.textContent = 'サンプル動画で試す'; }
+    fetch('video-sample.mp4')
+      .then(function (res) {
+        if (!res.ok) { throw new Error('サンプル動画を読み込めませんでした'); }
+        return res.blob();
+      })
+      .then(function (blob) {
+        state.file = new File([blob], 'sample-game.mp4', { type: 'video/mp4' });
+        $('file-info').textContent = 'サンプル対局動画（21秒・冒頭5手）';
+        restore();
+        run();
+      })
+      .catch(function (err) { restore(); showError(err); });
+  });
   $('btn-copy').addEventListener('click', function () {
     var ta = $('kif-out');
     ta.select();
