@@ -152,8 +152,8 @@
   }
 
   // ===== 形勢判断（β） =====
-  // video-kifuスタックの POST /eval (sunfish4/USI) を叩く。スコアは先手視点cp
-  var EVAL_URL = 'https://p02rzz43dl.execute-api.ap-northeast-1.amazonaws.com/eval';
+  // 独立の形勢判断サービス(EvalServiceStack)の POST /eval を叩く。スコアは先手視点cp
+  var EVAL_URL = 'https://2f7pfcr1z3.execute-api.ap-northeast-1.amazonaws.com/eval';
 
   function hideEval() {
     var out = document.getElementById('eval-out');
