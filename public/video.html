@@ -51,6 +51,26 @@
     .example { margin: 10px 0 4px; text-align: center; }
     .example img { max-width: 220px; width: 100%; border-radius: 8px; border: 1px solid #e5e1d8; }
     .example figcaption { font-size: 12px; color: #888; margin-top: 4px; }
+    /* 対局再現ビューワー */
+    .btn-sm { padding: 6px 10px; font-size: 13.5px; }
+    #board { display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
+             max-width: 342px; margin: 4px auto; border: 2px solid #7a5c39;
+             background: #f3d8a2; }
+    #board .sq { aspect-ratio: 1; border: 0.5px solid #b08d5e; display: flex;
+                 align-items: center; justify-content: center;
+                 font-size: 21px; line-height: 1; user-select: none; }
+    #board .sq.gote { transform: rotate(180deg); }
+    #board .sq.last { background: #f7b977; }
+    .hands { max-width: 342px; margin: 4px auto; font-size: 14px; }
+    .nav-row { display: flex; justify-content: center; align-items: center;
+               gap: 6px; margin: 10px 0 6px; }
+    #ply-label { font-size: 13.5px; min-width: 5.5em; text-align: center; }
+    #move-list { list-style: none; margin: 8px auto; padding: 0; max-height: 180px;
+                 overflow-y: auto; border: 1px solid #eee; border-radius: 8px;
+                 font-size: 14px; max-width: 342px; }
+    #move-list li { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; cursor: pointer; }
+    #move-list li.active { background: #fdecec; }
+    #move-list li.warn { color: #b26a00; }
   </style>
 </head>
 <body data-step="1">
@@ -131,6 +151,26 @@
   <section class="card only-3">
     <div class="card-label">3. できあがった棋譜</div>
     <div id="warnings" hidden></div>
+
+    <!-- 対局再現ビューワー -->
+    <div id="viewer" hidden>
+      <div class="hands" id="hands-gote"></div>
+      <div id="board"></div>
+      <div class="hands" id="hands-sente"></div>
+      <div class="nav-row">
+        <button class="btn btn-sm" id="btn-first">|◀</button>
+        <button class="btn btn-sm" id="btn-prev">◀ 前へ</button>
+        <span id="ply-label">開始局面</span>
+        <button class="btn btn-sm" id="btn-next">次へ ▶</button>
+        <button class="btn btn-sm" id="btn-last">▶|</button>
+      </div>
+      <ol id="move-list"></ol>
+      <div class="row" style="margin:10px 0 14px">
+        <button class="btn btn-sm" id="btn-sfen">この局面のSFENをコピー</button>
+        <a class="btn btn-sm" id="btn-kento" href="#" target="_blank" rel="noopener">KENTOで開く</a>
+      </div>
+    </div>
+
     <textarea id="kif-out" readonly></textarea>
     <div class="row" style="margin-top:10px">
       <button class="btn btn-primary" id="btn-copy">KIFをコピー</button>
@@ -273,6 +313,153 @@
     });
   }
 
+  // ---- 対局再現ビューワー ----
+  // stitch結果の開始局面(startPos)からpliesを再適用して各局面を再現する。
+  // 局面表現・適用ロジックは aws-nkkuma lambda/stitch/shogi.mjs (renzoku.js由来) の縮小移植
+  var KANJI_1 = { fu: '歩', ky: '香', ke: '桂', gi: '銀', ki: '金', ka: '角', hi: '飛', ou: '玉',
+                  to: 'と', ny: '杏', nk: '圭', ng: '全', um: '馬', ry: '龍' };
+  var PROMOTE = { fu: 'to', ky: 'ny', ke: 'nk', gi: 'ng', ka: 'um', hi: 'ry' };
+  var BASE = { to: 'fu', ny: 'ky', nk: 'ke', ng: 'gi', um: 'ka', ry: 'hi' };
+  var SFEN_LETTER = { fu: 'P', ky: 'L', ke: 'N', gi: 'S', ki: 'G', ka: 'B', hi: 'R', ou: 'K',
+                      to: '+P', ny: '+L', nk: '+N', ng: '+S', um: '+B', ry: '+R' };
+  var HAND_ORDER = ['hi', 'ka', 'ki', 'gi', 'ke', 'ky', 'fu'];
+
+  function cloneBan(b) { var o = {}; for (var k in b) { o[k] = b[k]; } return o; }
+  function cloneHands(h) { return JSON.parse(JSON.stringify(h)); }
+
+  function applyMoveLocal(pos, m) {
+    var side = pos.teban;
+    var ban = cloneBan(pos.ban);
+    var hands = cloneHands(pos.hands);
+    var toKey = String(m.to[0]) + String(m.to[1]);
+    var cap = ban[toKey];
+    if (cap && cap !== ' * ') {
+      var capKind = BASE[cap.substr(1)] || cap.substr(1);
+      hands[side][capKind] = (hands[side][capKind] || 0) + 1;
+    }
+    if (m.from) {
+      delete ban[String(m.from[0]) + String(m.from[1])];
+      ban[toKey] = (side === 'sente' ? ' ' : 'v') + (m.promote ? PROMOTE[m.kind] : m.kind);
+    } else {
+      hands[side][m.kind] -= 1;
+      if (!hands[side][m.kind]) { delete hands[side][m.kind]; }
+      ban[toKey] = (side === 'sente' ? ' ' : 'v') + m.kind;
+    }
+    return { ban: ban, hands: hands, teban: side === 'sente' ? 'gote' : 'sente' };
+  }
+
+  function toSfen(pos, moveNo) {
+    var rows = [];
+    for (var d = 1; d <= 9; d++) {
+      var row = '', empty = 0;
+      for (var s = 9; s >= 1; s--) {
+        var v = pos.ban[String(s) + String(d)];
+        if (!v || v === ' * ') { empty++; continue; }
+        if (empty) { row += empty; empty = 0; }
+        var letter = SFEN_LETTER[v.substr(1)];
+        row += (v.charAt(0) === 'v') ? letter.toLowerCase() : letter;
+      }
+      if (empty) { row += empty; }
+      rows.push(row);
+    }
+    var hands = '';
+    HAND_ORDER.forEach(function (k) {
+      var n = pos.hands.sente[k] || 0;
+      if (n > 0) { hands += (n > 1 ? n : '') + SFEN_LETTER[k]; }
+    });
+    HAND_ORDER.forEach(function (k) {
+      var n = pos.hands.gote[k] || 0;
+      if (n > 0) { hands += (n > 1 ? n : '') + SFEN_LETTER[k].toLowerCase(); }
+    });
+    return rows.join('/') + ' ' + (pos.teban === 'sente' ? 'b' : 'w') + ' ' +
+           (hands || '-') + ' ' + moveNo;
+  }
+
+  var viewer = { positions: null, plies: [], idx: 0 };
+
+  function handLineText(hand, mark) {
+    var parts = [];
+    HAND_ORDER.forEach(function (k) {
+      var n = hand[k] || 0;
+      if (n > 0) { parts.push(KANJI_1[k] + (n > 1 ? n : '')); }
+    });
+    return mark + '持駒：' + (parts.length ? parts.join(' ') : 'なし');
+  }
+
+  function renderBoard(pos, lastTo) {
+    var board = $('board');
+    board.innerHTML = '';
+    for (var d = 1; d <= 9; d++) {
+      for (var s = 9; s >= 1; s--) {
+        var sq = document.createElement('div');
+        sq.className = 'sq';
+        var v = pos.ban[String(s) + String(d)];
+        if (v && v !== ' * ') {
+          sq.textContent = KANJI_1[v.substr(1)] || '';
+          if (v.charAt(0) === 'v') { sq.className += ' gote'; }
+        }
+        if (lastTo && lastTo[0] === s && lastTo[1] === d) { sq.className += ' last'; }
+        board.appendChild(sq);
+      }
+    }
+    $('hands-gote').textContent = handLineText(pos.hands.gote, '△');
+    $('hands-sente').textContent = handLineText(pos.hands.sente, '▲');
+  }
+
+  function showPosition(i) {
+    if (!viewer.positions) { return; }
+    viewer.idx = Math.max(0, Math.min(i, viewer.positions.length - 1));
+    var pos = viewer.positions[viewer.idx];
+    var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
+    renderBoard(pos, lastTo);
+    $('ply-label').textContent = viewer.idx === 0 ? '開始局面' : viewer.idx + '手目';
+    var items = document.querySelectorAll('#move-list li');
+    for (var k = 0; k < items.length; k++) {
+      items[k].classList.toggle('active', k === viewer.idx - 1);
+    }
+    var active = document.querySelector('#move-list li.active');
+    if (active) { active.scrollIntoView({ block: 'nearest' }); }
+    $('btn-kento').href = 'https://www.kento-shogi.com/?initpos=' +
+      encodeURIComponent(toSfen(pos, viewer.idx + 1));
+  }
+
+  function initViewer(result) {
+    if (!result.startPos || !Array.isArray(result.plies)) { $('viewer').hidden = true; return; }
+    var cur = { ban: cloneBan(result.startPos.ban),
+                hands: cloneHands(result.startPos.hands),
+                teban: result.startPos.teban || 'sente' };
+    viewer.positions = [cur];
+    viewer.plies = result.plies;
+    result.plies.forEach(function (p) {
+      cur = applyMoveLocal(cur, p.move);
+      viewer.positions.push(cur);
+    });
+
+    // 指し手リスト(ラベルはKIF本文の行から拝借し、表記の一貫性を保つ)
+    var list = $('move-list');
+    list.innerHTML = '';
+    var kifLines = (result.kif || '').split('\n');
+    var moveLines = [];
+    var inMoves = false;
+    kifLines.forEach(function (line) {
+      if (inMoves && /^\s*\d+\s/.test(line)) { moveLines.push(line.replace(/\s*\(\s*\d+:.*$/, '')); }
+      if (line.indexOf('手数----') === 0) { inMoves = true; }
+    });
+    result.plies.forEach(function (ply, i) {
+      var li = document.createElement('li');
+      li.textContent = (ply.side === 'sente' ? '▲' : '△') + (moveLines[i] || (i + 1) + '手目').trim();
+      if (ply.warnings && ply.warnings.length) {
+        li.className = 'warn';
+        li.title = ply.warnings.join(' / ');
+      }
+      li.addEventListener('click', function () { showPosition(i + 1); });
+      list.appendChild(li);
+    });
+
+    $('viewer').hidden = false;
+    showPosition(viewer.positions.length - 1); // 最終局面から
+  }
+
   // ---- 結果表示 ----
   function showResult(job) {
     var result = job.result || {};
@@ -286,6 +473,7 @@
       box.appendChild(d);
     });
     box.hidden = warns.length === 0;
+    initViewer(result);
     setStep(3);
   }
 
@@ -342,6 +530,21 @@
     $('btn-copy').textContent = 'コピーしました';
     setTimeout(function () { $('btn-copy').textContent = 'KIFをコピー'; }, 1500);
   });
+  // ビューワー操作
+  $('btn-first').addEventListener('click', function () { showPosition(0); });
+  $('btn-prev').addEventListener('click', function () { showPosition(viewer.idx - 1); });
+  $('btn-next').addEventListener('click', function () { showPosition(viewer.idx + 1); });
+  $('btn-last').addEventListener('click', function () {
+    if (viewer.positions) { showPosition(viewer.positions.length - 1); }
+  });
+  $('btn-sfen').addEventListener('click', function () {
+    if (!viewer.positions) { return; }
+    var sfen = toSfen(viewer.positions[viewer.idx], viewer.idx + 1);
+    if (navigator.clipboard) { navigator.clipboard.writeText(sfen).catch(function () {}); }
+    $('btn-sfen').textContent = 'コピーしました';
+    setTimeout(function () { $('btn-sfen').textContent = 'この局面のSFENをコピー'; }, 1500);
+  });
+
   $('btn-save').addEventListener('click', function () {
     var blob = new Blob([$('kif-out').value], { type: 'text/plain' });
     var a = document.createElement('a');
