@@ -112,6 +112,7 @@
       <label class="btn btn-primary">
         動画を選ぶ
         <input type="file" id="file-input" accept="video/mp4,video/quicktime" hidden>
+        <p style="font-size:12px;color:#888;margin:6px 0 0;">iPhoneでは動画を選んだあと、iOS側の準備(iCloudからの取得・形式変換)で数分かかることがあります。画面はそのままお待ちください。</p>
       </label>
       <button class="btn" id="btn-start" disabled>変換スタート</button>
       <button class="btn" id="btn-sample">サンプル動画で試す</button>
@@ -656,9 +657,37 @@
 
   // 閾値超のときだけブラウザ内圧縮を試み、成功すれば圧縮版を、失敗/非対応なら元ファイルを返す。
   // 既存の2GB容量チェックは file-input 側にそのまま残っているので安全網は不変。
+  // 圧縮を使わなかった/失敗した理由を小さく表示する(iPhoneではconsoleが見えないため)
+  function compressNote(msg) {
+    var el = document.getElementById('compress-note');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'compress-note';
+      el.style.cssText = 'font-size:12px;color:#888;margin-top:4px;';
+      var pr = document.getElementById('progress-label');
+      if (pr && pr.parentNode) { pr.parentNode.appendChild(el); }
+    }
+    el.textContent = msg;
+  }
+  function compressSupportDetail() {
+    var miss = [];
+    if (typeof window.VideoEncoder !== 'function') { miss.push('VideoEncoder'); }
+    if (typeof window.VideoDecoder !== 'function') { miss.push('VideoDecoder'); }
+    if (typeof window.VideoFrame !== 'function') { miss.push('VideoFrame'); }
+    if (typeof window.EncodedVideoChunk !== 'function') { miss.push('EncodedVideoChunk'); }
+    if (typeof window.MP4Box === 'undefined') { miss.push('MP4Box'); }
+    if (typeof window.Mp4Muxer === 'undefined') { miss.push('Mp4Muxer'); }
+    return miss;
+  }
+
   function maybeCompress(file) {
     if (file.size <= COMPRESS_THRESHOLD_BYTES) { return Promise.resolve(file); }
-    if (!(window.VideoCompress && window.VideoCompress.isSupported())) { return Promise.resolve(file); }
+    if (!(window.VideoCompress && window.VideoCompress.isSupported())) {
+      var miss = compressSupportDetail();
+      compressNote('この端末では動画圧縮が使えないため、そのままアップロードします'
+        + (miss.length ? '(未対応: ' + miss.join(',') + ')' : ''));
+      return Promise.resolve(file);
+    }
     setProgress('動画を圧縮しています… 0%', 0);
     return window.VideoCompress.compress(file, function (pct) {
       setProgress('動画を圧縮しています… ' + pct + '%', pct);
@@ -669,6 +698,7 @@
       return new File([blob], base + '_720p.mp4', { type: 'video/mp4' });
     }).catch(function (err) {
       console.warn('圧縮に失敗したため元ファイルを直接アップロードします', err);
+      compressNote('圧縮に失敗したため、そのままアップロードします(' + (err && err.message ? err.message : err) + ')');
       return file; // フォールバック: 現行の直接アップロード
     });
   }
