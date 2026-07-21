@@ -300,13 +300,34 @@
     });
   }
 
+  // ---- job-status 応答の解釈 ----
+  // 新backend(aws-nkkuma PR#27〜)は evaluate(形勢グラフ)完了を待たず、kif.json が
+  // 書けた時点で result(kif/plies) と kifReady:true を返す。evals は後追いで付き、
+  // 揃うと evalsReady:true になる。旧backendにはこれらのフィールドが無いので、
+  // その場合は従来どおり status===SUCCEEDED を完了として扱う(フォールバック)。
+  function isFailStatus(s) { return s === 'FAILED' || s === 'TIMED_OUT' || s === 'ABORTED'; }
+  function kifAvailable(job) {
+    if (job.kifReady === true) { return true; }                    // 新backend: 先出し
+    return !!(job.result && Array.isArray(job.result.plies));      // 旧backend: SUCCEEDED時のみ
+  }
+  function evalsAvailable(job) {
+    if (job.evalsReady === true) { return true; }
+    return !!(job.result && Array.isArray(job.result.evals) && job.result.evals.length);
+  }
+
   // ---- 変換状況ポーリング ----
-  function pollJob(jobId) {
+  // onKif: 棋譜が読める状態になった最初の1回だけ呼ぶ(先出し表示用)。
+  // resolve は「これ以上待つものが無い」= 形勢グラフも揃った / 実行が終了した時点。
+  function pollJob(jobId, onKif) {
     var startedAt = Date.now();
+    var kifShown = false;
+    var lastJob = null;
     return new Promise(function (resolve, reject) {
       function tick() {
         if (Date.now() - startedAt > POLL_MAX_MS) {
-          return reject(new Error('タイムアウトしました。時間をおいてもう一度お試しください'));
+          // 棋譜だけでも出ていれば、それを消さずに確定させる
+          return kifShown ? resolve(lastJob)
+                          : reject(new Error('タイムアウトしました。時間をおいてもう一度お試しください'));
         }
         fetch(API_BASE + '/jobs/' + encodeURIComponent(jobId), { cache: 'no-store' })
           .then(function (res) {
@@ -315,13 +336,25 @@
             return res.json();
           })
           .then(function (job) {
-            if (job.status === 'SUCCEEDED') { return resolve(job); }
-            if (job.status === 'FAILED' || job.status === 'TIMED_OUT' || job.status === 'ABORTED') {
+            lastJob = job;
+            // 棋譜が読めるようになったら即表示(evaluate完了は待たない)
+            if (!kifShown && kifAvailable(job)) {
+              kifShown = true;
+              if (onKif) { onKif(job); }
+            }
+            if (isFailStatus(job.status)) {
+              // 棋譜表示後に評価段が失敗しても、出ている結果は消さない
+              if (kifShown) { return resolve(job); }
               return reject(new Error('変換に失敗しました。盤全体が映っているかご確認のうえ、もう一度お試しください'));
             }
-            var elapsed = Math.round((Date.now() - startedAt) / 1000);
-            setProgress('局面を解析中… (' + elapsed + '秒経過)',
-                        Math.min(95, 50 + elapsed / 3));
+            if (job.status === 'SUCCEEDED') { return resolve(job); }
+            if (kifShown && evalsAvailable(job)) { return resolve(job); }
+            // まだ待つ。棋譜表示前だけ step2 の進捗ラベルを更新する
+            if (!kifShown) {
+              var elapsed = Math.round((Date.now() - startedAt) / 1000);
+              setProgress('局面を解析中… (' + elapsed + '秒経過)',
+                          Math.min(95, 50 + elapsed / 3));
+            }
             setTimeout(tick, POLL_INTERVAL_MS);
           })
           .catch(reject);
@@ -430,6 +463,30 @@
     wrap.hidden = false;
     updateEvalMarker();
   }
+  // 形勢グラフがまだ計算中(evaluate段が後追い)のあいだのプレースホルダ。
+  function setEvalPending() {
+    var wrap = $('eval-wrap');
+    $('eval-graph').innerHTML =
+      '<line x1="0" y1="' + (GRAPH.H / 2) + '" x2="' + GRAPH.W + '" y2="' + (GRAPH.H / 2) +
+      '" stroke="#eee"/>' +
+      '<text x="' + (GRAPH.W / 2) + '" y="' + (GRAPH.H / 2 + 4) + '" text-anchor="middle" ' +
+      'fill="#aaa" font-size="12">形勢を計算中…</text>';
+    wrap.hidden = false;
+  }
+  // evaluate完了後、局面を保ったまま形勢グラフだけ差し込む(先出し表示の後続)。
+  function applyEvals(job) {
+    if (!viewer.positions) { return; } // 棋譜未表示なら何もしない(通常起きない)
+    var result = (job && job.result) || {};
+    if (Array.isArray(result.evals) && result.evals.length >= 2) {
+      viewer.evals = result.evals;
+      renderEvalGraph();
+      showPosition(viewer.idx); // 現在の閲覧位置は維持。ラベルに形勢値を反映
+    } else {
+      // evaluate が結果を出さなかった(ベストエフォート失敗/スキップ) → 計算中表示を消す
+      viewer.evals = null;
+      $('eval-wrap').hidden = true;
+    }
+  }
   function updateEvalMarker() {
     var m = document.getElementById('eval-marker');
     if (!m || !viewer.evals) { return; }
@@ -517,7 +574,7 @@
     $('btn-kento').href = kentoGameUrl(viewer.idx);
   }
 
-  function initViewer(result) {
+  function initViewer(result, evalsPending) {
     if (!result.startPos || !Array.isArray(result.plies)) { $('viewer').hidden = true; return; }
     var cur = { ban: cloneBan(result.startPos.ban),
                 hands: cloneHands(result.startPos.hands),
@@ -529,7 +586,9 @@
       cur = applyMoveLocal(cur, p.move);
       viewer.positions.push(cur);
     });
-    renderEvalGraph();
+    if (viewer.evals) { renderEvalGraph(); }
+    else if (evalsPending) { setEvalPending(); }   // 棋譜先出し中: グラフは後追い
+    else { $('eval-wrap').hidden = true; }
 
     // 指し手リスト(ラベルはKIF本文の行から拝借し、表記の一貫性を保つ)
     var list = $('move-list');
@@ -557,6 +616,8 @@
   }
 
   // ---- 結果表示 ----
+  // 棋譜が読めた時点で1回だけ呼ぶ。形勢グラフがまだなら「計算中」を出し、
+  // evaluate完了後に applyEvals() で差し込む(先出し表示)。
   function showResult(job) {
     var result = job.result || {};
     $('kif-out').value = result.kif || '';
@@ -569,7 +630,11 @@
       box.appendChild(d);
     });
     box.hidden = warns.length === 0;
-    initViewer(result);
+    // 新backendで実行継続中(RUNNING)かつ evals 未着なら「計算中」を出す。
+    // 旧backendは SUCCEEDED 時に evals 込みで来るため pending にはならない。
+    var evalsPending = !evalsAvailable(job) && !isFailStatus(job.status)
+                       && job.status !== 'SUCCEEDED';
+    initViewer(result, evalsPending);
     setStep(3);
   }
 
@@ -585,8 +650,8 @@
     setStep(2);
     setProgress('アップロードを準備中…', 2);
     uploadFile(state.file)
-      .then(function () { return pollJob(state.jobId); })
-      .then(showResult)
+      .then(function () { return pollJob(state.jobId, showResult); })
+      .then(applyEvals)   // 棋譜はshowResultで先出し済み。ここで形勢グラフを差し込む
       .catch(showError);
   }
 
@@ -684,8 +749,8 @@
     setStep(2);
     setProgress('前回の変換結果を確認しています…', 60);
     state.jobId = saved.jobId;
-    pollJob(saved.jobId)
-      .then(showResult)
+    pollJob(saved.jobId, showResult)
+      .then(applyEvals)
       .catch(function (err) {
         console.error(err);
         alert(err.message || '結果を取得できませんでした');
