@@ -720,21 +720,27 @@
   // 抽出処理の作業領域(4GiB)が元動画+音声除去コピーで約2倍を要するため、
   // それ以上は数分待たせた末に失敗する。門前で分かるようにここで止める。
   var MAX_UPLOAD_BYTES = 2 * 1000 * 1000 * 1000;
+  // ブラウザ圧縮が使える環境では、圧縮後に2GBを大きく下回るため
+  // 元ファイルの上限を緩和する(アクションカメラの長時間録画は平気で2GBを超える)。
+  var MAX_RAW_BYTES_WITH_COMPRESS = 20 * 1000 * 1000 * 1000;
   $('file-input').addEventListener('change', function (e) {
     var f = e.target.files[0] || null;
-    if (f && f.size > MAX_UPLOAD_BYTES) {
+    var canCompress = !!(window.VideoCompress && window.VideoCompress.isSupported());
+    var limit = canCompress ? MAX_RAW_BYTES_WITH_COMPRESS : MAX_UPLOAD_BYTES;
+    if (f && f.size > limit) {
       state.file = null;
       $('btn-start').disabled = true;
-      $('file-info').textContent = f.name + '（' + fmtSize(f.size) + '）は上限の2GBを超えています。'
-        + 'カメラの設定を 720p / 30fps にして撮り直すか、動画を前半・後半に分けてお試しください。'
-        + '（1080pの高画質設定では約30分で2GBに達します）';
+      $('file-info').textContent = f.name + '（' + fmtSize(f.size) + '）は上限を超えています。'
+        + 'カメラの設定を 720p / 30fps にして撮り直すか、動画を前半・後半に分けてお試しください。';
       e.target.value = '';
       return;
     }
     state.file = f;
     $('btn-start').disabled = !state.file;
+    var note = (f && f.size > MAX_UPLOAD_BYTES)
+      ? '（アップロード前にブラウザ内で720pに圧縮されます）' : '';
     $('file-info').textContent = state.file
-      ? state.file.name + '（' + fmtSize(state.file.size) + '）'
+      ? state.file.name + '（' + fmtSize(state.file.size) + '）' + note
       : '';
   });
   $('btn-start').addEventListener('click', run);
