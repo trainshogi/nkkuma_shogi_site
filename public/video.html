@@ -197,6 +197,12 @@
   </section>
 </main>
 
+<!-- アップロード前のブラウザ内圧縮に使う。いずれも同梱(CDN直リンクなし)。
+     読み込めなくても video-compress.js が非対応判定し、直接アップロードにフォールバックする。 -->
+<script src="js/vendor/mp4box.all.min.js"></script>
+<script src="js/vendor/mp4-muxer.min.js"></script>
+<script src="js/video-compress.js"></script>
+
 <script>
 (function () {
   'use strict';
@@ -206,6 +212,10 @@
   var API_BASE = 'https://p02rzz43dl.execute-api.ap-northeast-1.amazonaws.com';
   var POLL_INTERVAL_MS = 3000;
   var POLL_MAX_MS = 30 * 60 * 1000; // 30分(ステートマシンのタイムアウトと同じ)
+
+  // この閾値を超えた動画だけブラウザ内で 720p/H.264/音声なし に圧縮してからアップロードする。
+  // 以下なら現行どおり直接アップロード。非対応・失敗時も直接アップロードにフォールバックする。
+  var COMPRESS_THRESHOLD_BYTES = 80 * 1000 * 1000; // 80MB
 
   var state = { file: null, jobId: null };
   function $(id) { return document.getElementById(id); }
@@ -644,12 +654,32 @@
     setStep(1);
   }
 
+  // 閾値超のときだけブラウザ内圧縮を試み、成功すれば圧縮版を、失敗/非対応なら元ファイルを返す。
+  // 既存の2GB容量チェックは file-input 側にそのまま残っているので安全網は不変。
+  function maybeCompress(file) {
+    if (file.size <= COMPRESS_THRESHOLD_BYTES) { return Promise.resolve(file); }
+    if (!(window.VideoCompress && window.VideoCompress.isSupported())) { return Promise.resolve(file); }
+    setProgress('動画を圧縮しています… 0%', 0);
+    return window.VideoCompress.compress(file, function (pct) {
+      setProgress('動画を圧縮しています… ' + pct + '%', pct);
+    }).then(function (blob) {
+      // 念のため。圧縮で逆に大きくなった/空なら元ファイルを使う。
+      if (!blob || blob.size === 0 || blob.size >= file.size) { return file; }
+      var base = file.name.replace(/\.[^.]+$/, '');
+      return new File([blob], base + '_720p.mp4', { type: 'video/mp4' });
+    }).catch(function (err) {
+      console.warn('圧縮に失敗したため元ファイルを直接アップロードします', err);
+      return file; // フォールバック: 現行の直接アップロード
+    });
+  }
+
   function run() {
     if (!state.file) { return; }
     $('error-box').hidden = true;
     setStep(2);
     setProgress('アップロードを準備中…', 2);
-    uploadFile(state.file)
+    maybeCompress(state.file)
+      .then(function (fileToUpload) { return uploadFile(fileToUpload); })
       .then(function () { return pollJob(state.jobId, showResult); })
       .then(applyEvals)   // 棋譜はshowResultで先出し済み。ここで形勢グラフを差し込む
       .catch(showError);
