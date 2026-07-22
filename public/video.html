@@ -126,6 +126,10 @@
       <button class="btn" id="btn-sample">サンプル動画で試す</button>
     </div>
     <div id="file-info"></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#666;margin-top:8px;cursor:pointer">
+      <input type="checkbox" id="compress-toggle" checked style="width:16px;height:16px;flex:none">
+      アップロード前にブラウザで圧縮する（推奨。PCの動作が重くなる場合はオフ）
+    </label>
     <details style="font-size:12px;color:#888;margin-top:6px;">
       <summary style="cursor:pointer;">ⓘ スマホからアップロードする方へ</summary>
       <p style="margin:6px 0 0;">iPhoneでは動画を選んだあと、iOS側の準備（iCloudからの取得・形式変換）で数分かかることがあります。画面はそのままお待ちください。PCからのアップロードのほうがスムーズです。</p>
@@ -249,6 +253,15 @@
 
   var state = { file: null, jobId: null };
   function $(id) { return document.getElementById(id); }
+
+  // 圧縮のオン/オフ(既定オン)。WebCodecsエンコードはCPU/GPUを占有し、同じPCで
+  // 動いている他のアプリの動作を重くすることがあるため、ユーザーが切れるようにする。
+  // オフの選択は端末(localStorage)に記憶する。
+  var COMPRESS_OFF_KEY = 'videoKifuCompressOff';
+  function compressEnabled() {
+    var el = $('compress-toggle');
+    return !el || el.checked;
+  }
 
   // ---- ジョブの記憶（ページを閉じても結果を取りに戻れるように） ----
   // アップロード完了後の変換はサーバー側で進むため、jobIdさえ覚えていれば
@@ -735,6 +748,10 @@
 
   function maybeCompress(file) {
     if (file.size <= COMPRESS_THRESHOLD_BYTES) { return Promise.resolve(file); }
+    if (!compressEnabled()) {
+      compressNote('圧縮をオフにしているため、そのままアップロードします');
+      return Promise.resolve(file);
+    }
     if (!(window.VideoCompress && window.VideoCompress.isSupported())) {
       var miss = compressSupportDetail();
       compressNote('この端末では動画圧縮が使えないため、そのままアップロードします'
@@ -776,9 +793,24 @@
   // ブラウザ圧縮が使える環境では、圧縮後に2GBを大きく下回るため
   // 元ファイルの上限を緩和する(アクションカメラの長時間録画は平気で2GBを超える)。
   var MAX_RAW_BYTES_WITH_COMPRESS = 20 * 1000 * 1000 * 1000;
+  // 圧縮トグル: 記憶された選択を反映し、変更を保存する
+  try { if (localStorage.getItem(COMPRESS_OFF_KEY) === '1') { $('compress-toggle').checked = false; } } catch (e) {}
+  $('compress-toggle').addEventListener('change', function () {
+    try {
+      if (compressEnabled()) { localStorage.removeItem(COMPRESS_OFF_KEY); }
+      else { localStorage.setItem(COMPRESS_OFF_KEY, '1'); }
+    } catch (e) {}
+    // 圧縮オフでは2GB超を受理できないため、該当ファイルは選び直してもらう
+    if (state.file && !compressEnabled() && state.file.size > MAX_UPLOAD_BYTES) {
+      state.file = null;
+      $('file-input').value = '';
+      $('btn-start').disabled = true;
+      $('file-info').textContent = '圧縮オフでは2GBまでの動画のみアップロードできます。ファイルを選び直してください。';
+    }
+  });
   $('file-input').addEventListener('change', function (e) {
     var f = e.target.files[0] || null;
-    var canCompress = !!(window.VideoCompress && window.VideoCompress.isSupported());
+    var canCompress = compressEnabled() && !!(window.VideoCompress && window.VideoCompress.isSupported());
     var limit = canCompress ? MAX_RAW_BYTES_WITH_COMPRESS : MAX_UPLOAD_BYTES;
     if (f && f.size > limit) {
       state.file = null;
