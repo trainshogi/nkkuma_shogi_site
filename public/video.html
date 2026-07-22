@@ -92,6 +92,16 @@
     #move-list li { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; cursor: pointer; }
     #move-list li.active { background: #fdecec; }
     #move-list li.warn { color: #b26a00; }
+    /* 訂正モード（間違った手の指し直し） */
+    #board.correcting .sq { cursor: pointer; }
+    #board .sq.sel { outline: 2px solid #c62828; outline-offset: -2px; background: #fbd2ce; }
+    .hands .hand-piece { display: inline-block; padding: 0 4px; margin-left: 3px; }
+    .hands.tappable .hand-piece { cursor: pointer; border: 1px solid #d8d3c8;
+                                  border-radius: 4px; background: #fff; }
+    .hands .hand-piece.sel { background: #fbd2ce; border-color: #c62828; }
+    #correct-bar { background: #eef4fb; border: 1px solid #c8d9ec; border-radius: 8px;
+                   padding: 8px 10px; margin: 0 auto 8px; max-width: 342px; font-size: 13px; }
+    #correct-bar.busy { background: #f6f4ef; border-color: #ddd; color: #666; }
   </style>
 </head>
 <body data-step="1">
@@ -179,6 +189,15 @@
 
     <!-- 対局再現ビューワー -->
     <div id="viewer" hidden>
+      <!-- 訂正モードの案内バー（訂正中のみ表示） -->
+      <div id="correct-bar" hidden>
+        <span id="correct-msg"></span>
+        <div class="row" style="margin-top:6px">
+          <button class="btn btn-sm" id="btn-correct-cancel">訂正をやめる</button>
+        </div>
+      </div>
+      <div id="correct-done" style="background:#f0f8f1;border:1px solid #cfe3d2;border-radius:8px;
+           padding:8px 10px;margin:0 auto 8px;max-width:342px;font-size:13px" hidden></div>
       <div class="hands" id="hands-gote"></div>
       <div id="board"></div>
       <div class="hands" id="hands-sente"></div>
@@ -188,6 +207,9 @@
         <span id="ply-label">開始局面</span>
         <button class="btn btn-sm" id="btn-next">次へ ▶</button>
         <button class="btn btn-sm" id="btn-last">▶|</button>
+      </div>
+      <div class="row" style="justify-content:center;margin:0 0 4px">
+        <button class="btn btn-sm" id="btn-correct" hidden>この手が違う（訂正する）</button>
       </div>
       <ol id="move-list"></ol>
       <div id="eval-wrap" hidden>
@@ -566,13 +588,24 @@
     return url;
   }
 
-  function handLineText(hand, mark) {
-    var parts = [];
+  // 持ち駒は駒ごとに span で描く（訂正モードで「打つ駒」をタップ選択できるように）
+  function renderHandLine(el, hand, mark, side) {
+    el.innerHTML = '';
+    el.appendChild(document.createTextNode(mark + '持駒：'));
+    var any = false;
     HAND_ORDER.forEach(function (k) {
       var n = hand[k] || 0;
-      if (n > 0) { parts.push(KANJI_1[k] + (n > 1 ? n : '')); }
+      if (n > 0) {
+        any = true;
+        var sp = document.createElement('span');
+        sp.className = 'hand-piece';
+        sp.setAttribute('data-kind', k);
+        sp.setAttribute('data-side', side);
+        sp.textContent = KANJI_1[k] + (n > 1 ? n : '');
+        el.appendChild(sp);
+      }
     });
-    return mark + '持駒：' + (parts.length ? parts.join(' ') : 'なし');
+    if (!any) { el.appendChild(document.createTextNode('なし')); }
   }
 
   function renderBoard(pos, lastTo) {
@@ -582,6 +615,8 @@
       for (var s = 9; s >= 1; s--) {
         var sq = document.createElement('div');
         sq.className = 'sq';
+        sq.setAttribute('data-s', s);
+        sq.setAttribute('data-d', d);
         var v = pos.ban[String(s) + String(d)];
         if (v && v !== ' * ') {
           sq.textContent = KANJI_1[v.substr(1)] || '';
@@ -591,16 +626,18 @@
         board.appendChild(sq);
       }
     }
-    $('hands-gote').textContent = handLineText(pos.hands.gote, '△');
-    $('hands-sente').textContent = handLineText(pos.hands.sente, '▲');
+    renderHandLine($('hands-gote'), pos.hands.gote, '△', 'gote');
+    renderHandLine($('hands-sente'), pos.hands.sente, '▲', 'sente');
   }
 
   function showPosition(i) {
     if (!viewer.positions) { return; }
+    if (correction.active) { exitCorrection(); } // 別の手へ移動したら訂正は仕切り直し
     viewer.idx = Math.max(0, Math.min(i, viewer.positions.length - 1));
     var pos = viewer.positions[viewer.idx];
     var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
     renderBoard(pos, lastTo);
+    $('btn-correct').disabled = viewer.idx === 0;
     var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
     $('ply-label').textContent =
       (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') + evalLabel(ev);
@@ -651,8 +688,201 @@
       list.appendChild(li);
     });
 
+    // 訂正はv2ジョブ(イベント時刻frameIdx持ち)のみ対応。v1や古い結果ではボタンを出さない
+    viewer.correctedAt = result.correctedAt || null;
+    var canCorrect = result.pipeline === 'v2' && !!state.jobId &&
+      result.plies.length > 0 && typeof result.plies[0].frameIdx === 'number';
+    $('btn-correct').hidden = !canCorrect;
+    $('correct-done').hidden = true;
+
     $('viewer').hidden = false;
     showPosition(viewer.positions.length - 1); // 最終局面から
+  }
+
+  // ---- 訂正モード（間違った手の指し直し → ピンとして再解） ----
+  // 「間違っている最初の手」をユーザーが指し直すと、その手をピン(制約)として
+  // バックエンドがビームだけ再解し、以降の手も自動で直る(動画再処理なし・数秒)。
+  // それより前の手が正しい前提なので、直前局面の盤面表示は信頼できる。
+  var correction = { active: false, busy: false, ply: 0,
+                     from: null, fromKind: null, dropKind: null };
+
+  function setCorrectMsg(txt) { $('correct-msg').textContent = txt; }
+  function correctionSide() { return viewer.plies[correction.ply - 1].side; }
+
+  function inZoneLocal(side, d) { return side === 'sente' ? d <= 3 : d >= 7; }
+  function mustPromoteLocal(side, kind, d) {
+    if (kind === 'fu' || kind === 'ky') { return side === 'sente' ? d === 1 : d === 9; }
+    if (kind === 'ke') { return side === 'sente' ? d <= 2 : d >= 8; }
+    return false;
+  }
+
+  function clearSel() {
+    correction.from = null; correction.fromKind = null; correction.dropKind = null;
+    var sels = document.querySelectorAll('#board .sq.sel, .hands .hand-piece.sel');
+    for (var i = 0; i < sels.length; i++) { sels[i].classList.remove('sel'); }
+  }
+
+  function enterCorrection() {
+    if (!viewer.positions || viewer.idx === 0 || correction.busy) { return; }
+    correction.active = true;
+    correction.ply = viewer.idx;
+    clearSel();
+    var side = correctionSide();
+    renderBoard(viewer.positions[correction.ply - 1], null); // 訂正する手の直前局面
+    $('board').classList.add('correcting');
+    $(side === 'sente' ? 'hands-sente' : 'hands-gote').classList.add('tappable');
+    $('ply-label').textContent = correction.ply + '手目を訂正中';
+    $('correct-done').hidden = true;
+    $('correct-bar').hidden = false;
+    $('correct-bar').classList.remove('busy');
+    setCorrectMsg(correction.ply + '手目（' + (side === 'sente' ? '▲先手' : '△後手') +
+      '）の正しい手を入力: 動かした駒（打った場合は持ち駒）→ 行き先 の順にタップしてください');
+  }
+
+  function exitCorrection() {
+    correction.active = false;
+    clearSel();
+    $('board').classList.remove('correcting');
+    $('hands-sente').classList.remove('tappable');
+    $('hands-gote').classList.remove('tappable');
+    $('correct-bar').hidden = true;
+    $('correct-bar').classList.remove('busy');
+  }
+
+  function selectFrom(s, d, token) {
+    clearSel();
+    correction.from = [s, d];
+    correction.fromKind = token.substr(1);
+    var el = document.querySelector('#board .sq[data-s="' + s + '"][data-d="' + d + '"]');
+    if (el) { el.classList.add('sel'); }
+    setCorrectMsg(KANJI_1[correction.fromKind] + '（' + s + d + '）を選択中。行き先のマスをタップしてください');
+  }
+
+  function onSquareTap(s, d) {
+    var side = correctionSide();
+    var pre = viewer.positions[correction.ply - 1];
+    var v = pre.ban[String(s) + String(d)];
+    var own = !!(v && v !== ' * ' && ((v.charAt(0) === 'v') === (side === 'gote')));
+
+    if (correction.from == null && correction.dropKind == null) {
+      if (own) { selectFrom(s, d, v); }
+      else {
+        setCorrectMsg('まず動かした駒（' + (side === 'sente' ? '▲先手' : '△後手') +
+          '側）か持ち駒をタップしてください');
+      }
+      return;
+    }
+    if (correction.from && correction.from[0] === s && correction.from[1] === d) {
+      clearSel();
+      setCorrectMsg('選択を解除しました。動かした駒か持ち駒をタップしてください');
+      return;
+    }
+    if (own) { selectFrom(s, d, v); return; } // 自駒タップは選び直し
+
+    if (correction.dropKind != null) { // 打ち
+      if (v && v !== ' * ') { setCorrectMsg('打つ先は空きマスを選んでください'); return; }
+      if (mustPromoteLocal(side, correction.dropKind, d)) { setCorrectMsg('そのマスには打てません'); return; }
+      submitCorrection({ from: null, to: [s, d], kind: correction.dropKind });
+      return;
+    }
+    // 盤上の駒の移動。成れる手だけ確認する(行き所のない手は強制成り)
+    var kind = correction.fromKind;
+    var promote = false;
+    if (PROMOTE[kind] && (inZoneLocal(side, d) || inZoneLocal(side, correction.from[1]))) {
+      promote = mustPromoteLocal(side, kind, d) || window.confirm('成りますか？（OK=成る／キャンセル=不成）');
+    }
+    submitCorrection({ from: correction.from, to: [s, d], kind: kind, promote: promote });
+  }
+
+  function onHandTap(el) {
+    var side = correctionSide();
+    if (el.getAttribute('data-side') !== side) {
+      setCorrectMsg('手番側（' + (side === 'sente' ? '▲先手' : '△後手') + '）の持ち駒を選んでください');
+      return;
+    }
+    clearSel();
+    correction.dropKind = el.getAttribute('data-kind');
+    el.classList.add('sel');
+    setCorrectMsg(KANJI_1[correction.dropKind] + 'を打ちます。打つマスをタップしてください');
+  }
+
+  function submitCorrection(m) {
+    var ply = correction.ply;
+    var t = viewer.plies[ply - 1].frameIdx;
+    var pin = { t: t, from: m.from, to: m.to, kind: m.kind, ply: ply };
+    if (m.promote !== undefined) { pin.promote = m.promote; }
+    correction.busy = true;
+    $('correct-bar').classList.add('busy');
+    setCorrectMsg('訂正を反映して以降の手を再解析しています…（数秒かかります）');
+    var prevCorrectedAt = viewer.correctedAt || null;
+    fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/correct', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ pin: pin })
+    }).then(function (res) {
+      if (res.status === 422) { // ピン不成立(指せない手など)。サーバー側は何も変えていない
+        return res.json().then(function (j) {
+          var e = new Error((j && j.message) || 'この訂正は反映できませんでした');
+          e.unapplied = true;
+          throw e;
+        });
+      }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    }).then(function (resp) {
+      applyCorrection(resp.result, ply);
+    }).catch(function (err) {
+      if (err && err.unapplied) {
+        correction.busy = false;
+        $('correct-bar').classList.remove('busy');
+        clearSel();
+        setCorrectMsg('⚠ ' + err.message + '。手をよくご確認のうえ、もう一度入力してください');
+        return;
+      }
+      // タイムアウト等でもサーバー側では完了している可能性があるため、結果をポーリングで拾う
+      console.warn('correct request failed; falling back to polling', err);
+      pollCorrected(prevCorrectedAt, ply);
+    });
+  }
+
+  // 訂正リクエストの応答が取れなかったときの保険。kif.json の correctedAt の
+  // 変化を最大60秒待ち、変わっていれば成功として取り込む。
+  function pollCorrected(prevCorrectedAt, ply) {
+    var tries = 0;
+    function tick() {
+      if (++tries > 20) {
+        correction.busy = false;
+        $('correct-bar').classList.remove('busy');
+        setCorrectMsg('⚠ 通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください');
+        return;
+      }
+      setTimeout(function () {
+        fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (job) {
+            var r = job && job.result;
+            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply); }
+            else { tick(); }
+          })
+          .catch(tick);
+      }, 3000);
+    }
+    tick();
+  }
+
+  function applyCorrection(result, ply) {
+    correction.busy = false;
+    exitCorrection();
+    // 訂正で手数が変わることがある(手が復活する等)。ビューワーごと差し替える。
+    // evals(形勢グラフ)は訂正後の棋譜では未計算のため表示しない(initViewerが隠す)。
+    showResult({ status: 'SUCCEEDED', result: result });
+    viewer.correctedAt = result.correctedAt || null;
+    showPosition(Math.min(ply, viewer.positions.length - 1));
+    var done = $('correct-done');
+    done.textContent = '✔ ' + ply + '手目を訂正し、以降の手を再計算しました（全' +
+      viewer.plies.length + '手）。まだ違う手があれば、同じように訂正できます。' +
+      '（形勢グラフは訂正後の再計算に未対応です）';
+    done.hidden = false;
   }
 
   // ---- 結果表示 ----
@@ -693,6 +923,14 @@
       d.textContent = '⚠️ ' + w;
       box.appendChild(d);
     });
+    // 要確認手は訂正の入口: v2なら直し方をここで案内する
+    if (warns.length > 0 && result.pipeline === 'v2') {
+      var hint = document.createElement('div');
+      hint.style.cssText = 'margin-top:6px;font-size:12px;color:#8a6d3b;';
+      hint.textContent = '⚠の手は読み取りに自信がありません。下の指し手一覧でオレンジ色の手をタップして局面を確かめ、' +
+        '間違っていたら「この手が違う（訂正する）」から正しい手を入力すると、以降の手も自動で直ります。';
+      box.appendChild(hint);
+    }
     box.hidden = warns.length === 0;
     // 新backendで実行継続中(RUNNING)かつ evals 未着なら「計算中」を出す。
     // 旧backendは SUCCEEDED 時に evals 込みで来るため pending にはならない。
@@ -831,6 +1069,29 @@
   $('btn-last').addEventListener('click', function () {
     if (viewer.positions) { showPosition(viewer.positions.length - 1); }
   });
+  // 訂正モードの操作
+  $('btn-correct').addEventListener('click', enterCorrection);
+  $('btn-correct-cancel').addEventListener('click', function () {
+    if (correction.busy) { return; }
+    var p = correction.ply;
+    exitCorrection();
+    showPosition(p);
+  });
+  $('board').addEventListener('click', function (ev) {
+    if (!correction.active || correction.busy) { return; }
+    var t = ev.target;
+    if (!t || !t.getAttribute || t.getAttribute('data-s') == null) { return; }
+    onSquareTap(Number(t.getAttribute('data-s')), Number(t.getAttribute('data-d')));
+  });
+  function handTapHandler(ev) {
+    if (!correction.active || correction.busy) { return; }
+    var t = ev.target;
+    if (!t || !t.classList || !t.classList.contains('hand-piece')) { return; }
+    onHandTap(t);
+  }
+  $('hands-sente').addEventListener('click', handTapHandler);
+  $('hands-gote').addEventListener('click', handTapHandler);
+
   $('btn-sfen').addEventListener('click', function () {
     if (!viewer.positions) { return; }
     var sfen = toSfen(viewer.positions[viewer.idx], viewer.idx + 1);
