@@ -112,6 +112,42 @@
     #photo-crop img { position: absolute; display: block; }
     #photo-panel .photo-nav { display: flex; align-items: center; justify-content: space-between;
                               gap: 4px; margin-top: 4px; font-size: 12px; color: #666; }
+    /* 再解析中の盤オーバーレイ: 白半透明+スピナーで「今は触れない」を明示 */
+    #board { position: relative; }
+    .board-overlay { position: absolute; inset: 0; z-index: 5;
+                     background: rgba(255,255,255,.68);
+                     display: flex; flex-direction: column; align-items: center;
+                     justify-content: center; gap: 10px; font-size: 13px; color: #555; }
+    .board-overlay .spin { width: 30px; height: 30px; border: 3px solid #c62828;
+                           border-top-color: transparent; border-radius: 50%;
+                           animation: board-spin .9s linear infinite; }
+    @keyframes board-spin { to { transform: rotate(360deg); } }
+    /* PCレイアウト(900px以上): 盤と実映像を左右に並べ、常時比較しやすくする。
+       スマホ(既定)は従来どおり縦積み */
+    @media (min-width: 900px) {
+      main { max-width: 880px; }
+      main > .card { max-width: 560px; margin-left: auto; margin-right: auto; }
+      main > .card.only-3 { max-width: 850px; }
+      /* :not([hidden]) ガード必須: id指定のdisplayはUAの [hidden]{display:none} に勝って
+         しまうため、素の #viewer{display:grid} だと結果表示前に空のグリッドが見える */
+      #viewer:not([hidden]) { display: grid; grid-template-columns: 380px 380px;
+                justify-content: center; column-gap: 30px; align-items: start; }
+      #correct-bar, #correct-done { grid-row: 1; grid-column: 1 / -1;
+                                    max-width: 790px; width: 100%; justify-self: center; }
+      #hands-gote  { grid-row: 2; grid-column: 1; max-width: 380px; }
+      /* width明示が必要: グリッドアイテムで margin:auto が付くと fit-content 幅に
+         縮んでしまう(文字幅ベースの236px程度になる実測) */
+      #board       { grid-row: 3; grid-column: 1; width: 380px; max-width: 380px; }
+      #board .sq   { font-size: 24px; }
+      #hands-sente { grid-row: 4; grid-column: 1; max-width: 380px; }
+      #viewer .nav-row { grid-row: 5; grid-column: 1; }
+      #correct-entry   { grid-row: 6; grid-column: 1; }
+      #photo-panel { grid-row: 2 / span 3; grid-column: 2; max-width: 380px; width: 100%; }
+      #move-list   { grid-row: 5 / span 2; grid-column: 2; max-width: 380px; width: 100%;
+                     max-height: 230px; margin: 10px 0 6px; }
+      #eval-wrap   { grid-row: 7; grid-column: 1 / -1; }
+      #tools-row   { grid-row: 8; grid-column: 1 / -1; justify-content: center; }
+    }
   </style>
 </head>
 <body data-step="1">
@@ -242,7 +278,7 @@
         <button class="btn btn-sm" id="btn-next">次へ ▶</button>
         <button class="btn btn-sm" id="btn-last">▶|</button>
       </div>
-      <div class="row" style="justify-content:center;margin:0 0 4px">
+      <div class="row" id="correct-entry" style="justify-content:center;margin:0 0 4px">
         <button class="btn btn-sm" id="btn-correct" hidden>この手が違う（訂正する）</button>
       </div>
       <ol id="move-list"></ol>
@@ -251,7 +287,7 @@
         <svg id="eval-graph" viewBox="0 0 342 110"
              style="width:100%;max-width:342px;display:block;margin:0 auto;background:#fcfbf8;border:1px solid #eee;border-radius:8px"></svg>
       </div>
-      <div class="row" style="margin:10px 0 14px">
+      <div class="row" id="tools-row" style="margin:10px 0 14px">
         <button class="btn btn-sm" id="btn-sfen">この局面のSFENをコピー</button>
         <a class="btn btn-sm" id="btn-kento" href="#" target="_blank" rel="noopener">KENTOで開く</a>
       </div>
@@ -797,6 +833,26 @@
 
   // 訂正モード中は「盤タップ・持ち駒タップ・キャンセル・写真送り」以外を封じる。
   // ナビや一覧タップで訂正が意図せず解除される事故を防ぐ(オーナー要望 2026-07-22)。
+  // 再解析中に盤へ被せる白半透明+スピナー(「今は触れない」の視覚化)。
+  // renderBoard は innerHTML を作り直すため、オーバーレイは busy の間だけ動的に足す
+  function showBoardOverlay(msg) {
+    removeBoardOverlay();
+    var ov = document.createElement('div');
+    ov.className = 'board-overlay';
+    ov.id = 'board-overlay';
+    var sp = document.createElement('div');
+    sp.className = 'spin';
+    var tx = document.createElement('span');
+    tx.textContent = msg;
+    ov.appendChild(sp);
+    ov.appendChild(tx);
+    $('board').appendChild(ov);
+  }
+  function removeBoardOverlay() {
+    var ov = document.getElementById('board-overlay');
+    if (ov && ov.parentNode) { ov.parentNode.removeChild(ov); }
+  }
+
   function setViewerLocked(locked) {
     ['btn-first', 'btn-prev', 'btn-next', 'btn-last', 'btn-sfen',
      'btn-copy', 'btn-save', 'btn-retry', 'btn-correct'].forEach(function (id) {
@@ -946,6 +1002,7 @@
   function exitCorrection() {
     correction.active = false;
     stopCorrectTimer();
+    removeBoardOverlay();
     clearSel();
     setViewerLocked(false);
     $('board').classList.remove('correcting');
@@ -1022,6 +1079,7 @@
     $('correct-bar').classList.add('busy');
     // 再解中はキャンセルも無効(サーバー側は完了してしまうため、途中中断は状態の食い違いを生む)
     $('btn-correct-cancel').disabled = true;
+    showBoardOverlay('再解析中…');
     startCorrectTimer();
     var oldPlies = viewer.plies.slice(); // 完了時に「どこが変わったか」を出すための控え
     var prevCorrectedAt = viewer.correctedAt || null;
@@ -1047,6 +1105,7 @@
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
         $('btn-correct-cancel').disabled = false;
+        removeBoardOverlay();
         clearSel();
         setCorrectMsg('⚠ ' + err.message + '。手をよくご確認のうえ、もう一度入力してください');
         return;
@@ -1068,6 +1127,7 @@
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
         $('btn-correct-cancel').disabled = false;
+        removeBoardOverlay();
         setCorrectMsg('⚠ 通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください');
         return;
       }
