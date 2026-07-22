@@ -1098,7 +1098,7 @@
       if (!res.ok) { throw new Error('HTTP ' + res.status); }
       return res.json();
     }).then(function (resp) {
-      applyCorrection(resp.result, ply, oldPlies);
+      applyCorrection(resp.result, ply, oldPlies, !!resp.evalsRecomputing);
     }).catch(function (err) {
       if (err && err.unapplied) {
         stopCorrectTimer();
@@ -1136,13 +1136,45 @@
           .then(function (res) { return res.ok ? res.json() : null; })
           .then(function (job) {
             var r = job && job.result;
-            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply, oldPlies); }
+            // フォールバック経路では evalsRecomputing が分からないため控えめに false
+            // (旧バックエンドで「計算中」を出しっぱなしにしない)
+            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply, oldPlies, false); }
             else { tick(); }
           })
           .catch(tick);
       }, 3000);
     }
     tick();
+  }
+
+  // ---- 訂正後の形勢グラフ後追い ----
+  // 訂正が成功するとバックエンドが evaluate を非同期で叩き直す(aws PR#38)。
+  // correctedAt が一致する evals が kif.json に付くまでポーリングして差し込む。
+  // 途中で別の訂正が入ったら(correctedAt不一致)このポーリングは役目を終える
+  // (新しい訂正が自分のポーリングを張り直す)。
+  var evalPoll = { timer: null, expected: null };
+  function stopEvalPoll() {
+    if (evalPoll.timer) { clearInterval(evalPoll.timer); evalPoll.timer = null; }
+  }
+  function startEvalPoll(expectedCorrectedAt) {
+    stopEvalPoll();
+    evalPoll.expected = expectedCorrectedAt || null;
+    var tries = 0;
+    evalPoll.timer = setInterval(function () {
+      if (++tries > 40) { stopEvalPoll(); $('eval-wrap').hidden = true; return; } // 最大4分で諦める
+      fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (job) {
+          var r = job && job.result;
+          if (!r) { return; }
+          if ((r.correctedAt || null) !== evalPoll.expected) { stopEvalPoll(); return; }
+          if (!Array.isArray(r.evals) || !r.evals.length) { return; } // まだ計算中
+          if (correction.active || correction.busy) { return; } // 訂正中は反映を保留
+          stopEvalPoll();
+          applyEvals({ status: 'SUCCEEDED', result: r });
+        })
+        .catch(function () {});
+    }, 6000);
   }
 
   // 旧棋譜との差分から「どこが変わったか」を手番号のリストで返す(1始まり)
@@ -1156,15 +1188,24 @@
     return out;
   }
 
-  function applyCorrection(result, ply, oldPlies) {
+  function applyCorrection(result, ply, oldPlies, evalsRecomputing) {
     stopCorrectTimer();
     correction.busy = false;
     exitCorrection();
     // 訂正で手数が変わることがある(手が復活する等)。ビューワーごと差し替える。
-    // evals(形勢グラフ)は訂正後の棋譜では未計算のため表示しない(initViewerが隠す)。
+    // evals(形勢グラフ)は訂正直後は未計算(initViewerが隠す)。バックエンドが
+    // 再計算中なら「計算中」を出して後追いポーリングで差し込む。
     showResult({ status: 'SUCCEEDED', result: result });
     viewer.correctedAt = result.correctedAt || null;
     showPosition(Math.min(ply, viewer.positions.length - 1));
+    var evalNote;
+    if (evalsRecomputing) {
+      setEvalPending();
+      startEvalPoll(result.correctedAt || null);
+      evalNote = '（形勢グラフは再計算中です。1〜2分で自動更新されます）';
+    } else {
+      evalNote = '（形勢グラフは訂正後の再計算に未対応です）';
+    }
 
     // どこが変わったかを明示する。訂正の価値(連鎖で以降も直る)はここで初めて目に見える
     var changed = oldPlies ? changedPlies(oldPlies, viewer.plies) : [];
@@ -1182,8 +1223,7 @@
         viewer.plies.length + '手）。黄色の手が変わった箇所です。';
     }
     var done = $('correct-done');
-    done.textContent = msg + 'まだ違う手があれば、同じように訂正できます。' +
-      '（形勢グラフは訂正後の再計算に未対応です）';
+    done.textContent = msg + 'まだ違う手があれば、同じように訂正できます。' + evalNote;
     done.hidden = false;
 
     // 変わった手を一覧上でハイライト(読む時間を考えて30秒で消す。
