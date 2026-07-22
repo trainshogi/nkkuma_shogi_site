@@ -94,6 +94,15 @@
     #correct-bar { background: #eef4fb; border: 1px solid #c8d9ec; border-radius: 8px;
                    padding: 8px 10px; margin: 0 auto 8px; max-width: 342px; font-size: 13px; }
     #correct-bar.busy { background: #f6f4ef; border-color: #ddd; color: #666; }
+    /* 再解析中の生存表示（点滅ドット + 経過秒はJSで更新） */
+    #correct-bar .busy-dot { display: none; }
+    #correct-bar.busy .busy-dot { display: inline-block; width: 8px; height: 8px;
+                   border-radius: 50%; background: #c62828; margin-right: 6px;
+                   animation: correct-pulse 1s ease-in-out infinite; }
+    @keyframes correct-pulse { 0%, 100% { opacity: .25; transform: scale(.8); }
+                               50% { opacity: 1; transform: scale(1.1); } }
+    /* 訂正で変わった手のハイライト（数秒で消す） */
+    #move-list li.changed { background: #fff3c4; }
   </style>
 </head>
 <body data-step="1">
@@ -193,7 +202,7 @@
     <div id="viewer" hidden>
       <!-- 訂正モードの案内バー（訂正中のみ表示） -->
       <div id="correct-bar" hidden>
-        <span id="correct-msg"></span>
+        <span class="busy-dot" aria-hidden="true"></span><span id="correct-msg"></span>
         <div class="row" style="margin-top:6px">
           <button class="btn btn-sm" id="btn-correct-cancel">訂正をやめる</button>
         </div>
@@ -706,10 +715,43 @@
   // バックエンドがビームだけ再解し、以降の手も自動で直る(動画再処理なし・数秒)。
   // それより前の手が正しい前提なので、直前局面の盤面表示は信頼できる。
   var correction = { active: false, busy: false, ply: 0,
-                     from: null, fromKind: null, dropKind: null };
+                     from: null, fromKind: null, dropKind: null, timer: null };
 
   function setCorrectMsg(txt) { $('correct-msg').textContent = txt; }
   function correctionSide() { return viewer.plies[correction.ply - 1].side; }
+
+  // 再解の所要は対局の長さ(イベント数)にほぼ比例する。実測: 5手<1秒 / 83手約20秒
+  // (Lambda 1vCPU化後は約12秒)。嘘をつかない粗い目安を出す。
+  function correctEstimateText() {
+    var n = viewer.plies ? viewer.plies.length : 0;
+    if (n >= 60) { return '目安 10〜30秒'; }
+    if (n >= 25) { return '目安 5〜15秒'; }
+    return '目安 数秒';
+  }
+  // 再解析中の生存表示: 経過秒を毎秒更新し、30秒を超えたら文言を切り替える
+  // (30秒はAPI Gatewayの応答上限。以降はポーリング保険が結果を拾う)
+  function startCorrectTimer() {
+    stopCorrectTimer();
+    var t0 = Date.now();
+    function render() {
+      var s = Math.round((Date.now() - t0) / 1000);
+      setCorrectMsg(s >= 30
+        ? 'サーバーの応答を待っています… ' + s + '秒経過（最大60秒ほどかかることがあります）'
+        : '以降の手を再解析しています… ' + s + '秒経過（' + correctEstimateText() + '）');
+    }
+    render();
+    correction.timer = setInterval(render, 1000);
+  }
+  function stopCorrectTimer() {
+    if (correction.timer) { clearInterval(correction.timer); correction.timer = null; }
+  }
+
+  function movesEqual(a, b) {
+    return a.to[0] === b.to[0] && a.to[1] === b.to[1] && a.kind === b.kind &&
+      !!a.promote === !!b.promote &&
+      ((a.from == null) === (b.from == null)) &&
+      (a.from == null || (a.from[0] === b.from[0] && a.from[1] === b.from[1]));
+  }
 
   function inZoneLocal(side, d) { return side === 'sente' ? d <= 3 : d >= 7; }
   function mustPromoteLocal(side, kind, d) {
@@ -743,6 +785,7 @@
 
   function exitCorrection() {
     correction.active = false;
+    stopCorrectTimer();
     clearSel();
     $('board').classList.remove('correcting');
     $('hands-sente').classList.remove('tappable');
@@ -815,7 +858,8 @@
     if (m.promote !== undefined) { pin.promote = m.promote; }
     correction.busy = true;
     $('correct-bar').classList.add('busy');
-    setCorrectMsg('訂正を反映して以降の手を再解析しています…（数秒かかります）');
+    startCorrectTimer();
+    var oldPlies = viewer.plies.slice(); // 完了時に「どこが変わったか」を出すための控え
     var prevCorrectedAt = viewer.correctedAt || null;
     fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/correct', {
       method: 'POST',
@@ -832,9 +876,10 @@
       if (!res.ok) { throw new Error('HTTP ' + res.status); }
       return res.json();
     }).then(function (resp) {
-      applyCorrection(resp.result, ply);
+      applyCorrection(resp.result, ply, oldPlies);
     }).catch(function (err) {
       if (err && err.unapplied) {
+        stopCorrectTimer();
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
         clearSel();
@@ -842,17 +887,19 @@
         return;
       }
       // タイムアウト等でもサーバー側では完了している可能性があるため、結果をポーリングで拾う
+      // (経過表示のタイマーは動かしたまま。30秒超の文言に自動で切り替わる)
       console.warn('correct request failed; falling back to polling', err);
-      pollCorrected(prevCorrectedAt, ply);
+      pollCorrected(prevCorrectedAt, ply, oldPlies);
     });
   }
 
   // 訂正リクエストの応答が取れなかったときの保険。kif.json の correctedAt の
   // 変化を最大60秒待ち、変わっていれば成功として取り込む。
-  function pollCorrected(prevCorrectedAt, ply) {
+  function pollCorrected(prevCorrectedAt, ply, oldPlies) {
     var tries = 0;
     function tick() {
       if (++tries > 20) {
+        stopCorrectTimer();
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
         setCorrectMsg('⚠ 通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください');
@@ -863,7 +910,7 @@
           .then(function (res) { return res.ok ? res.json() : null; })
           .then(function (job) {
             var r = job && job.result;
-            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply); }
+            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply, oldPlies); }
             else { tick(); }
           })
           .catch(tick);
@@ -872,7 +919,19 @@
     tick();
   }
 
-  function applyCorrection(result, ply) {
+  // 旧棋譜との差分から「どこが変わったか」を手番号のリストで返す(1始まり)
+  function changedPlies(oldPlies, newPlies) {
+    var out = [];
+    var n = Math.max(oldPlies.length, newPlies.length);
+    for (var i = 0; i < n; i++) {
+      var a = oldPlies[i], b = newPlies[i];
+      if (!a || !b || !movesEqual(a.move, b.move)) { out.push(i + 1); }
+    }
+    return out;
+  }
+
+  function applyCorrection(result, ply, oldPlies) {
+    stopCorrectTimer();
     correction.busy = false;
     exitCorrection();
     // 訂正で手数が変わることがある(手が復活する等)。ビューワーごと差し替える。
@@ -880,11 +939,39 @@
     showResult({ status: 'SUCCEEDED', result: result });
     viewer.correctedAt = result.correctedAt || null;
     showPosition(Math.min(ply, viewer.positions.length - 1));
+
+    // どこが変わったかを明示する。訂正の価値(連鎖で以降も直る)はここで初めて目に見える
+    var changed = oldPlies ? changedPlies(oldPlies, viewer.plies) : [];
+    var others = changed.filter(function (p) { return p !== ply; });
+    var msg;
+    if (changed.length === 0) {
+      msg = '✔ ' + ply + '手目の訂正を確認しました（棋譜に変更はありませんでした・全' +
+        viewer.plies.length + '手）。';
+    } else if (others.length === 0) {
+      msg = '✔ ' + ply + '手目を訂正しました（他の手は変わっていません・全' +
+        viewer.plies.length + '手）。';
+    } else {
+      msg = '✔ ' + ply + '手目を訂正 → ほかに' + others.length + '手が変わりました（' +
+        Math.min.apply(null, others) + '〜' + Math.max.apply(null, others) + '手目・全' +
+        viewer.plies.length + '手）。黄色の手が変わった箇所です。';
+    }
     var done = $('correct-done');
-    done.textContent = '✔ ' + ply + '手目を訂正し、以降の手を再計算しました（全' +
-      viewer.plies.length + '手）。まだ違う手があれば、同じように訂正できます。' +
+    done.textContent = msg + 'まだ違う手があれば、同じように訂正できます。' +
       '（形勢グラフは訂正後の再計算に未対応です）';
     done.hidden = false;
+
+    // 変わった手を一覧上でハイライト(読む時間を考えて30秒で消す。
+    // 次の訂正やビューワー再構築でも自然に消える)
+    var items = document.querySelectorAll('#move-list li');
+    changed.forEach(function (p) {
+      if (items[p - 1]) { items[p - 1].classList.add('changed'); }
+    });
+    if (changed.length) {
+      setTimeout(function () {
+        var lis = document.querySelectorAll('#move-list li.changed');
+        for (var k = 0; k < lis.length; k++) { lis[k].classList.remove('changed'); }
+      }, 30000);
+    }
   }
 
   // ---- 結果表示 ----
