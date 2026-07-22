@@ -81,7 +81,9 @@ jobs:
           fi
 
       - name: Sync to S3
-        # deploy.sh と同一の除外リスト。ACL 無しは CloudFront が AccessDenied になるので必須
+        # deploy.sh と同一の除外リスト。ACL 無しは CloudFront が AccessDenied になるので必須。
+        # video-alpha.html はα実験レーン(alphaブランチ + deploy-alpha.yml)が正本のため、
+        # masterデプロイでは触らない(masterにはファイル自体を置かない。2026-07-22〜)
         run: |
           aws s3 sync public/ s3://shogi.nkkuma.tokyo \
             --exclude "firebase.json" \
@@ -89,6 +91,7 @@ jobs:
             --exclude "mentenanse/*" \
             --exclude "*.DS_Store" \
             --exclude ".git/*" \
+            --exclude "video-alpha.html" \
             --acl public-read
 
       - name: Invalidate CloudFront
