@@ -103,6 +103,12 @@
                                50% { opacity: 1; transform: scale(1.1); } }
     /* 訂正で変わった手のハイライト（数秒で消す） */
     #move-list li.changed { background: #fff3c4; }
+    /* 訂正モード中は盤タップとキャンセル以外を封じる（誤操作で訂正が飛ぶのを防ぐ） */
+    .locked { pointer-events: none; opacity: .45; }
+    /* 訂正中の「実際の映像」パネル */
+    #correct-photo img { width: 100%; border-radius: 6px; border: 1px solid #c8d9ec; display: block; }
+    #correct-photo .photo-nav { display: flex; align-items: center; justify-content: space-between;
+                                gap: 4px; margin-top: 4px; font-size: 12px; color: #666; }
   </style>
 </head>
 <body data-step="1">
@@ -209,6 +215,15 @@
         <span class="busy-dot" aria-hidden="true"></span><span id="correct-msg"></span>
         <div class="row" style="margin-top:6px">
           <button class="btn btn-sm" id="btn-correct-cancel">訂正をやめる</button>
+        </div>
+        <!-- 実際の映像（着地静止フレーム）。「本当にその手だっけ?」を見ながら訂正できる -->
+        <div id="correct-photo" hidden style="margin-top:8px">
+          <img id="correct-photo-img" alt="実際の対局映像のコマ">
+          <div class="photo-nav">
+            <button class="btn btn-sm" id="photo-prev">◀ 前のコマ</button>
+            <span id="photo-caption"></span>
+            <button class="btn btn-sm" id="photo-next">次のコマ ▶</button>
+          </div>
         </div>
       </div>
       <div id="correct-done" style="background:#f0f8f1;border:1px solid #cfe3d2;border-radius:8px;
@@ -541,6 +556,7 @@
     var svg = $('eval-graph');
     svg.innerHTML = parts.join('');
     svg.onclick = function (ev) {
+      if (correction.active) { return; } // 訂正中は局面移動を封じる
       var t = ev.target;
       if (t && t.getAttribute && t.getAttribute('data-i') !== null) {
         showPosition(Number(t.getAttribute('data-i')));
@@ -562,6 +578,7 @@
   // evaluate完了後、局面を保ったまま形勢グラフだけ差し込む(先出し表示の後続)。
   function applyEvals(job) {
     if (!viewer.positions) { return; } // 棋譜未表示なら何もしない(通常起きない)
+    if (correction.active || correction.busy) { return; } // 訂正中に盤を再描画しない(どのみち訂正後は陳腐化する)
     var result = (job && job.result) || {};
     if (Array.isArray(result.evals) && result.evals.length >= 2) {
       viewer.evals = result.evals;
@@ -708,12 +725,17 @@
         li.className = 'warn';
         li.title = ply.warnings.join(' / ');
       }
-      li.addEventListener('click', function () { showPosition(i + 1); });
+      li.addEventListener('click', function () {
+        if (correction.active) { return; } // 訂正中の誤タップで訂正が飛ばないように
+        showPosition(i + 1);
+      });
       list.appendChild(li);
     });
 
     // 訂正はv2ジョブ(イベント時刻frameIdx持ち)のみ対応。v1や古い結果ではボタンを出さない
     viewer.correctedAt = result.correctedAt || null;
+    viewer.framesPromise = null; // 映像フレーム一覧はジョブ単位のキャッシュ(結果差し替えでリセット)
+    correction.frames = null;
     var canCorrect = result.pipeline === 'v2' && !!state.jobId &&
       result.plies.length > 0 && typeof result.plies[0].frameIdx === 'number';
     $('btn-correct').hidden = !canCorrect;
@@ -766,6 +788,74 @@
       (a.from == null || (a.from[0] === b.from[0] && a.from[1] === b.from[1]));
   }
 
+  // 訂正モード中は「盤タップ・持ち駒タップ・キャンセル・写真送り」以外を封じる。
+  // ナビや一覧タップで訂正が意図せず解除される事故を防ぐ(オーナー要望 2026-07-22)。
+  function setViewerLocked(locked) {
+    ['btn-first', 'btn-prev', 'btn-next', 'btn-last', 'btn-sfen',
+     'btn-copy', 'btn-save', 'btn-retry', 'btn-correct'].forEach(function (id) {
+      var el = $(id);
+      if (el) { el.disabled = locked; }
+    });
+    var kento = $('btn-kento'); // <a>なのでdisabledが効かない
+    if (kento) {
+      kento.style.pointerEvents = locked ? 'none' : '';
+      kento.style.opacity = locked ? '.45' : '';
+    }
+    $('move-list').classList.toggle('locked', locked);
+    $('eval-wrap').classList.toggle('locked', locked);
+  }
+
+  // ---- 訂正中の「実際の映像」表示 ----
+  // v2が保存した着地静止フレームを GET /jobs/{jobId}/frames (presigned URL) から取得し、
+  // 訂正中の手の時刻に最も近いコマを表示する。API未対応(404)なら黙って出さない。
+  function fmtTime(t) {
+    var m = Math.floor(t / 60), s = Math.round(t % 60);
+    if (s === 60) { m++; s = 0; }
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function loadFrames() {
+    if (!viewer.framesPromise) {
+      viewer.framesPromise = fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/frames',
+        { cache: 'no-store' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (j) { return (j && j.frames && j.frames.length) ? j.frames : null; })
+        .catch(function () { return null; });
+    }
+    return viewer.framesPromise;
+  }
+  function renderCorrectPhoto() {
+    var frames = correction.frames;
+    var i = correction.photoIdx;
+    if (!frames || i == null || i < 0 || i >= frames.length) { $('correct-photo').hidden = true; return; }
+    $('correct-photo-img').src = frames[i].url;
+    var t = viewer.plies[correction.ply - 1] ? viewer.plies[correction.ply - 1].frameIdx : null;
+    var rel = '';
+    if (t != null) {
+      var d = frames[i].t - t;
+      rel = Math.abs(d) <= 4 ? (d >= 0 ? '・この手の直後' : '・この手の直前')
+        : (d > 0 ? '・約' + Math.round(d) + '秒後' : '・約' + Math.round(-d) + '秒前');
+    }
+    $('photo-caption').textContent = '実際の映像 ' + fmtTime(frames[i].t) + rel;
+    $('photo-prev').disabled = i <= 0;
+    $('photo-next').disabled = i >= frames.length - 1;
+    $('correct-photo').hidden = false;
+  }
+  function showCorrectPhoto() {
+    var ply = correction.ply;
+    loadFrames().then(function (frames) {
+      // 取得中に訂正をやめた/別の手に移った場合は何もしない
+      if (!correction.active || correction.ply !== ply || !frames) { return; }
+      var t = viewer.plies[ply - 1].frameIdx;
+      var best = 0;
+      for (var i = 1; i < frames.length; i++) {
+        if (Math.abs(frames[i].t - t) < Math.abs(frames[best].t - t)) { best = i; }
+      }
+      correction.frames = frames;
+      correction.photoIdx = best;
+      renderCorrectPhoto();
+    });
+  }
+
   function inZoneLocal(side, d) { return side === 'sente' ? d <= 3 : d >= 7; }
   function mustPromoteLocal(side, kind, d) {
     if (kind === 'fu' || kind === 'ky') { return side === 'sente' ? d === 1 : d === 9; }
@@ -783,6 +873,7 @@
     if (!viewer.positions || viewer.idx === 0 || correction.busy) { return; }
     correction.active = true;
     correction.ply = viewer.idx;
+    correction.photoIdx = null;
     clearSel();
     var side = correctionSide();
     renderBoard(viewer.positions[correction.ply - 1], null); // 訂正する手の直前局面
@@ -792,6 +883,9 @@
     $('correct-done').hidden = true;
     $('correct-bar').hidden = false;
     $('correct-bar').classList.remove('busy');
+    $('correct-photo').hidden = true;
+    setViewerLocked(true); // 盤・持ち駒・キャンセル・写真送り以外は封じる
+    showCorrectPhoto();
     setCorrectMsg(correction.ply + '手目（' + (side === 'sente' ? '▲先手' : '△後手') +
       '）の正しい手を入力: 動かした駒（打った場合は持ち駒）→ 行き先 の順にタップしてください');
   }
@@ -800,11 +894,14 @@
     correction.active = false;
     stopCorrectTimer();
     clearSel();
+    setViewerLocked(false);
     $('board').classList.remove('correcting');
     $('hands-sente').classList.remove('tappable');
     $('hands-gote').classList.remove('tappable');
     $('correct-bar').hidden = true;
     $('correct-bar').classList.remove('busy');
+    $('correct-photo').hidden = true;
+    $('btn-correct-cancel').disabled = false;
   }
 
   function selectFrom(s, d, token) {
@@ -871,6 +968,8 @@
     if (m.promote !== undefined) { pin.promote = m.promote; }
     correction.busy = true;
     $('correct-bar').classList.add('busy');
+    // 再解中はキャンセルも無効(サーバー側は完了してしまうため、途中中断は状態の食い違いを生む)
+    $('btn-correct-cancel').disabled = true;
     startCorrectTimer();
     var oldPlies = viewer.plies.slice(); // 完了時に「どこが変わったか」を出すための控え
     var prevCorrectedAt = viewer.correctedAt || null;
@@ -895,6 +994,7 @@
         stopCorrectTimer();
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
+        $('btn-correct-cancel').disabled = false;
         clearSel();
         setCorrectMsg('⚠ ' + err.message + '。手をよくご確認のうえ、もう一度入力してください');
         return;
@@ -915,6 +1015,7 @@
         stopCorrectTimer();
         correction.busy = false;
         $('correct-bar').classList.remove('busy');
+        $('btn-correct-cancel').disabled = false;
         setCorrectMsg('⚠ 通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください');
         return;
       }
@@ -1212,6 +1313,15 @@
   }
   $('hands-sente').addEventListener('click', handTapHandler);
   $('hands-gote').addEventListener('click', handTapHandler);
+  // 訂正中の映像コマ送り(訂正モードの一部なのでロック対象外)
+  $('photo-prev').addEventListener('click', function () {
+    if (correction.frames && correction.photoIdx > 0) { correction.photoIdx--; renderCorrectPhoto(); }
+  });
+  $('photo-next').addEventListener('click', function () {
+    if (correction.frames && correction.photoIdx < correction.frames.length - 1) {
+      correction.photoIdx++; renderCorrectPhoto();
+    }
+  });
 
   $('btn-sfen').addEventListener('click', function () {
     if (!viewer.positions) { return; }
