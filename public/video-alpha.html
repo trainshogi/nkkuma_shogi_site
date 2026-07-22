@@ -1161,7 +1161,9 @@
     evalPoll.expected = expectedCorrectedAt || null;
     var tries = 0;
     evalPoll.timer = setInterval(function () {
-      if (++tries > 40) { stopEvalPoll(); $('eval-wrap').hidden = true; return; } // 最大4分で諦める
+      // 最大12分で諦める。評価はsunfishの既知問題(特定局面で無応答→タイムアウト待ち)で
+      // 数分かかることがある(実測: 83手のnull多発対局で5分超)
+      if (++tries > 120) { stopEvalPoll(); $('eval-wrap').hidden = true; return; }
       fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
         .then(function (res) { return res.ok ? res.json() : null; })
         .then(function (job) {
@@ -1202,7 +1204,7 @@
     if (evalsRecomputing) {
       setEvalPending();
       startEvalPoll(result.correctedAt || null);
-      evalNote = '（形勢グラフは再計算中です。1〜2分で自動更新されます）';
+      evalNote = '（形勢グラフは再計算中です。数分かかることがありますが自動で更新されます）';
     } else {
       evalNote = '（形勢グラフは訂正後の再計算に未対応です）';
     }
