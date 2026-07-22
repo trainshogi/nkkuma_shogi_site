@@ -105,10 +105,13 @@
     #move-list li.changed { background: #fff3c4; }
     /* 訂正モード中は盤タップとキャンセル以外を封じる（誤操作で訂正が飛ぶのを防ぐ） */
     .locked { pointer-events: none; opacity: .45; }
-    /* 訂正中の「実際の映像」パネル */
-    #correct-photo img { width: 100%; border-radius: 6px; border: 1px solid #c8d9ec; display: block; }
-    #correct-photo .photo-nav { display: flex; align-items: center; justify-content: space-between;
-                                gap: 4px; margin-top: 4px; font-size: 12px; color: #666; }
+    /* 実映像パネル(常設): 盤の下に、その手の時刻の実映像を盤領域だけ切り出して表示 */
+    #photo-panel { max-width: 342px; margin: 6px auto 2px; }
+    #photo-crop { position: relative; overflow: hidden; width: 100%;
+                  border-radius: 6px; border: 1px solid #d8d3c8; background: #1c1c1c; }
+    #photo-crop img { position: absolute; display: block; }
+    #photo-panel .photo-nav { display: flex; align-items: center; justify-content: space-between;
+                              gap: 4px; margin-top: 4px; font-size: 12px; color: #666; }
   </style>
 </head>
 <body data-step="1">
@@ -216,21 +219,22 @@
         <div class="row" style="margin-top:6px">
           <button class="btn btn-sm" id="btn-correct-cancel">訂正をやめる</button>
         </div>
-        <!-- 実際の映像（着地静止フレーム）。「本当にその手だっけ?」を見ながら訂正できる -->
-        <div id="correct-photo" hidden style="margin-top:8px">
-          <img id="correct-photo-img" alt="実際の対局映像のコマ">
-          <div class="photo-nav">
-            <button class="btn btn-sm" id="photo-prev">◀ 前のコマ</button>
-            <span id="photo-caption"></span>
-            <button class="btn btn-sm" id="photo-next">次のコマ ▶</button>
-          </div>
-        </div>
       </div>
       <div id="correct-done" style="background:#f0f8f1;border:1px solid #cfe3d2;border-radius:8px;
            padding:8px 10px;margin:0 auto 8px;max-width:342px;font-size:13px" hidden></div>
       <div class="hands" id="hands-gote"></div>
       <div id="board"></div>
       <div class="hands" id="hands-sente"></div>
+      <!-- 実映像パネル(常設): 手を進めるたびに、その手の時刻に最も近い実映像のコマを
+           盤領域だけ切り出して表示する。復元盤面と実映像を常に突き合わせられる -->
+      <div id="photo-panel" hidden>
+        <div id="photo-crop"><img id="photo-img" alt="実際の対局映像のコマ"></div>
+        <div class="photo-nav">
+          <button class="btn btn-sm" id="photo-prev">◀ 前のコマ</button>
+          <span id="photo-caption"></span>
+          <button class="btn btn-sm" id="photo-next">次のコマ ▶</button>
+        </div>
+      </div>
       <div class="nav-row">
         <button class="btn btn-sm" id="btn-first">|◀</button>
         <button class="btn btn-sm" id="btn-prev">◀ 前へ</button>
@@ -690,6 +694,7 @@
     var active = document.querySelector('#move-list li.active');
     if (active) { active.scrollIntoView({ block: 'nearest' }); }
     $('btn-kento').href = kentoGameUrl(viewer.idx);
+    updatePhotoForPly(); // 実映像パネルを現在手に追従させる
   }
 
   function initViewer(result, evalsPending) {
@@ -734,12 +739,14 @@
 
     // 訂正はv2ジョブ(イベント時刻frameIdx持ち)のみ対応。v1や古い結果ではボタンを出さない
     viewer.correctedAt = result.correctedAt || null;
-    viewer.framesPromise = null; // 映像フレーム一覧はジョブ単位のキャッシュ(結果差し替えでリセット)
-    correction.frames = null;
     var canCorrect = result.pipeline === 'v2' && !!state.jobId &&
       result.plies.length > 0 && typeof result.plies[0].frameIdx === 'number';
     $('btn-correct').hidden = !canCorrect;
     $('correct-done').hidden = true;
+    // 実映像パネル: v2ジョブなら着地フレーム一覧を読み込んで常時表示する
+    // (フレームはジョブ単位でキャッシュされ、訂正後の結果差し替えでは再取得しない)
+    if (canCorrect) { initPhotoPanel(); }
+    else { photo.frames = null; $('photo-panel').hidden = true; }
 
     $('viewer').hidden = false;
     showPosition(viewer.positions.length - 1); // 最終局面から
@@ -805,54 +812,102 @@
     $('eval-wrap').classList.toggle('locked', locked);
   }
 
-  // ---- 訂正中の「実際の映像」表示 ----
-  // v2が保存した着地静止フレームを GET /jobs/{jobId}/frames (presigned URL) から取得し、
-  // 訂正中の手の時刻に最も近いコマを表示する。API未対応(404)なら黙って出さない。
+  // ---- 実映像パネル(常設) ----
+  // 検証ビューワー由来の体験: 手を進めるたびに、その手の時刻に最も近い着地静止フレーム
+  // (GET /jobs/{jobId}/frames の presigned URL)を盤の下に表示し、復元盤面と実映像を
+  // 常に突き合わせられる。盤の四隅(points)があれば盤領域だけをCSSで切り出す。
+  // API未対応・v1ジョブ(404)ならパネルごと出さない。
+  var photo = { frames: null, points: null, idx: null, imgW: 0, imgH: 0 };
+
   function fmtTime(t) {
     var m = Math.floor(t / 60), s = Math.round(t % 60);
     if (s === 60) { m++; s = 0; }
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
   function loadFrames() {
-    if (!viewer.framesPromise) {
+    if (viewer.framesJobId !== state.jobId) { // ジョブ単位でキャッシュ(訂正後の再表示で再取得しない)
+      viewer.framesJobId = state.jobId;
       viewer.framesPromise = fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/frames',
         { cache: 'no-store' })
         .then(function (res) { return res.ok ? res.json() : null; })
-        .then(function (j) { return (j && j.frames && j.frames.length) ? j.frames : null; })
         .catch(function () { return null; });
     }
     return viewer.framesPromise;
   }
-  function renderCorrectPhoto() {
-    var frames = correction.frames;
-    var i = correction.photoIdx;
-    if (!frames || i == null || i < 0 || i >= frames.length) { $('correct-photo').hidden = true; return; }
-    $('correct-photo-img').src = frames[i].url;
-    var t = viewer.plies[correction.ply - 1] ? viewer.plies[correction.ply - 1].frameIdx : null;
-    var rel = '';
-    if (t != null) {
-      var d = frames[i].t - t;
-      rel = Math.abs(d) <= 4 ? (d >= 0 ? '・この手の直後' : '・この手の直前')
-        : (d > 0 ? '・約' + Math.round(d) + '秒後' : '・約' + Math.round(-d) + '秒前');
+  function nearestFrameIdx(t) {
+    var fs = photo.frames;
+    var best = 0;
+    for (var i = 1; i < fs.length; i++) {
+      if (Math.abs(fs[i].t - t) < Math.abs(fs[best].t - t)) { best = i; }
     }
-    $('photo-caption').textContent = '実際の映像 ' + fmtTime(frames[i].t) + rel;
-    $('photo-prev').disabled = i <= 0;
-    $('photo-next').disabled = i >= frames.length - 1;
-    $('correct-photo').hidden = false;
+    return best;
   }
-  function showCorrectPhoto() {
-    var ply = correction.ply;
-    loadFrames().then(function (frames) {
-      // 取得中に訂正をやめた/別の手に移った場合は何もしない
-      if (!correction.active || correction.ply !== ply || !frames) { return; }
-      var t = viewer.plies[ply - 1].frameIdx;
-      var best = 0;
-      for (var i = 1; i < frames.length; i++) {
-        if (Math.abs(frames[i].t - t) < Math.abs(frames[best].t - t)) { best = i; }
-      }
-      correction.frames = frames;
-      correction.photoIdx = best;
-      renderCorrectPhoto();
+  // いま注目している手(訂正中ならその手、通常はビューワーの現在手)の映像時刻
+  function currentPly() { return correction.active ? correction.ply : viewer.idx; }
+  function currentPlyTime() {
+    var ply = currentPly();
+    if (!viewer.plies || ply < 1) { return 0; }
+    var p = viewer.plies[ply - 1];
+    return (p && typeof p.frameIdx === 'number') ? p.frameIdx : 0;
+  }
+  // 盤の四隅のバウンディングボックス+余白10%で切り出す(CSSのみ。points無しなら全体表示)
+  function applyPhotoCrop() {
+    var img = $('photo-img');
+    var crop = $('photo-crop');
+    if (img.naturalWidth) { photo.imgW = img.naturalWidth; photo.imgH = img.naturalHeight; }
+    var pts = photo.points;
+    if (!pts || !photo.imgW) {
+      crop.style.paddingTop = '';
+      img.style.cssText = 'position:static;width:100%;height:auto;display:block';
+      return;
+    }
+    var xs = pts.map(function (p) { return p[0]; });
+    var ys = pts.map(function (p) { return p[1]; });
+    var mx = (Math.max.apply(null, xs) - Math.min.apply(null, xs)) * 0.10;
+    var my = (Math.max.apply(null, ys) - Math.min.apply(null, ys)) * 0.10;
+    var x0 = Math.max(0, Math.min.apply(null, xs) - mx);
+    var y0 = Math.max(0, Math.min.apply(null, ys) - my);
+    var x1 = Math.min(photo.imgW, Math.max.apply(null, xs) + mx);
+    var y1 = Math.min(photo.imgH, Math.max.apply(null, ys) + my);
+    var cw = x1 - x0, ch = y1 - y0;
+    if (cw <= 0 || ch <= 0) { return; }
+    crop.style.paddingTop = (ch / cw * 100) + '%';
+    img.style.cssText = 'position:absolute;display:block;' +
+      'width:' + (photo.imgW / cw * 100) + '%;' +
+      'left:' + (-x0 / cw * 100) + '%;' +
+      'top:' + (-y0 / ch * 100) + '%;';
+  }
+  function renderPhotoPanel() {
+    var fs = photo.frames;
+    var i = photo.idx;
+    if (!fs || i == null) { $('photo-panel').hidden = true; return; }
+    $('photo-img').src = fs[i].url;
+    var ply = currentPly();
+    var rel = '';
+    if (ply >= 1) {
+      var d = fs[i].t - currentPlyTime();
+      rel = Math.abs(d) <= 4 ? (d >= 0 ? '・' + ply + '手目の直後' : '・' + ply + '手目の直前')
+        : (d > 0 ? '・' + ply + '手目の約' + Math.round(d) + '秒後'
+                 : '・' + ply + '手目の約' + Math.round(-d) + '秒前');
+    }
+    $('photo-caption').textContent = '実際の映像 ' + fmtTime(fs[i].t) + rel;
+    $('photo-prev').disabled = i <= 0;
+    $('photo-next').disabled = i >= fs.length - 1;
+    $('photo-panel').hidden = false;
+  }
+  function updatePhotoForPly() {
+    if (!photo.frames) { return; }
+    photo.idx = nearestFrameIdx(currentPlyTime());
+    renderPhotoPanel();
+  }
+  function initPhotoPanel() {
+    photo.frames = null; photo.points = null; photo.idx = null;
+    $('photo-panel').hidden = true;
+    loadFrames().then(function (resp) {
+      if (!resp || !resp.frames || !resp.frames.length) { return; }
+      photo.frames = resp.frames;
+      photo.points = Array.isArray(resp.points) ? resp.points : null;
+      updatePhotoForPly();
     });
   }
 
@@ -873,7 +928,6 @@
     if (!viewer.positions || viewer.idx === 0 || correction.busy) { return; }
     correction.active = true;
     correction.ply = viewer.idx;
-    correction.photoIdx = null;
     clearSel();
     var side = correctionSide();
     renderBoard(viewer.positions[correction.ply - 1], null); // 訂正する手の直前局面
@@ -883,9 +937,8 @@
     $('correct-done').hidden = true;
     $('correct-bar').hidden = false;
     $('correct-bar').classList.remove('busy');
-    $('correct-photo').hidden = true;
-    setViewerLocked(true); // 盤・持ち駒・キャンセル・写真送り以外は封じる
-    showCorrectPhoto();
+    setViewerLocked(true); // 盤・持ち駒・キャンセル・映像コマ送り以外は封じる
+    updatePhotoForPly(); // 常設の映像パネルは訂正中も同じ手のコマを表示し続ける
     setCorrectMsg(correction.ply + '手目（' + (side === 'sente' ? '▲先手' : '△後手') +
       '）の正しい手を入力: 動かした駒（打った場合は持ち駒）→ 行き先 の順にタップしてください');
   }
@@ -900,7 +953,6 @@
     $('hands-gote').classList.remove('tappable');
     $('correct-bar').hidden = true;
     $('correct-bar').classList.remove('busy');
-    $('correct-photo').hidden = true;
     $('btn-correct-cancel').disabled = false;
   }
 
@@ -1313,15 +1365,14 @@
   }
   $('hands-sente').addEventListener('click', handTapHandler);
   $('hands-gote').addEventListener('click', handTapHandler);
-  // 訂正中の映像コマ送り(訂正モードの一部なのでロック対象外)
+  // 実映像パネルのコマ送り(訂正中もロック対象外)と、読み込み時の盤領域クロップ適用
   $('photo-prev').addEventListener('click', function () {
-    if (correction.frames && correction.photoIdx > 0) { correction.photoIdx--; renderCorrectPhoto(); }
+    if (photo.frames && photo.idx > 0) { photo.idx--; renderPhotoPanel(); }
   });
   $('photo-next').addEventListener('click', function () {
-    if (correction.frames && correction.photoIdx < correction.frames.length - 1) {
-      correction.photoIdx++; renderCorrectPhoto();
-    }
+    if (photo.frames && photo.idx < photo.frames.length - 1) { photo.idx++; renderPhotoPanel(); }
   });
+  $('photo-img').addEventListener('load', applyPhotoCrop);
 
   $('btn-sfen').addEventListener('click', function () {
     if (!viewer.positions) { return; }
