@@ -2,6 +2,15 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) — 他ページと同じ計測ID。動画ページだけ未計測だったため追加 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>【β版】動画まるごと棋譜化 — 対局動画から手順付きKIFを作る</title>
   <link rel="icon" href="/favicon.ico">
@@ -197,6 +206,23 @@
       <button class="btn btn-primary" id="btn-copy">KIFをコピー</button>
       <button class="btn" id="btn-save">KIFを保存</button>
       <button class="btn" id="btn-retry">別の動画で試す</button>
+    </div>
+
+    <!-- 棋譜ができた直後が、いちばん人に伝えたくなる瞬間。ここにシェア導線を置く -->
+    <div id="share-result" style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid #eee">
+      <div style="font-size:13px;color:#666;margin-bottom:8px">できた棋譜をシェアする</div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <a id="share-x" href="#" target="_blank" rel="noopener" aria-label="Xでポストする"
+           style="display:inline-flex;align-items:center;gap:5px;background:#000;color:#fff;
+                  padding:7px 14px;border-radius:6px;font-size:13.5px;line-height:1;text-decoration:none">
+          <span aria-hidden="true">&#120143;</span> ポスト
+        </a>
+        <a id="share-fb" href="#" target="_blank" rel="noopener" aria-label="Facebookでシェアする"
+           style="display:inline-flex;align-items:center;gap:5px;background:#1877f2;color:#fff;
+                  padding:7px 14px;border-radius:6px;font-size:13.5px;line-height:1;text-decoration:none">
+          <span aria-hidden="true">f</span> シェア
+        </a>
+      </div>
     </div>
   </section>
 </main>
@@ -632,9 +658,33 @@
   // ---- 結果表示 ----
   // 棋譜が読めた時点で1回だけ呼ぶ。形勢グラフがまだなら「計算中」を出し、
   // evaluate完了後に applyEvals() で差し込む(先出し表示)。
+  // 棋譜の手数を数えてシェア文面を組む。手数が入ると「一局まるごと棋譜になった」が伝わる
+  function setupShare(kif) {
+    var wrap = $('share-result');
+    if (!wrap) { return; }
+    var plies = (kif || '').split('\n').filter(function (l) {
+      return /^\s*\d+\s+\S/.test(l);
+    }).length;
+    var url = 'https://shogi.nkkuma.tokyo/video.html';
+    var text = plies > 0
+      ? '対局を撮った動画から、' + plies + '手の棋譜が自動でできました。'
+      : '対局を撮った動画から、棋譜が自動でできました。';
+    var x = $('share-x');
+    var fb = $('share-fb');
+    if (x) {
+      x.href = 'https://twitter.com/intent/tweet?text='
+        + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
+    }
+    if (fb) {
+      fb.href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+    }
+    wrap.hidden = plies === 0;
+  }
+
   function showResult(job) {
     var result = job.result || {};
     $('kif-out').value = result.kif || '';
+    setupShare(result.kif);
     var warns = result.warnings || [];
     var box = $('warnings');
     box.innerHTML = '';
@@ -834,5 +884,28 @@
   });
 })();
 </script>
+
+<footer style="max-width:640px;margin:32px auto 0;padding:20px 16px 32px;border-top:1px solid #e5e0d6;
+               text-align:center;font-size:13.5px;color:#666;line-height:1.8">
+  <p style="margin:0 0 12px">
+    <a href="/">写真から棋譜化（トップ）</a> ・
+    <a href="/beta.html">写真認識 新エンジン版（β）</a> ・
+    <a href="/faq.html">FAQ</a>
+  </p>
+  <p style="margin:0 0 14px;font-size:12px;color:#888">
+    このサービスを利用することで、<a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>に同意したものとみなされます。
+  </p>
+  <p style="margin:0 0 8px">開発：えぬっくま</p>
+  <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
+     class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <div style="margin-top:16px">
+    <p style="margin:0 0 8px;font-size:13px">このサービスが役立ったら<br>コーヒーで応援していただけると嬉しいです ☕</p>
+    <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
+      <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
+           alt="Buy Me A Coffee" height="36" width="150" style="opacity:.9">
+    </a>
+  </div>
+</footer>
 </body>
 </html>
