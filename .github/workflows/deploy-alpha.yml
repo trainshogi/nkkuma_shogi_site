@@ -1,0 +1,73 @@
+# α実験レーン: alpha ブランチへの push で public/video-alpha.html「だけ」を本番へ反映する。
+#
+# 設計(2026-07-22 オーナー承認):
+#   - αページ(video-alpha.html)はオーナーの事前レビューなしで自動デプロイしてよい。
+#     ただし本番に出られるのはこのワークフローが cp する1ファイルのみ——
+#     alpha ブランチに何が積まれても、β(video.html)やトップ等には一切触れない
+#     (爆風半径をパイプライン構造で固定する)。
+#   - master 側の deploy-s3.yml は video-alpha.html を sync 除外しており、
+#     αページの正本はこの alpha ブランチ。
+#   - β昇格は従来どおり video.html への PR + オーナーマージ(ゲートの位置は不変)。
+# 認証は master 用と同じ OIDC ロール(信頼ポリシーは repo:...:* で全ブランチ許可)。
+name: Deploy alpha page
+
+on:
+  push:
+    branches: [alpha]
+    paths: ['public/video-alpha.html', '.github/workflows/deploy-alpha.yml']
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-alpha
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.AWS_ROLE_ARN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ap-northeast-1
+
+      - name: Inject API keys (video-alpha.html のみ)
+        # 現状の video-alpha.html はプレースホルダを持たない(動画APIはキー不要)が、
+        # 将来 __API_KEY__ / __ALPHA_API_KEY__ を使い始めたときに
+        # 生のプレースホルダを本番に出さないための安全網(master 側と同じ流儀)。
+        env:
+          SHOGI_API_KEY: ${{ secrets.SHOGI_API_KEY }}
+          SHOGI_ALPHA_API_KEY: ${{ secrets.SHOGI_ALPHA_API_KEY }}
+        run: |
+          f=public/video-alpha.html
+          if grep -q "__API_KEY__" "$f"; then
+            if [ -z "$SHOGI_API_KEY" ]; then
+              echo "::error::__API_KEY__ があるのに secrets.SHOGI_API_KEY が未設定です"; exit 1
+            fi
+            perl -i -pe 's/__API_KEY__/$ENV{SHOGI_API_KEY}/g' "$f"
+          fi
+          if grep -q "__ALPHA_API_KEY__" "$f"; then
+            if [ -z "$SHOGI_ALPHA_API_KEY" ]; then
+              echo "::error::__ALPHA_API_KEY__ があるのに secrets.SHOGI_ALPHA_API_KEY が未設定です"; exit 1
+            fi
+            perl -i -pe 's/__ALPHA_API_KEY__/$ENV{SHOGI_ALPHA_API_KEY}/g' "$f"
+          fi
+
+      - name: Upload video-alpha.html only
+        # このレーンから本番へ出るのはこの1ファイルだけ。他は絶対に触らない。
+        run: |
+          aws s3 cp public/video-alpha.html s3://shogi.nkkuma.tokyo/video-alpha.html \
+            --content-type "text/html; charset=utf-8" \
+            --acl public-read
+
+      - name: Invalidate CloudFront (αページのみ)
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ECK0AXFXSKK8W --paths '/video-alpha.html'
