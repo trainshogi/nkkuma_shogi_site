@@ -202,7 +202,7 @@
     document.getElementById('eval-text').innerHTML =
       '<b>' + evalJudgeText(r.cp, r.mate, senteToMove) + '</b>' +
       (best ? '<br>次の一手の候補: ' + best : '') +
-      '<br><small style="color:#888">エンジン: Sunfish4 / 深さ' + (r.depth || '-') + '（β）</small>';
+      '<br><small style="color:#888">エンジン: YaneuraOu (NAGISA_V3) / 深さ' + (r.depth || '-') + '（β）</small>';
     out.hidden = false;
   }
 
