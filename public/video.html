@@ -1160,8 +1160,7 @@
     evalPoll.expected = expectedCorrectedAt || null;
     var tries = 0;
     evalPoll.timer = setInterval(function () {
-      // 最大12分で諦める(安全網)。評価エンジンはYaneuraOu(nagisa)で、旧sunfishのような
-      // 無応答は起きず高速(実測: 83手で約42秒・null無し)。通常は1分ほどで揃う。
+      // 最大12分で諦める(安全網)。評価は高速・null無し(実測: 83手で約42秒)、通常は1分ほどで揃う。
       if (++tries > 120) { stopEvalPoll(); $('eval-wrap').hidden = true; return; }
       fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
         .then(function (res) { return res.ok ? res.json() : null; })
