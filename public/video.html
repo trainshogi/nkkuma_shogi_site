@@ -1160,8 +1160,8 @@
     evalPoll.expected = expectedCorrectedAt || null;
     var tries = 0;
     evalPoll.timer = setInterval(function () {
-      // 最大12分で諦める。評価はsunfishの既知問題(特定局面で無応答→タイムアウト待ち)で
-      // 数分かかることがある(実測: 83手のnull多発対局で5分超)
+      // 最大12分で諦める(安全網)。評価エンジンはYaneuraOu(nagisa)で、旧sunfishのような
+      // 無応答は起きず高速(実測: 83手で約42秒・null無し)。通常は1分ほどで揃う。
       if (++tries > 120) { stopEvalPoll(); $('eval-wrap').hidden = true; return; }
       fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
         .then(function (res) { return res.ok ? res.json() : null; })
@@ -1203,7 +1203,7 @@
     if (evalsRecomputing) {
       setEvalPending();
       startEvalPoll(result.correctedAt || null);
-      evalNote = '（形勢グラフは再計算中です。数分かかることがありますが自動で更新されます）';
+      evalNote = '（形勢グラフは再計算中です。1分ほどで自動更新されます）';
     } else {
       evalNote = '（形勢グラフは訂正後の再計算に未対応です）';
     }
@@ -1544,6 +1544,7 @@
     人目の訪問です
   </p>
   <p style="margin:0 0 8px">開発：えぬっくま</p>
+  <p style="margin:0 0 8px;font-size:11.5px;color:#999">形勢判断エンジン：<a href="https://ngs436.booth.pm/" target="_blank" rel="noopener" style="color:#999">NAGISA_V3（nagisa 様）</a></p>
   <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
      class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a>
   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
