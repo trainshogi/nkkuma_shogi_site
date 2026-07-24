@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) — 他ページと同じ計測ID。動画ページだけ未計測だったため追加 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>動画まるごと棋譜化（イベント用・データを保存しません）</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- イベント会場での対面利用専用。告知・共有はしないため OGP は付けない -->
+  <meta name="description" content="イベント会場向けの動画→棋譜化。映像・棋譜を保存しません。">
+  <meta name="robots" content="noindex, nofollow">
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; color: #222; background: #faf8f4;
+      font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.7; -webkit-text-size-adjust: 100%;
+    }
+    main { max-width: 560px; margin: 0 auto; padding: 16px 14px 60px; }
+    h1 { font-size: 20px; margin: 10px 0 2px; }
+    .beta { display:inline-block; background:#7c4dff; color:#fff; font-size:11px;
+            padding:2px 8px; border-radius: 10px; vertical-align: middle; }
+    .lead { color: #555; font-size: 13.5px; margin: 6px 0 18px; }
+    .card { background:#fff; border:1px solid #e5e1d8; border-radius: 12px;
+            padding: 14px; margin: 0 0 14px; }
+    .card-label { font-size: 12.5px; color: #888; margin-bottom: 8px; font-weight: bold; }
+    .btn {
+      display:inline-block; border:1px solid #d8d3c8; border-radius: 8px; background:#fff;
+      padding: 10px 14px; font-size: 15px; cursor: pointer; font-family: inherit;
+    }
+    .btn-primary { background:#c62828; border-color:#c62828; color:#fff; font-weight:bold; }
+    .btn:disabled { opacity:.4; cursor: default; }
+    .row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
+    /* step切替 */
+    [data-step="1"] .only-2, [data-step="1"] .only-3 { display:none; }
+    [data-step="2"] .only-1, [data-step="2"] .only-3 { display:none; }
+    [data-step="3"] .only-1, [data-step="3"] .only-2 { display:none; }
+    .progress-track { height: 10px; background:#eee; border-radius: 6px; overflow:hidden; }
+    #progress-bar { height: 100%; width: 0%; background:#c62828; transition: width .3s; }
+    #progress-label { font-size: 13.5px; color:#555; margin-bottom: 6px; }
+    #file-info { font-size: 13.5px; color:#555; margin-top: 8px; }
+    #kif-out { width: 100%; height: 240px; font-family: ui-monospace, Menlo, monospace;
+               font-size: 12.5px; border:1px solid #ddd; border-radius: 8px; padding: 8px; }
+    #warnings { font-size: 13px; color:#b26a00; background:#fff8ec; border:1px solid #f3e3bd;
+                border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+    .note { font-size: 12.5px; color: #888; }
+    #error-box { background:#fdf2f0; border:1px solid #ecc8c0; border-radius:10px;
+                 padding:10px 14px; margin-bottom:12px; font-size:14px; }
+    .howto { padding-left: 1.3em; margin: 4px 0; }
+    .howto li { margin: 10px 0; }
+    .tips { padding-left: 1.3em; margin: 4px 0; }
+    .tips li { margin: 6px 0; }
+    .example { margin: 10px 0 4px; text-align: center; }
+    .example img { max-width: 220px; width: 100%; border-radius: 8px; border: 1px solid #e5e1d8; }
+    .example figcaption { font-size: 12px; color: #888; margin-top: 4px; }
+    /* 対局再現ビューワー */
+    .btn-sm { padding: 6px 10px; font-size: 13.5px; }
+    #board { display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
+             max-width: 342px; margin: 4px auto; border: 2px solid #7a5c39;
+             background: #f3d8a2; }
+    #board .sq { aspect-ratio: 1; border: 0.5px solid #b08d5e; display: flex;
+                 align-items: center; justify-content: center;
+                 font-size: 21px; line-height: 1; user-select: none; }
+    #board .sq.gote { transform: rotate(180deg); }
+    #board .sq.last { background: #f7b977; }
+    .hands { max-width: 342px; margin: 4px auto; font-size: 14px; }
+    .nav-row { display: flex; justify-content: center; align-items: center;
+               gap: 6px; margin: 10px 0 6px; }
+    #ply-label { font-size: 13.5px; min-width: 5.5em; text-align: center; }
+    #move-list { list-style: none; margin: 8px auto; padding: 0; max-height: 180px;
+                 overflow-y: auto; border: 1px solid #eee; border-radius: 8px;
+                 font-size: 14px; max-width: 342px; }
+    #move-list li { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; cursor: pointer; }
+    #move-list li.active { background: #fdecec; }
+    #move-list li.warn { color: #b26a00; }
+    /* イベント用: 保存しないことを常時明示するバー（画面上部に固定表示） */
+    .nosave-bar { background:#0f5132; color:#fff; padding:10px 14px; font-size:13.5px;
+                  line-height:1.6; text-align:center; }
+    .nosave-bar b { font-size:15px; display:block; margin-bottom:2px; }
+    /* 訂正モード（間違った手の指し直し） */
+    #board.correcting .sq { cursor: pointer; }
+    #board .sq.sel { outline: 2px solid #c62828; outline-offset: -2px; background: #fbd2ce; }
+    .hands .hand-piece { display: inline-block; padding: 0 4px; margin-left: 3px; }
+    .hands.tappable .hand-piece { cursor: pointer; border: 1px solid #d8d3c8;
+                                  border-radius: 4px; background: #fff; }
+    .hands .hand-piece.sel { background: #fbd2ce; border-color: #c62828; }
+    #correct-bar { background: #eef4fb; border: 1px solid #c8d9ec; border-radius: 8px;
+                   padding: 8px 10px; margin: 0 auto 8px; max-width: 342px; font-size: 13px; }
+    #correct-bar.busy { background: #f6f4ef; border-color: #ddd; color: #666; }
+    /* 再解析中の生存表示（点滅ドット + 経過秒はJSで更新） */
+    #correct-bar .busy-dot { display: none; }
+    #correct-bar.busy .busy-dot { display: inline-block; width: 8px; height: 8px;
+                   border-radius: 50%; background: #c62828; margin-right: 6px;
+                   animation: correct-pulse 1s ease-in-out infinite; }
+    @keyframes correct-pulse { 0%, 100% { opacity: .25; transform: scale(.8); }
+                               50% { opacity: 1; transform: scale(1.1); } }
+    /* 訂正で変わった手のハイライト（数秒で消す） */
+    #move-list li.changed { background: #fff3c4; }
+    /* 訂正モード中は盤タップとキャンセル以外を封じる（誤操作で訂正が飛ぶのを防ぐ） */
+    .locked { pointer-events: none; opacity: .45; }
+    /* 実映像パネル(常設): 盤の下に、その手の時刻の実映像を盤領域だけ切り出して表示 */
+    #photo-panel { max-width: 342px; margin: 6px auto 2px; }
+    #photo-crop { position: relative; overflow: hidden; width: 100%;
+                  border-radius: 6px; border: 1px solid #d8d3c8; background: #1c1c1c; }
+    #photo-crop img { position: absolute; display: block; }
+    #photo-panel .photo-nav { display: flex; align-items: center; justify-content: space-between;
+                              gap: 4px; margin-top: 4px; font-size: 12px; color: #666; }
+    /* 再解析中の盤オーバーレイ: 白半透明+スピナーで「今は触れない」を明示 */
+    #board { position: relative; }
+    .board-overlay { position: absolute; inset: 0; z-index: 5;
+                     background: rgba(255,255,255,.68);
+                     display: flex; flex-direction: column; align-items: center;
+                     justify-content: center; gap: 10px; font-size: 13px; color: #555; }
+    .board-overlay .spin { width: 30px; height: 30px; border: 3px solid #c62828;
+                           border-top-color: transparent; border-radius: 50%;
+                           animation: board-spin .9s linear infinite; }
+    @keyframes board-spin { to { transform: rotate(360deg); } }
+    /* PCレイアウト(900px以上): 盤と実映像を左右に並べ、常時比較しやすくする。
+       スマホ(既定)は従来どおり縦積み */
+    @media (min-width: 900px) {
+      main { max-width: 880px; }
+      main > .card { max-width: 560px; margin-left: auto; margin-right: auto; }
+      main > .card.only-3 { max-width: 850px; }
+      /* :not([hidden]) ガード必須: id指定のdisplayはUAの [hidden]{display:none} に勝って
+         しまうため、素の #viewer{display:grid} だと結果表示前に空のグリッドが見える */
+      #viewer:not([hidden]) { display: grid; grid-template-columns: 380px 380px;
+                justify-content: center; column-gap: 30px; align-items: start; }
+      #correct-bar, #correct-done { grid-row: 1; grid-column: 1 / -1;
+                                    max-width: 790px; width: 100%; justify-self: center; }
+      #hands-gote  { grid-row: 2; grid-column: 1; max-width: 380px; }
+      /* width明示が必要: グリッドアイテムで margin:auto が付くと fit-content 幅に
+         縮んでしまう(文字幅ベースの236px程度になる実測) */
+      #board       { grid-row: 3; grid-column: 1; width: 380px; max-width: 380px; }
+      #board .sq   { font-size: 24px; }
+      #hands-sente { grid-row: 4; grid-column: 1; max-width: 380px; }
+      #viewer .nav-row { grid-row: 5; grid-column: 1; }
+      #correct-entry   { grid-row: 6; grid-column: 1; }
+      #photo-panel { grid-row: 2 / span 3; grid-column: 2; max-width: 380px; width: 100%; }
+      #move-list   { grid-row: 5 / span 2; grid-column: 2; max-width: 380px; width: 100%;
+                     max-height: 230px; margin: 10px 0 6px; }
+      #eval-wrap   { grid-row: 7; grid-column: 1 / -1; }
+      #tools-row   { grid-row: 8; grid-column: 1 / -1; justify-content: center; }
+    }
+  </style>
+</head>
+<body data-step="1">
+<div class="nosave-bar">
+  <b>この画面で変換したデータは保存しません</b>
+  映像・画像・棋譜はすべて、変換が終わり次第こちらで削除します。学習にも使いません。
+</div>
+<main>
+  <h1>動画まるごと棋譜化 <span class="beta" style="background:#0f5132">イベント用</span></h1>
+  <p class="lead">対局を撮った動画1本から、指し手つきの棋譜（KIF）を自動で復元します。
+    盤全体が映る位置にスマホを固定して撮影した動画をお使いください。</p>
+
+
+  <!-- STEP 1: 動画選択 -->
+  <section class="card only-1">
+    <div class="card-label">1. 対局動画を選ぶ</div>
+    <div id="resume-box" hidden>
+      前回の変換（<span id="resume-name"></span>）の結果を確認できます。
+      <div class="row" style="margin:6px 0 10px">
+        <button class="btn" id="btn-resume">結果を確認する</button>
+        <button class="btn" id="btn-resume-dismiss">消す</button>
+      </div>
+    </div>
+    <div id="error-box" hidden>
+      <p style="margin:4px 0 6px"><b>ごめんなさい、うまく読み取れませんでした。</b></p>
+      <p class="note" style="margin:0 0 10px">盤の四隅と駒台が画面に入っているか、明るさが十分かをご確認のうえ、もう一度お試しください。
+        何度も失敗する場合は、撮影環境（角度・照明・盤の種類）と一緒に
+        <a href="https://twitter.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a>
+        へ教えてもらえると、次の改善につながります。</p>
+    </div>
+    <div class="row">
+      <label class="btn btn-primary">
+        動画を選ぶ
+        <input type="file" id="file-input" accept="video/mp4,video/quicktime" hidden>
+      </label>
+      <button class="btn" id="btn-start" disabled>変換スタート</button>
+      <button class="btn" id="btn-sample">サンプル動画で試す</button>
+    </div>
+    <div id="file-info"></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#666;margin-top:8px;cursor:pointer">
+      <input type="checkbox" id="compress-toggle" checked style="width:16px;height:16px;flex:none">
+      アップロード前にブラウザで圧縮する（推奨。PCの動作が重くなる場合はオフ）
+    </label>
+    <details style="font-size:12px;color:#888;margin-top:6px;">
+      <summary style="cursor:pointer;">ⓘ スマホからアップロードする方へ</summary>
+      <p style="margin:6px 0 0;">iPhoneでは動画を選んだあと、iOS側の準備（iCloudからの取得・形式変換）で数分かかることがあります。画面はそのままお待ちください。PCからのアップロードのほうがスムーズです。</p>
+    </details>
+    <p class="note">対応: mp4 / mov、目安2GBまで。<b>この画面から変換した映像・画像・棋譜は保存せず、変換後にすべて削除します</b>（学習にも使いません）。棋譜が必要な方は、できあがった画面から保存してお持ち帰りください。通常版は<a href="video.html">こちら</a>（そちらは精度向上のため映像を保存します／<a href="privacy.html">プライバシーポリシー</a>）。</p>
+  </section>
+
+  <!-- 使い方ガイド -->
+  <section class="card only-1">
+    <div class="card-label">使い方（3ステップ）</div>
+    <ol class="howto">
+      <li><b>対局前</b>：スマホスタンドを使って、盤全体と駒台が映る位置にスマホを固定します（スタンドがなければ、コップや本に立てかけても構いません）。
+        <figure class="example">
+          <img src="img/video-example.jpg" alt="構図の例：盤全体と両方の駒台が画面に収まっている" loading="lazy">
+          <figcaption>構図の例：盤の四隅と駒台がすべて画面に入るように</figcaption>
+        </figure>
+      </li>
+      <li><b>対局中</b>：撮りっぱなしにして、カメラは動かさないでください。1局まるごと1本の動画でOKです。</li>
+      <li><b>対局後</b>：このページで動画を選んで「変換スタート」。動画の長さに応じて数分待つと、指し手と消費時間つきの棋譜（KIF）が表示されます。</li>
+    </ol>
+  </section>
+
+  <section class="card only-1">
+    <div class="card-label">うまく撮るコツ</div>
+    <ul class="tips">
+      <li>盤の四隅が欠けずに映っていること。まわりに少し余白があるくらいがちょうどいいです</li>
+      <li>明るい場所で。強い逆光や、盤面へのライトの映り込みは認識ミスのもとになります</li>
+      <li>途中で撮影を止めたり、スマホの位置を変えたりしない</li>
+      <li>指したあと、手や腕を盤の上に置きっぱなしにしない（盤が見えている間に局面を読み取ります）</li>
+      <li>一手指すごとに、盤から手を引いて1〜2秒そのまま見せる意識で。極端な早指しは指し手を読み飛ばすことがあります（1手分の飛ばしは自動で補いますが、確実なのは映っている時間です）</li>
+    </ul>
+    <p class="note">うまくいかなかったときは、撮影環境（角度・照明・盤の種類）と一緒に
+      <a href="https://twitter.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a>
+      まで教えてもらえると、精度改善の材料になります。</p>
+  </section>
+
+  <!-- STEP 2: アップロード + 変換中 -->
+  <section class="card only-2">
+    <div class="card-label">2. 変換中</div>
+    <div id="progress-label">準備中…</div>
+    <div class="progress-track"><div id="progress-bar"></div></div>
+    <p class="note">動画の長さにより数分かかることがあります。<b>アップロード中はこのページを閉じないでください。</b>
+      「局面を解析中…」に変わったら、変換はサーバー側で進むので、ページを閉じても大丈夫です。
+      あとでこのページを開き直すと、結果を確認できます。</p>
+  </section>
+
+  <!-- STEP 3: 結果 -->
+  <section class="card only-3">
+    <div class="card-label">3. できあがった棋譜</div>
+    <div id="warnings" hidden></div>
+
+    <!-- 対局再現ビューワー -->
+    <div id="viewer" hidden>
+      <!-- 訂正モードの案内バー（訂正中のみ表示） -->
+      <div id="correct-bar" hidden>
+        <span class="busy-dot" aria-hidden="true"></span><span id="correct-msg"></span>
+        <div class="row" style="margin-top:6px">
+          <button class="btn btn-sm" id="btn-correct-cancel">訂正をやめる</button>
+        </div>
+      </div>
+      <div id="correct-done" style="background:#f0f8f1;border:1px solid #cfe3d2;border-radius:8px;
+           padding:8px 10px;margin:0 auto 8px;max-width:342px;font-size:13px" hidden></div>
+      <div class="hands" id="hands-gote"></div>
+      <div id="board"></div>
+      <div class="hands" id="hands-sente"></div>
+      <!-- 実映像パネル(常設): 手を進めるたびに、その手の時刻に最も近い実映像のコマを
+           盤領域だけ切り出して表示する。復元盤面と実映像を常に突き合わせられる -->
+      <div id="photo-panel" hidden>
+        <div id="photo-crop"><img id="photo-img" alt="実際の対局映像のコマ"></div>
+        <div class="photo-nav">
+          <button class="btn btn-sm" id="photo-prev">◀ 前のコマ</button>
+          <span id="photo-caption"></span>
+          <button class="btn btn-sm" id="photo-next">次のコマ ▶</button>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn btn-sm" id="btn-first">|◀</button>
+        <button class="btn btn-sm" id="btn-prev">◀ 前へ</button>
+        <span id="ply-label">開始局面</span>
+        <button class="btn btn-sm" id="btn-next">次へ ▶</button>
+        <button class="btn btn-sm" id="btn-last">▶|</button>
+      </div>
+      <div class="row" id="correct-entry" style="justify-content:center;margin:0 0 4px">
+        <button class="btn btn-sm" id="btn-correct" hidden>この手が違う（訂正する）</button>
+      </div>
+      <ol id="move-list"></ol>
+      <div id="eval-wrap" hidden>
+        <div style="font-size:12.5px;color:#888;margin:10px auto 4px;max-width:342px">形勢グラフ（上＝先手有利。点をタップでその局面へ）</div>
+        <svg id="eval-graph" viewBox="0 0 342 110"
+             style="width:100%;max-width:342px;display:block;margin:0 auto;background:#fcfbf8;border:1px solid #eee;border-radius:8px"></svg>
+      </div>
+      <div class="row" id="tools-row" style="margin:10px 0 14px">
+        <button class="btn btn-sm" id="btn-sfen">この局面のSFENをコピー</button>
+        <a class="btn btn-sm" id="btn-kento" href="#" target="_blank" rel="noopener">KENTOで開く</a>
+      </div>
+    </div>
+
+    <textarea id="kif-out" readonly></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-primary" id="btn-copy">KIFをコピー</button>
+      <button class="btn" id="btn-save">KIFを保存</button>
+      <button class="btn" id="btn-retry">別の動画で試す</button>
+    </div>
+
+    <!-- イベント用: データを残さないので、SNSシェアではなく「その場で持ち帰る」案内を出す -->
+    <div id="share-result" style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid #eee">
+      <div style="font-size:13px;color:#555;line-height:1.7">
+        棋譜が必要な方は、上の「<b>KIFを保存</b>」でお手元に残してください。<br>
+        <span style="color:#888;font-size:12.5px">この画面を離れると、こちらにはデータが残りません。</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- アップロード前のブラウザ内圧縮に使う。いずれも同梱(CDN直リンクなし)。
+     読み込めなくても video-compress.js が非対応判定し、直接アップロードにフォールバックする。 -->
+<script src="js/vendor/mp4box.all.min.js"></script>
+<script src="js/vendor/mp4-muxer.min.js"></script>
+<script src="js/video-compress.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  // 動画→棋譜化API (aws-nkkuma VideoKifuStack)。
+  // TODO: 本番昇格時に独自ドメインへ差し替える
+  var API_BASE = 'https://p02rzz43dl.execute-api.ap-northeast-1.amazonaws.com';
+  var POLL_INTERVAL_MS = 3000;
+  var POLL_MAX_MS = 30 * 60 * 1000; // 30分(ステートマシンのタイムアウトと同じ)
+
+  // この閾値を超えた動画だけブラウザ内で 720p/H.264/音声なし に圧縮してからアップロードする。
+  // 以下なら現行どおり直接アップロード。非対応・失敗時も直接アップロードにフォールバックする。
+  var COMPRESS_THRESHOLD_BYTES = 80 * 1000 * 1000; // 80MB
+
+  var state = { file: null, jobId: null };
+  function $(id) { return document.getElementById(id); }
+
+  // 圧縮のオン/オフ(既定オン)。WebCodecsエンコードはCPU/GPUを占有し、同じPCで
+  // 動いている他のアプリの動作を重くすることがあるため、ユーザーが切れるようにする。
+  // オフの選択は端末(localStorage)に記憶する。
+  var COMPRESS_OFF_KEY = 'videoKifuCompressOff';
+  function compressEnabled() {
+    var el = $('compress-toggle');
+    return !el || el.checked;
+  }
+
+  // ---- ジョブの記憶（ページを閉じても結果を取りに戻れるように） ----
+  // アップロード完了後の変換はサーバー側で進むため、jobIdさえ覚えていれば
+  // 後から GET /jobs/{jobId} で結果を取得できる。
+  // イベント用: 通常版とキーを分け、動画のファイル名は端末にも残さない
+  // (「保存しません」の趣旨。jobIdだけは再表示のために持つ)
+  var JOB_KEY = 'videoKifuEventJob';
+  function saveJob(jobId, name) {
+    try { localStorage.setItem(JOB_KEY, JSON.stringify({ jobId: jobId, name: 'この会場の対局', startedAt: Date.now() })); } catch (e) {}
+  }
+  function loadJob() {
+    try { return JSON.parse(localStorage.getItem(JOB_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function clearJob() {
+    try { localStorage.removeItem(JOB_KEY); } catch (e) {}
+  }
+  function setStep(n) { document.body.setAttribute('data-step', String(n)); }
+  function setProgress(label, pct) {
+    $('progress-label').textContent = label;
+    if (pct != null) { $('progress-bar').style.width = pct + '%'; }
+  }
+
+  function fmtSize(bytes) {
+    if (bytes > 1024 * 1024 * 1024) { return (bytes / 1073741824).toFixed(2) + ' GB'; }
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  // ---- アップロード: presign → 各パートPUT → complete ----
+  function createUpload(file) {
+    return fetch(API_BASE + '/uploads', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: file.type || 'video/mp4',
+        fileSizeBytes: file.size,
+        // イベント用: サーバー側は jobId に ns- を付け、全成果物を保存対象外にする
+        // (音声込み元動画は解析後に削除、archive は作られない。残りは purge-nosave.py で消す)
+        noSave: true
+      })
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロード準備に失敗しました (HTTP ' + res.status + ')'); }
+      return res.json();
+    });
+  }
+
+  function putPart(url, blob) {
+    return fetch(url, { method: 'PUT', body: blob }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロードに失敗しました (HTTP ' + res.status + ')'); }
+      var etag = res.headers.get('ETag');
+      if (!etag) { throw new Error('アップロード応答からETagを取得できませんでした'); }
+      return etag;
+    });
+  }
+
+  function completeUpload(jobId, uploadId, parts) {
+    return fetch(API_BASE + '/uploads/complete', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ jobId: jobId, uploadId: uploadId, parts: parts })
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('アップロード完了処理に失敗しました (HTTP ' + res.status + ')'); }
+      return res.json();
+    });
+  }
+
+  function uploadFile(file) {
+    return createUpload(file).then(function (up) {
+      state.jobId = up.jobId;
+      var partSize = up.partSizeBytes;
+      var done = 0;
+      var etags = [];
+      // パートを順番にPUT(回線を圧迫しないよう直列。必要なら並列2〜3に)
+      var chain = Promise.resolve();
+      up.parts.forEach(function (part, i) {
+        chain = chain.then(function () {
+          var blob = file.slice(i * partSize, Math.min((i + 1) * partSize, file.size));
+          setProgress('アップロード中… ' + (i + 1) + ' / ' + up.parts.length,
+                      Math.round(i / up.parts.length * 50));
+          return putPart(part.url, blob).then(function (etag) {
+            etags.push({ partNumber: part.partNumber, etag: etag });
+            done++;
+          });
+        });
+      });
+      return chain.then(function () {
+        setProgress('アップロード完了。変換を開始しています…', 50);
+        return completeUpload(up.jobId, up.uploadId, etags).then(function (res) {
+          // ここから先はサーバー側で進む。閉じても戻れるようにjobIdを記憶する
+          saveJob(up.jobId, file.name);
+          return res;
+        });
+      });
+    });
+  }
+
+  // ---- job-status 応答の解釈 ----
+  // 新backend(aws-nkkuma PR#27〜)は evaluate(形勢グラフ)完了を待たず、kif.json が
+  // 書けた時点で result(kif/plies) と kifReady:true を返す。evals は後追いで付き、
+  // 揃うと evalsReady:true になる。旧backendにはこれらのフィールドが無いので、
+  // その場合は従来どおり status===SUCCEEDED を完了として扱う(フォールバック)。
+  function isFailStatus(s) { return s === 'FAILED' || s === 'TIMED_OUT' || s === 'ABORTED'; }
+  function kifAvailable(job) {
+    if (job.kifReady === true) { return true; }                    // 新backend: 先出し
+    return !!(job.result && Array.isArray(job.result.plies));      // 旧backend: SUCCEEDED時のみ
+  }
+  function evalsAvailable(job) {
+    if (job.evalsReady === true) { return true; }
+    return !!(job.result && Array.isArray(job.result.evals) && job.result.evals.length);
+  }
+
+  // ---- 変換状況ポーリング ----
+  // onKif: 棋譜が読める状態になった最初の1回だけ呼ぶ(先出し表示用)。
+  // resolve は「これ以上待つものが無い」= 形勢グラフも揃った / 実行が終了した時点。
+  function pollJob(jobId, onKif) {
+    var startedAt = Date.now();
+    var kifShown = false;
+    var lastJob = null;
+    return new Promise(function (resolve, reject) {
+      function tick() {
+        if (Date.now() - startedAt > POLL_MAX_MS) {
+          // 棋譜だけでも出ていれば、それを消さずに確定させる
+          return kifShown ? resolve(lastJob)
+                          : reject(new Error('タイムアウトしました。時間をおいてもう一度お試しください'));
+        }
+        fetch(API_BASE + '/jobs/' + encodeURIComponent(jobId), { cache: 'no-store' })
+          .then(function (res) {
+            if (res.status === 404) { return { status: 'STARTING' }; } // 実行開始前
+            if (!res.ok) { throw new Error('状態確認に失敗しました (HTTP ' + res.status + ')'); }
+            return res.json();
+          })
+          .then(function (job) {
+            lastJob = job;
+            // 棋譜が読めるようになったら即表示(evaluate完了は待たない)
+            if (!kifShown && kifAvailable(job)) {
+              kifShown = true;
+              if (onKif) { onKif(job); }
+            }
+            if (isFailStatus(job.status)) {
+              // 棋譜表示後に評価段が失敗しても、出ている結果は消さない
+              if (kifShown) { return resolve(job); }
+              return reject(new Error('変換に失敗しました。盤全体が映っているかご確認のうえ、もう一度お試しください'));
+            }
+            if (job.status === 'SUCCEEDED') { return resolve(job); }
+            if (kifShown && evalsAvailable(job)) { return resolve(job); }
+            // まだ待つ。棋譜表示前だけ step2 の進捗ラベルを更新する
+            if (!kifShown) {
+              var elapsed = Math.round((Date.now() - startedAt) / 1000);
+              setProgress('局面を解析中… (' + elapsed + '秒経過)',
+                          Math.min(95, 50 + elapsed / 3));
+            }
+            setTimeout(tick, POLL_INTERVAL_MS);
+          })
+          .catch(reject);
+      }
+      tick();
+    });
+  }
+
+  // ---- 対局再現ビューワー ----
+  // stitch結果の開始局面(startPos)からpliesを再適用して各局面を再現する。
+  // 局面表現・適用ロジックは aws-nkkuma lambda/stitch/shogi.mjs (renzoku.js由来) の縮小移植
+  var KANJI_1 = { fu: '歩', ky: '香', ke: '桂', gi: '銀', ki: '金', ka: '角', hi: '飛', ou: '玉',
+                  to: 'と', ny: '杏', nk: '圭', ng: '全', um: '馬', ry: '龍' };
+  var PROMOTE = { fu: 'to', ky: 'ny', ke: 'nk', gi: 'ng', ka: 'um', hi: 'ry' };
+  var BASE = { to: 'fu', ny: 'ky', nk: 'ke', ng: 'gi', um: 'ka', ry: 'hi' };
+  var SFEN_LETTER = { fu: 'P', ky: 'L', ke: 'N', gi: 'S', ki: 'G', ka: 'B', hi: 'R', ou: 'K',
+                      to: '+P', ny: '+L', nk: '+N', ng: '+S', um: '+B', ry: '+R' };
+  var HAND_ORDER = ['hi', 'ka', 'ki', 'gi', 'ke', 'ky', 'fu'];
+
+  function cloneBan(b) { var o = {}; for (var k in b) { o[k] = b[k]; } return o; }
+  function cloneHands(h) { return JSON.parse(JSON.stringify(h)); }
+
+  function applyMoveLocal(pos, m) {
+    var side = pos.teban;
+    var ban = cloneBan(pos.ban);
+    var hands = cloneHands(pos.hands);
+    var toKey = String(m.to[0]) + String(m.to[1]);
+    var cap = ban[toKey];
+    if (cap && cap !== ' * ') {
+      var capKind = BASE[cap.substr(1)] || cap.substr(1);
+      hands[side][capKind] = (hands[side][capKind] || 0) + 1;
+    }
+    if (m.from) {
+      delete ban[String(m.from[0]) + String(m.from[1])];
+      ban[toKey] = (side === 'sente' ? ' ' : 'v') + (m.promote ? PROMOTE[m.kind] : m.kind);
+    } else {
+      hands[side][m.kind] -= 1;
+      if (!hands[side][m.kind]) { delete hands[side][m.kind]; }
+      ban[toKey] = (side === 'sente' ? ' ' : 'v') + m.kind;
+    }
+    return { ban: ban, hands: hands, teban: side === 'sente' ? 'gote' : 'sente' };
+  }
+
+  function toSfen(pos, moveNo) {
+    var rows = [];
+    for (var d = 1; d <= 9; d++) {
+      var row = '', empty = 0;
+      for (var s = 9; s >= 1; s--) {
+        var v = pos.ban[String(s) + String(d)];
+        if (!v || v === ' * ') { empty++; continue; }
+        if (empty) { row += empty; empty = 0; }
+        var letter = SFEN_LETTER[v.substr(1)];
+        row += (v.charAt(0) === 'v') ? letter.toLowerCase() : letter;
+      }
+      if (empty) { row += empty; }
+      rows.push(row);
+    }
+    var hands = '';
+    HAND_ORDER.forEach(function (k) {
+      var n = pos.hands.sente[k] || 0;
+      if (n > 0) { hands += (n > 1 ? n : '') + SFEN_LETTER[k]; }
+    });
+    HAND_ORDER.forEach(function (k) {
+      var n = pos.hands.gote[k] || 0;
+      if (n > 0) { hands += (n > 1 ? n : '') + SFEN_LETTER[k].toLowerCase(); }
+    });
+    return rows.join('/') + ' ' + (pos.teban === 'sente' ? 'b' : 'w') + ' ' +
+           (hands || '-') + ' ' + moveNo;
+  }
+
+  var viewer = { positions: null, plies: [], idx: 0, evals: null };
+
+  // ---- 形勢グラフ (先手視点cp。±1500でクランプ、詰み級は端に張り付く) ----
+  var GRAPH = { W: 342, H: 110, PAD: 10, MAX: 1500 };
+  function gx(i, n) { return GRAPH.PAD + (GRAPH.W - 2 * GRAPH.PAD) * (n <= 1 ? 0 : i / (n - 1)); }
+  function gy(cp) {
+    var v = Math.max(-GRAPH.MAX, Math.min(GRAPH.MAX, cp == null ? 0 : cp));
+    return GRAPH.H / 2 - (GRAPH.H / 2 - GRAPH.PAD) * v / GRAPH.MAX;
+  }
+  function renderEvalGraph() {
+    var evals = viewer.evals;
+    var wrap = $('eval-wrap');
+    if (!evals || evals.length < 2) { wrap.hidden = true; return; }
+    var n = evals.length;
+    var d = '';
+    for (var i = 0; i < n; i++) {
+      d += (i ? 'L' : 'M') + gx(i, n).toFixed(1) + ' ' + gy(evals[i].cp).toFixed(1) + ' ';
+    }
+    var parts = [
+      '<line x1="0" y1="' + (GRAPH.H / 2) + '" x2="' + GRAPH.W + '" y2="' + (GRAPH.H / 2) + '" stroke="#ddd"/>',
+      '<path d="' + d + '" fill="none" stroke="#c62828" stroke-width="1.5"/>'
+    ];
+    for (var k = 0; k < n; k++) {
+      parts.push('<circle data-i="' + k + '" cx="' + gx(k, n).toFixed(1) + '" cy="' + gy(evals[k].cp).toFixed(1) +
+                 '" r="4" fill="#c62828" opacity="0.8" style="cursor:pointer"/>');
+    }
+    parts.push('<circle id="eval-marker" r="6" fill="none" stroke="#222" stroke-width="1.6"/>');
+    var svg = $('eval-graph');
+    svg.innerHTML = parts.join('');
+    svg.onclick = function (ev) {
+      if (correction.active) { return; } // 訂正中は局面移動を封じる
+      var t = ev.target;
+      if (t && t.getAttribute && t.getAttribute('data-i') !== null) {
+        showPosition(Number(t.getAttribute('data-i')));
+      }
+    };
+    wrap.hidden = false;
+    updateEvalMarker();
+  }
+  // 形勢グラフがまだ計算中(evaluate段が後追い)のあいだのプレースホルダ。
+  function setEvalPending() {
+    var wrap = $('eval-wrap');
+    $('eval-graph').innerHTML =
+      '<line x1="0" y1="' + (GRAPH.H / 2) + '" x2="' + GRAPH.W + '" y2="' + (GRAPH.H / 2) +
+      '" stroke="#eee"/>' +
+      '<text x="' + (GRAPH.W / 2) + '" y="' + (GRAPH.H / 2 + 4) + '" text-anchor="middle" ' +
+      'fill="#aaa" font-size="12">形勢を計算中…</text>';
+    wrap.hidden = false;
+  }
+  // evaluate完了後、局面を保ったまま形勢グラフだけ差し込む(先出し表示の後続)。
+  function applyEvals(job) {
+    if (!viewer.positions) { return; } // 棋譜未表示なら何もしない(通常起きない)
+    if (correction.active || correction.busy) { return; } // 訂正中に盤を再描画しない(どのみち訂正後は陳腐化する)
+    var result = (job && job.result) || {};
+    if (Array.isArray(result.evals) && result.evals.length >= 2) {
+      viewer.evals = result.evals;
+      renderEvalGraph();
+      showPosition(viewer.idx); // 現在の閲覧位置は維持。ラベルに形勢値を反映
+    } else {
+      // evaluate が結果を出さなかった(ベストエフォート失敗/スキップ) → 計算中表示を消す
+      viewer.evals = null;
+      $('eval-wrap').hidden = true;
+    }
+  }
+  function updateEvalMarker() {
+    var m = document.getElementById('eval-marker');
+    if (!m || !viewer.evals) { return; }
+    var n = viewer.evals.length;
+    var i = Math.min(viewer.idx, n - 1);
+    m.setAttribute('cx', gx(i, n).toFixed(1));
+    m.setAttribute('cy', gy(viewer.evals[i].cp).toFixed(1));
+  }
+  function evalLabel(e) {
+    if (!e || e.cp == null) { return ''; }
+    if (e.mate != null) { return e.mate > 0 ? '（▲詰みあり）' : '（△詰みあり）'; }
+    var cp = e.cp;
+    var side = cp >= 0 ? '先手' : '後手';
+    return '（' + side + (cp >= 0 ? '+' : '') + cp + '）';
+  }
+
+  var HIRATE_SFEN = 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1';
+
+  // USI形式の指し手 (例: 7g7f, 8h2b+, B*4e)。KENTOの moves= はこれをドット区切りで受け取る
+  function plyToUsi(m) {
+    function rankChar(d) { return String.fromCharCode(96 + d); } // 1→a ... 9→i
+    if (!m.from) { return SFEN_LETTER[m.kind] + '*' + m.to[0] + rankChar(m.to[1]); }
+    return String(m.from[0]) + rankChar(m.from[1]) +
+           String(m.to[0]) + rankChar(m.to[1]) + (m.promote ? '+' : '');
+  }
+
+  // 棋譜まるごとKENTOへ(現在表示中の手数から再生開始)。
+  // 開始局面が平手なら initpos は省略する(KENTO自身の共有URLと同じ流儀)
+  function kentoGameUrl(turnIdx) {
+    var movesStr = viewer.plies.map(function (p) { return plyToUsi(p.move); }).join('.');
+    var url = 'https://www.kento-shogi.com/?moves=' + encodeURIComponent(movesStr) +
+              '&turn=' + turnIdx;
+    var startSfen = toSfen(viewer.positions[0], 1);
+    if (startSfen !== HIRATE_SFEN) {
+      url += '&initpos=' + encodeURIComponent(startSfen);
+    }
+    return url;
+  }
+
+  // 持ち駒は駒ごとに span で描く（訂正モードで「打つ駒」をタップ選択できるように）
+  function renderHandLine(el, hand, mark, side) {
+    el.innerHTML = '';
+    el.appendChild(document.createTextNode(mark + '持駒：'));
+    var any = false;
+    HAND_ORDER.forEach(function (k) {
+      var n = hand[k] || 0;
+      if (n > 0) {
+        any = true;
+        var sp = document.createElement('span');
+        sp.className = 'hand-piece';
+        sp.setAttribute('data-kind', k);
+        sp.setAttribute('data-side', side);
+        sp.textContent = KANJI_1[k] + (n > 1 ? n : '');
+        el.appendChild(sp);
+      }
+    });
+    if (!any) { el.appendChild(document.createTextNode('なし')); }
+  }
+
+  function renderBoard(pos, lastTo) {
+    var board = $('board');
+    board.innerHTML = '';
+    for (var d = 1; d <= 9; d++) {
+      for (var s = 9; s >= 1; s--) {
+        var sq = document.createElement('div');
+        sq.className = 'sq';
+        sq.setAttribute('data-s', s);
+        sq.setAttribute('data-d', d);
+        var v = pos.ban[String(s) + String(d)];
+        if (v && v !== ' * ') {
+          sq.textContent = KANJI_1[v.substr(1)] || '';
+          if (v.charAt(0) === 'v') { sq.className += ' gote'; }
+        }
+        if (lastTo && lastTo[0] === s && lastTo[1] === d) { sq.className += ' last'; }
+        board.appendChild(sq);
+      }
+    }
+    renderHandLine($('hands-gote'), pos.hands.gote, '△', 'gote');
+    renderHandLine($('hands-sente'), pos.hands.sente, '▲', 'sente');
+  }
+
+  function showPosition(i) {
+    if (!viewer.positions) { return; }
+    if (correction.active) { exitCorrection(); } // 別の手へ移動したら訂正は仕切り直し
+    viewer.idx = Math.max(0, Math.min(i, viewer.positions.length - 1));
+    var pos = viewer.positions[viewer.idx];
+    var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
+    renderBoard(pos, lastTo);
+    $('btn-correct').disabled = viewer.idx === 0;
+    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
+    $('ply-label').textContent =
+      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') + evalLabel(ev);
+    updateEvalMarker();
+    var items = document.querySelectorAll('#move-list li');
+    for (var k = 0; k < items.length; k++) {
+      items[k].classList.toggle('active', k === viewer.idx - 1);
+    }
+    var active = document.querySelector('#move-list li.active');
+    if (active) { active.scrollIntoView({ block: 'nearest' }); }
+    $('btn-kento').href = kentoGameUrl(viewer.idx);
+    updatePhotoForPly(); // 実映像パネルを現在手に追従させる
+  }
+
+  function initViewer(result, evalsPending) {
+    if (!result.startPos || !Array.isArray(result.plies)) { $('viewer').hidden = true; return; }
+    var cur = { ban: cloneBan(result.startPos.ban),
+                hands: cloneHands(result.startPos.hands),
+                teban: result.startPos.teban || 'sente' };
+    viewer.positions = [cur];
+    viewer.plies = result.plies;
+    viewer.evals = (Array.isArray(result.evals) && result.evals.length) ? result.evals : null;
+    result.plies.forEach(function (p) {
+      cur = applyMoveLocal(cur, p.move);
+      viewer.positions.push(cur);
+    });
+    if (viewer.evals) { renderEvalGraph(); }
+    else if (evalsPending) { setEvalPending(); }   // 棋譜先出し中: グラフは後追い
+    else { $('eval-wrap').hidden = true; }
+
+    // 指し手リスト(ラベルはKIF本文の行から拝借し、表記の一貫性を保つ)
+    var list = $('move-list');
+    list.innerHTML = '';
+    var kifLines = (result.kif || '').split('\n');
+    var moveLines = [];
+    var inMoves = false;
+    kifLines.forEach(function (line) {
+      if (inMoves && /^\s*\d+\s/.test(line)) { moveLines.push(line.replace(/\s*\(\s*\d+:.*$/, '')); }
+      if (line.indexOf('手数----') === 0) { inMoves = true; }
+    });
+    result.plies.forEach(function (ply, i) {
+      var li = document.createElement('li');
+      li.textContent = (ply.side === 'sente' ? '▲' : '△') + (moveLines[i] || (i + 1) + '手目').trim();
+      if (ply.warnings && ply.warnings.length) {
+        li.className = 'warn';
+        li.title = ply.warnings.join(' / ');
+      }
+      li.addEventListener('click', function () {
+        if (correction.active) { return; } // 訂正中の誤タップで訂正が飛ばないように
+        showPosition(i + 1);
+      });
+      list.appendChild(li);
+    });
+
+    // 訂正はv2ジョブ(イベント時刻frameIdx持ち)のみ対応。v1や古い結果ではボタンを出さない
+    viewer.correctedAt = result.correctedAt || null;
+    var canCorrect = result.pipeline === 'v2' && !!state.jobId &&
+      result.plies.length > 0 && typeof result.plies[0].frameIdx === 'number';
+    $('btn-correct').hidden = !canCorrect;
+    $('correct-done').hidden = true;
+    // 実映像パネル: v2ジョブなら着地フレーム一覧を読み込んで常時表示する
+    // (フレームはジョブ単位でキャッシュされ、訂正後の結果差し替えでは再取得しない)
+    if (canCorrect) { initPhotoPanel(); }
+    else { photo.frames = null; $('photo-panel').hidden = true; }
+
+    $('viewer').hidden = false;
+    showPosition(viewer.positions.length - 1); // 最終局面から
+  }
+
+  // ---- 訂正モード（間違った手の指し直し → ピンとして再解） ----
+  // 「間違っている最初の手」をユーザーが指し直すと、その手をピン(制約)として
+  // バックエンドがビームだけ再解し、以降の手も自動で直る(動画再処理なし・数秒)。
+  // それより前の手が正しい前提なので、直前局面の盤面表示は信頼できる。
+  var correction = { active: false, busy: false, ply: 0,
+                     from: null, fromKind: null, dropKind: null, timer: null };
+
+  function setCorrectMsg(txt) { $('correct-msg').textContent = txt; }
+  function correctionSide() { return viewer.plies[correction.ply - 1].side; }
+
+  // 再解の所要は対局の長さ(イベント数)にほぼ比例する。実測: 5手<1秒 / 83手約20秒
+  // (Lambda 1vCPU化後は約12秒)。嘘をつかない粗い目安を出す。
+  function correctEstimateText() {
+    var n = viewer.plies ? viewer.plies.length : 0;
+    if (n >= 60) { return '目安 10〜30秒'; }
+    if (n >= 25) { return '目安 5〜15秒'; }
+    return '目安 数秒';
+  }
+  // 再解析中の生存表示: 経過秒を毎秒更新し、30秒を超えたら文言を切り替える
+  // (30秒はAPI Gatewayの応答上限。以降はポーリング保険が結果を拾う)
+  function startCorrectTimer() {
+    stopCorrectTimer();
+    var t0 = Date.now();
+    function render() {
+      var s = Math.round((Date.now() - t0) / 1000);
+      setCorrectMsg(s >= 30
+        ? 'サーバーの応答を待っています… ' + s + '秒経過（最大60秒ほどかかることがあります）'
+        : '以降の手を再解析しています… ' + s + '秒経過（' + correctEstimateText() + '）');
+    }
+    render();
+    correction.timer = setInterval(render, 1000);
+  }
+  function stopCorrectTimer() {
+    if (correction.timer) { clearInterval(correction.timer); correction.timer = null; }
+  }
+
+  function movesEqual(a, b) {
+    return a.to[0] === b.to[0] && a.to[1] === b.to[1] && a.kind === b.kind &&
+      !!a.promote === !!b.promote &&
+      ((a.from == null) === (b.from == null)) &&
+      (a.from == null || (a.from[0] === b.from[0] && a.from[1] === b.from[1]));
+  }
+
+  // 訂正モード中は「盤タップ・持ち駒タップ・キャンセル・写真送り」以外を封じる。
+  // ナビや一覧タップで訂正が意図せず解除される事故を防ぐ(オーナー要望 2026-07-22)。
+  // 再解析中に盤へ被せる白半透明+スピナー(「今は触れない」の視覚化)。
+  // renderBoard は innerHTML を作り直すため、オーバーレイは busy の間だけ動的に足す
+  function showBoardOverlay(msg) {
+    removeBoardOverlay();
+    var ov = document.createElement('div');
+    ov.className = 'board-overlay';
+    ov.id = 'board-overlay';
+    var sp = document.createElement('div');
+    sp.className = 'spin';
+    var tx = document.createElement('span');
+    tx.textContent = msg;
+    ov.appendChild(sp);
+    ov.appendChild(tx);
+    $('board').appendChild(ov);
+  }
+  function removeBoardOverlay() {
+    var ov = document.getElementById('board-overlay');
+    if (ov && ov.parentNode) { ov.parentNode.removeChild(ov); }
+  }
+
+  function setViewerLocked(locked) {
+    ['btn-first', 'btn-prev', 'btn-next', 'btn-last', 'btn-sfen',
+     'btn-copy', 'btn-save', 'btn-retry', 'btn-correct'].forEach(function (id) {
+      var el = $(id);
+      if (el) { el.disabled = locked; }
+    });
+    var kento = $('btn-kento'); // <a>なのでdisabledが効かない
+    if (kento) {
+      kento.style.pointerEvents = locked ? 'none' : '';
+      kento.style.opacity = locked ? '.45' : '';
+    }
+    $('move-list').classList.toggle('locked', locked);
+    $('eval-wrap').classList.toggle('locked', locked);
+  }
+
+  // ---- 実映像パネル(常設) ----
+  // 検証ビューワー由来の体験: 手を進めるたびに、その手の時刻に最も近い着地静止フレーム
+  // (GET /jobs/{jobId}/frames の presigned URL)を盤の下に表示し、復元盤面と実映像を
+  // 常に突き合わせられる。盤の四隅(points)があれば盤領域だけをCSSで切り出す。
+  // API未対応・v1ジョブ(404)ならパネルごと出さない。
+  var photo = { frames: null, points: null, idx: null, imgW: 0, imgH: 0 };
+
+  function fmtTime(t) {
+    var m = Math.floor(t / 60), s = Math.round(t % 60);
+    if (s === 60) { m++; s = 0; }
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function loadFrames() {
+    if (viewer.framesJobId !== state.jobId) { // ジョブ単位でキャッシュ(訂正後の再表示で再取得しない)
+      viewer.framesJobId = state.jobId;
+      viewer.framesPromise = fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/frames',
+        { cache: 'no-store' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .catch(function () { return null; });
+    }
+    return viewer.framesPromise;
+  }
+  function nearestFrameIdx(t) {
+    var fs = photo.frames;
+    var best = 0;
+    for (var i = 1; i < fs.length; i++) {
+      if (Math.abs(fs[i].t - t) < Math.abs(fs[best].t - t)) { best = i; }
+    }
+    return best;
+  }
+  // いま注目している手(訂正中ならその手、通常はビューワーの現在手)の映像時刻
+  function currentPly() { return correction.active ? correction.ply : viewer.idx; }
+  function currentPlyTime() {
+    var ply = currentPly();
+    if (!viewer.plies || ply < 1) { return 0; }
+    var p = viewer.plies[ply - 1];
+    return (p && typeof p.frameIdx === 'number') ? p.frameIdx : 0;
+  }
+  // 盤の四隅のバウンディングボックス+余白10%で切り出す(CSSのみ。points無しなら全体表示)
+  function applyPhotoCrop() {
+    var img = $('photo-img');
+    var crop = $('photo-crop');
+    if (img.naturalWidth) { photo.imgW = img.naturalWidth; photo.imgH = img.naturalHeight; }
+    var pts = photo.points;
+    if (!pts || !photo.imgW) {
+      crop.style.paddingTop = '';
+      img.style.cssText = 'position:static;width:100%;height:auto;display:block';
+      return;
+    }
+    var xs = pts.map(function (p) { return p[0]; });
+    var ys = pts.map(function (p) { return p[1]; });
+    var mx = (Math.max.apply(null, xs) - Math.min.apply(null, xs)) * 0.10;
+    var my = (Math.max.apply(null, ys) - Math.min.apply(null, ys)) * 0.10;
+    var x0 = Math.max(0, Math.min.apply(null, xs) - mx);
+    var y0 = Math.max(0, Math.min.apply(null, ys) - my);
+    var x1 = Math.min(photo.imgW, Math.max.apply(null, xs) + mx);
+    var y1 = Math.min(photo.imgH, Math.max.apply(null, ys) + my);
+    var cw = x1 - x0, ch = y1 - y0;
+    if (cw <= 0 || ch <= 0) { return; }
+    crop.style.paddingTop = (ch / cw * 100) + '%';
+    img.style.cssText = 'position:absolute;display:block;' +
+      'width:' + (photo.imgW / cw * 100) + '%;' +
+      'left:' + (-x0 / cw * 100) + '%;' +
+      'top:' + (-y0 / ch * 100) + '%;';
+  }
+  function renderPhotoPanel() {
+    var fs = photo.frames;
+    var i = photo.idx;
+    if (!fs || i == null) { $('photo-panel').hidden = true; return; }
+    $('photo-img').src = fs[i].url;
+    var ply = currentPly();
+    var rel = '';
+    if (ply >= 1) {
+      var d = fs[i].t - currentPlyTime();
+      rel = Math.abs(d) <= 4 ? (d >= 0 ? '・' + ply + '手目の直後' : '・' + ply + '手目の直前')
+        : (d > 0 ? '・' + ply + '手目の約' + Math.round(d) + '秒後'
+                 : '・' + ply + '手目の約' + Math.round(-d) + '秒前');
+    }
+    $('photo-caption').textContent = '実際の映像 ' + fmtTime(fs[i].t) + rel;
+    $('photo-prev').disabled = i <= 0;
+    $('photo-next').disabled = i >= fs.length - 1;
+    $('photo-panel').hidden = false;
+  }
+  function updatePhotoForPly() {
+    if (!photo.frames) { return; }
+    photo.idx = nearestFrameIdx(currentPlyTime());
+    renderPhotoPanel();
+  }
+  function initPhotoPanel() {
+    photo.frames = null; photo.points = null; photo.idx = null;
+    $('photo-panel').hidden = true;
+    loadFrames().then(function (resp) {
+      if (!resp || !resp.frames || !resp.frames.length) { return; }
+      photo.frames = resp.frames;
+      photo.points = Array.isArray(resp.points) ? resp.points : null;
+      updatePhotoForPly();
+    });
+  }
+
+  function inZoneLocal(side, d) { return side === 'sente' ? d <= 3 : d >= 7; }
+  function mustPromoteLocal(side, kind, d) {
+    if (kind === 'fu' || kind === 'ky') { return side === 'sente' ? d === 1 : d === 9; }
+    if (kind === 'ke') { return side === 'sente' ? d <= 2 : d >= 8; }
+    return false;
+  }
+
+  function clearSel() {
+    correction.from = null; correction.fromKind = null; correction.dropKind = null;
+    var sels = document.querySelectorAll('#board .sq.sel, .hands .hand-piece.sel');
+    for (var i = 0; i < sels.length; i++) { sels[i].classList.remove('sel'); }
+  }
+
+  function enterCorrection() {
+    if (!viewer.positions || viewer.idx === 0 || correction.busy) { return; }
+    correction.active = true;
+    correction.ply = viewer.idx;
+    clearSel();
+    var side = correctionSide();
+    renderBoard(viewer.positions[correction.ply - 1], null); // 訂正する手の直前局面
+    $('board').classList.add('correcting');
+    $(side === 'sente' ? 'hands-sente' : 'hands-gote').classList.add('tappable');
+    $('ply-label').textContent = correction.ply + '手目を訂正中';
+    $('correct-done').hidden = true;
+    $('correct-bar').hidden = false;
+    $('correct-bar').classList.remove('busy');
+    setViewerLocked(true); // 盤・持ち駒・キャンセル・映像コマ送り以外は封じる
+    updatePhotoForPly(); // 常設の映像パネルは訂正中も同じ手のコマを表示し続ける
+    setCorrectMsg(correction.ply + '手目（' + (side === 'sente' ? '▲先手' : '△後手') +
+      '）の正しい手を入力: 動かした駒（打った場合は持ち駒）→ 行き先 の順にタップしてください');
+  }
+
+  function exitCorrection() {
+    correction.active = false;
+    stopCorrectTimer();
+    removeBoardOverlay();
+    clearSel();
+    setViewerLocked(false);
+    $('board').classList.remove('correcting');
+    $('hands-sente').classList.remove('tappable');
+    $('hands-gote').classList.remove('tappable');
+    $('correct-bar').hidden = true;
+    $('correct-bar').classList.remove('busy');
+    $('btn-correct-cancel').disabled = false;
+  }
+
+  function selectFrom(s, d, token) {
+    clearSel();
+    correction.from = [s, d];
+    correction.fromKind = token.substr(1);
+    var el = document.querySelector('#board .sq[data-s="' + s + '"][data-d="' + d + '"]');
+    if (el) { el.classList.add('sel'); }
+    setCorrectMsg(KANJI_1[correction.fromKind] + '（' + s + d + '）を選択中。行き先のマスをタップしてください');
+  }
+
+  function onSquareTap(s, d) {
+    var side = correctionSide();
+    var pre = viewer.positions[correction.ply - 1];
+    var v = pre.ban[String(s) + String(d)];
+    var own = !!(v && v !== ' * ' && ((v.charAt(0) === 'v') === (side === 'gote')));
+
+    if (correction.from == null && correction.dropKind == null) {
+      if (own) { selectFrom(s, d, v); }
+      else {
+        setCorrectMsg('まず動かした駒（' + (side === 'sente' ? '▲先手' : '△後手') +
+          '側）か持ち駒をタップしてください');
+      }
+      return;
+    }
+    if (correction.from && correction.from[0] === s && correction.from[1] === d) {
+      clearSel();
+      setCorrectMsg('選択を解除しました。動かした駒か持ち駒をタップしてください');
+      return;
+    }
+    if (own) { selectFrom(s, d, v); return; } // 自駒タップは選び直し
+
+    if (correction.dropKind != null) { // 打ち
+      if (v && v !== ' * ') { setCorrectMsg('打つ先は空きマスを選んでください'); return; }
+      if (mustPromoteLocal(side, correction.dropKind, d)) { setCorrectMsg('そのマスには打てません'); return; }
+      submitCorrection({ from: null, to: [s, d], kind: correction.dropKind });
+      return;
+    }
+    // 盤上の駒の移動。成れる手だけ確認する(行き所のない手は強制成り)
+    var kind = correction.fromKind;
+    var promote = false;
+    if (PROMOTE[kind] && (inZoneLocal(side, d) || inZoneLocal(side, correction.from[1]))) {
+      promote = mustPromoteLocal(side, kind, d) || window.confirm('成りますか？（OK=成る／キャンセル=不成）');
+    }
+    submitCorrection({ from: correction.from, to: [s, d], kind: kind, promote: promote });
+  }
+
+  function onHandTap(el) {
+    var side = correctionSide();
+    if (el.getAttribute('data-side') !== side) {
+      setCorrectMsg('手番側（' + (side === 'sente' ? '▲先手' : '△後手') + '）の持ち駒を選んでください');
+      return;
+    }
+    clearSel();
+    correction.dropKind = el.getAttribute('data-kind');
+    el.classList.add('sel');
+    setCorrectMsg(KANJI_1[correction.dropKind] + 'を打ちます。打つマスをタップしてください');
+  }
+
+  function submitCorrection(m) {
+    var ply = correction.ply;
+    var t = viewer.plies[ply - 1].frameIdx;
+    var pin = { t: t, from: m.from, to: m.to, kind: m.kind, ply: ply };
+    if (m.promote !== undefined) { pin.promote = m.promote; }
+    correction.busy = true;
+    $('correct-bar').classList.add('busy');
+    // 再解中はキャンセルも無効(サーバー側は完了してしまうため、途中中断は状態の食い違いを生む)
+    $('btn-correct-cancel').disabled = true;
+    showBoardOverlay('再解析中…');
+    startCorrectTimer();
+    var oldPlies = viewer.plies.slice(); // 完了時に「どこが変わったか」を出すための控え
+    var prevCorrectedAt = viewer.correctedAt || null;
+    fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId) + '/correct', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ pin: pin })
+    }).then(function (res) {
+      if (res.status === 422) { // ピン不成立(指せない手など)。サーバー側は何も変えていない
+        return res.json().then(function (j) {
+          var e = new Error((j && j.message) || 'この訂正は反映できませんでした');
+          e.unapplied = true;
+          throw e;
+        });
+      }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    }).then(function (resp) {
+      applyCorrection(resp.result, ply, oldPlies, !!resp.evalsRecomputing);
+    }).catch(function (err) {
+      if (err && err.unapplied) {
+        stopCorrectTimer();
+        correction.busy = false;
+        $('correct-bar').classList.remove('busy');
+        $('btn-correct-cancel').disabled = false;
+        removeBoardOverlay();
+        clearSel();
+        setCorrectMsg('⚠ ' + err.message + '。手をよくご確認のうえ、もう一度入力してください');
+        return;
+      }
+      // タイムアウト等でもサーバー側では完了している可能性があるため、結果をポーリングで拾う
+      // (経過表示のタイマーは動かしたまま。30秒超の文言に自動で切り替わる)
+      console.warn('correct request failed; falling back to polling', err);
+      pollCorrected(prevCorrectedAt, ply, oldPlies);
+    });
+  }
+
+  // 訂正リクエストの応答が取れなかったときの保険。kif.json の correctedAt の
+  // 変化を最大60秒待ち、変わっていれば成功として取り込む。
+  function pollCorrected(prevCorrectedAt, ply, oldPlies) {
+    var tries = 0;
+    function tick() {
+      if (++tries > 20) {
+        stopCorrectTimer();
+        correction.busy = false;
+        $('correct-bar').classList.remove('busy');
+        $('btn-correct-cancel').disabled = false;
+        removeBoardOverlay();
+        setCorrectMsg('⚠ 通信に失敗しました。電波状況をご確認のうえ、もう一度お試しください');
+        return;
+      }
+      setTimeout(function () {
+        fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (job) {
+            var r = job && job.result;
+            // フォールバック経路では evalsRecomputing が分からないため控えめに false
+            // (旧バックエンドで「計算中」を出しっぱなしにしない)
+            if (r && r.correctedAt && r.correctedAt !== prevCorrectedAt) { applyCorrection(r, ply, oldPlies, false); }
+            else { tick(); }
+          })
+          .catch(tick);
+      }, 3000);
+    }
+    tick();
+  }
+
+  // ---- 訂正後の形勢グラフ後追い ----
+  // 訂正が成功するとバックエンドが evaluate を非同期で叩き直す(aws PR#38)。
+  // correctedAt が一致する evals が kif.json に付くまでポーリングして差し込む。
+  // 途中で別の訂正が入ったら(correctedAt不一致)このポーリングは役目を終える
+  // (新しい訂正が自分のポーリングを張り直す)。
+  var evalPoll = { timer: null, expected: null };
+  function stopEvalPoll() {
+    if (evalPoll.timer) { clearInterval(evalPoll.timer); evalPoll.timer = null; }
+  }
+  function startEvalPoll(expectedCorrectedAt) {
+    stopEvalPoll();
+    evalPoll.expected = expectedCorrectedAt || null;
+    var tries = 0;
+    evalPoll.timer = setInterval(function () {
+      // 最大12分で諦める(安全網)。評価は高速・null無し(実測: 83手で約42秒)、通常は1分ほどで揃う。
+      if (++tries > 120) { stopEvalPoll(); $('eval-wrap').hidden = true; return; }
+      fetch(API_BASE + '/jobs/' + encodeURIComponent(state.jobId), { cache: 'no-store' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (job) {
+          var r = job && job.result;
+          if (!r) { return; }
+          if ((r.correctedAt || null) !== evalPoll.expected) { stopEvalPoll(); return; }
+          if (!Array.isArray(r.evals) || !r.evals.length) { return; } // まだ計算中
+          if (correction.active || correction.busy) { return; } // 訂正中は反映を保留
+          stopEvalPoll();
+          applyEvals({ status: 'SUCCEEDED', result: r });
+        })
+        .catch(function () {});
+    }, 6000);
+  }
+
+  // 旧棋譜との差分から「どこが変わったか」を手番号のリストで返す(1始まり)
+  function changedPlies(oldPlies, newPlies) {
+    var out = [];
+    var n = Math.max(oldPlies.length, newPlies.length);
+    for (var i = 0; i < n; i++) {
+      var a = oldPlies[i], b = newPlies[i];
+      if (!a || !b || !movesEqual(a.move, b.move)) { out.push(i + 1); }
+    }
+    return out;
+  }
+
+  function applyCorrection(result, ply, oldPlies, evalsRecomputing) {
+    stopCorrectTimer();
+    correction.busy = false;
+    exitCorrection();
+    // 訂正で手数が変わることがある(手が復活する等)。ビューワーごと差し替える。
+    // evals(形勢グラフ)は訂正直後は未計算(initViewerが隠す)。バックエンドが
+    // 再計算中なら「計算中」を出して後追いポーリングで差し込む。
+    showResult({ status: 'SUCCEEDED', result: result });
+    viewer.correctedAt = result.correctedAt || null;
+    showPosition(Math.min(ply, viewer.positions.length - 1));
+    var evalNote;
+    if (evalsRecomputing) {
+      setEvalPending();
+      startEvalPoll(result.correctedAt || null);
+      evalNote = '（形勢グラフは再計算中です。1分ほどで自動更新されます）';
+    } else {
+      evalNote = '（形勢グラフは訂正後の再計算に未対応です）';
+    }
+
+    // どこが変わったかを明示する。訂正の価値(連鎖で以降も直る)はここで初めて目に見える
+    var changed = oldPlies ? changedPlies(oldPlies, viewer.plies) : [];
+    var others = changed.filter(function (p) { return p !== ply; });
+    var msg;
+    if (changed.length === 0) {
+      msg = '✔ ' + ply + '手目の訂正を確認しました（棋譜に変更はありませんでした・全' +
+        viewer.plies.length + '手）。';
+    } else if (others.length === 0) {
+      msg = '✔ ' + ply + '手目を訂正しました（他の手は変わっていません・全' +
+        viewer.plies.length + '手）。';
+    } else {
+      msg = '✔ ' + ply + '手目を訂正 → ほかに' + others.length + '手が変わりました（' +
+        Math.min.apply(null, others) + '〜' + Math.max.apply(null, others) + '手目・全' +
+        viewer.plies.length + '手）。黄色の手が変わった箇所です。';
+    }
+    var done = $('correct-done');
+    done.textContent = msg + 'まだ違う手があれば、同じように訂正できます。' + evalNote;
+    done.hidden = false;
+
+    // 変わった手を一覧上でハイライト(読む時間を考えて30秒で消す。
+    // 次の訂正やビューワー再構築でも自然に消える)
+    var items = document.querySelectorAll('#move-list li');
+    changed.forEach(function (p) {
+      if (items[p - 1]) { items[p - 1].classList.add('changed'); }
+    });
+    if (changed.length) {
+      setTimeout(function () {
+        var lis = document.querySelectorAll('#move-list li.changed');
+        for (var k = 0; k < lis.length; k++) { lis[k].classList.remove('changed'); }
+      }, 30000);
+    }
+  }
+
+  // ---- 結果表示 ----
+  // 棋譜が読めた時点で1回だけ呼ぶ。形勢グラフがまだなら「計算中」を出し、
+  // evaluate完了後に applyEvals() で差し込む(先出し表示)。
+  // イベント用: SNSシェアは置かず「その場で持ち帰る」案内を出す。
+  // 棋譜が1手も無いときは案内自体を隠す(通常版のシェア枠と同じ出し分け)。
+  function setupShare(kif) {
+    var wrap = $('share-result');
+    if (!wrap) { return; }
+    var plies = (kif || '').split('\n').filter(function (l) {
+      return /^\s*\d+\s+\S/.test(l);
+    }).length;
+    wrap.hidden = plies === 0;
+  }
+
+  function showResult(job) {
+    var result = job.result || {};
+    $('kif-out').value = result.kif || '';
+    setupShare(result.kif);
+    var warns = result.warnings || [];
+    var box = $('warnings');
+    box.innerHTML = '';
+    warns.forEach(function (w) {
+      var d = document.createElement('div');
+      d.textContent = '⚠️ ' + w;
+      box.appendChild(d);
+    });
+    // 要確認手は訂正の入口: v2なら直し方をここで案内する
+    if (warns.length > 0 && result.pipeline === 'v2') {
+      var hint = document.createElement('div');
+      hint.style.cssText = 'margin-top:6px;font-size:12px;color:#8a6d3b;';
+      hint.textContent = '⚠の手は読み取りに自信がありません。下の指し手一覧でオレンジ色の手をタップして局面を確かめ、' +
+        '間違っていたら「この手が違う（訂正する）」から正しい手を入力すると、以降の手も自動で直ります。';
+      box.appendChild(hint);
+    }
+    box.hidden = warns.length === 0;
+    // 新backendで実行継続中(RUNNING)かつ evals 未着なら「計算中」を出す。
+    // 旧backendは SUCCEEDED 時に evals 込みで来るため pending にはならない。
+    var evalsPending = !evalsAvailable(job) && !isFailStatus(job.status)
+                       && job.status !== 'SUCCEEDED';
+    initViewer(result, evalsPending);
+    setStep(3);
+  }
+
+  function showError(err) {
+    console.error(err);
+    $('error-box').hidden = false;
+    setStep(1);
+  }
+
+  // 閾値超のときだけブラウザ内圧縮を試み、成功すれば圧縮版を、失敗/非対応なら元ファイルを返す。
+  // 既存の2GB容量チェックは file-input 側にそのまま残っているので安全網は不変。
+  // 圧縮を使わなかった/失敗した理由を小さく表示する(iPhoneではconsoleが見えないため)
+  function compressNote(msg) {
+    var el = document.getElementById('compress-note');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'compress-note';
+      el.style.cssText = 'font-size:12px;color:#888;margin-top:4px;';
+      var pr = document.getElementById('progress-label');
+      if (pr && pr.parentNode) { pr.parentNode.appendChild(el); }
+    }
+    el.textContent = msg;
+  }
+  function compressSupportDetail() {
+    var miss = [];
+    if (typeof window.VideoEncoder !== 'function') { miss.push('VideoEncoder'); }
+    if (typeof window.VideoDecoder !== 'function') { miss.push('VideoDecoder'); }
+    if (typeof window.VideoFrame !== 'function') { miss.push('VideoFrame'); }
+    if (typeof window.EncodedVideoChunk !== 'function') { miss.push('EncodedVideoChunk'); }
+    if (typeof window.MP4Box === 'undefined') { miss.push('MP4Box'); }
+    if (typeof window.Mp4Muxer === 'undefined') { miss.push('Mp4Muxer'); }
+    return miss;
+  }
+
+  function maybeCompress(file) {
+    if (file.size <= COMPRESS_THRESHOLD_BYTES) { return Promise.resolve(file); }
+    if (!compressEnabled()) {
+      compressNote('圧縮をオフにしているため、そのままアップロードします');
+      return Promise.resolve(file);
+    }
+    if (!(window.VideoCompress && window.VideoCompress.isSupported())) {
+      var miss = compressSupportDetail();
+      compressNote('この端末では動画圧縮が使えないため、そのままアップロードします'
+        + (miss.length ? '(未対応: ' + miss.join(',') + ')' : ''));
+      return Promise.resolve(file);
+    }
+    setProgress('動画を圧縮しています… 0%', 0);
+    return window.VideoCompress.compress(file, function (pct) {
+      setProgress('動画を圧縮しています… ' + pct + '%', pct);
+    }).then(function (blob) {
+      // 念のため。圧縮で逆に大きくなった/空なら元ファイルを使う。
+      if (!blob || blob.size === 0 || blob.size >= file.size) { return file; }
+      var base = file.name.replace(/\.[^.]+$/, '');
+      return new File([blob], base + '_720p.mp4', { type: 'video/mp4' });
+    }).catch(function (err) {
+      console.warn('圧縮に失敗したため元ファイルを直接アップロードします', err);
+      compressNote('圧縮に失敗したため、そのままアップロードします(' + (err && err.message ? err.message : err) + ')');
+      return file; // フォールバック: 現行の直接アップロード
+    });
+  }
+
+  function run() {
+    if (!state.file) { return; }
+    $('error-box').hidden = true;
+    setStep(2);
+    setProgress('アップロードを準備中…', 2);
+    maybeCompress(state.file)
+      .then(function (fileToUpload) { return uploadFile(fileToUpload); })
+      .then(function () { return pollJob(state.jobId, showResult); })
+      .then(applyEvals)   // 棋譜はshowResultで先出し済み。ここで形勢グラフを差し込む
+      .catch(showError);
+  }
+
+  // ---- UI ----
+  // 変換まで通る実質上限。アップロードAPI自体は約3.9GiBまで受けるが、
+  // 抽出処理の作業領域(4GiB)が元動画+音声除去コピーで約2倍を要するため、
+  // それ以上は数分待たせた末に失敗する。門前で分かるようにここで止める。
+  var MAX_UPLOAD_BYTES = 2 * 1000 * 1000 * 1000;
+  // ブラウザ圧縮が使える環境では、圧縮後に2GBを大きく下回るため
+  // 元ファイルの上限を緩和する(アクションカメラの長時間録画は平気で2GBを超える)。
+  var MAX_RAW_BYTES_WITH_COMPRESS = 20 * 1000 * 1000 * 1000;
+  // 圧縮トグル: 記憶された選択を反映し、変更を保存する
+  try { if (localStorage.getItem(COMPRESS_OFF_KEY) === '1') { $('compress-toggle').checked = false; } } catch (e) {}
+  $('compress-toggle').addEventListener('change', function () {
+    try {
+      if (compressEnabled()) { localStorage.removeItem(COMPRESS_OFF_KEY); }
+      else { localStorage.setItem(COMPRESS_OFF_KEY, '1'); }
+    } catch (e) {}
+    // 圧縮オフでは2GB超を受理できないため、該当ファイルは選び直してもらう
+    if (state.file && !compressEnabled() && state.file.size > MAX_UPLOAD_BYTES) {
+      state.file = null;
+      $('file-input').value = '';
+      $('btn-start').disabled = true;
+      $('file-info').textContent = '圧縮オフでは2GBまでの動画のみアップロードできます。ファイルを選び直してください。';
+    }
+  });
+  $('file-input').addEventListener('change', function (e) {
+    var f = e.target.files[0] || null;
+    var canCompress = compressEnabled() && !!(window.VideoCompress && window.VideoCompress.isSupported());
+    var limit = canCompress ? MAX_RAW_BYTES_WITH_COMPRESS : MAX_UPLOAD_BYTES;
+    if (f && f.size > limit) {
+      state.file = null;
+      $('btn-start').disabled = true;
+      $('file-info').textContent = f.name + '（' + fmtSize(f.size) + '）は上限を超えています。'
+        + 'カメラの設定を 720p / 30fps にして撮り直すか、動画を前半・後半に分けてお試しください。';
+      e.target.value = '';
+      return;
+    }
+    state.file = f;
+    $('btn-start').disabled = !state.file;
+    var note = (f && f.size > MAX_UPLOAD_BYTES)
+      ? '（アップロード前にブラウザ内で720pに圧縮されます）' : '';
+    $('file-info').textContent = state.file
+      ? state.file.name + '（' + fmtSize(state.file.size) + '）' + note
+      : '';
+  });
+  $('btn-start').addEventListener('click', run);
+  // サンプル動画(サイト同梱・約0.6MB)でその場で体験できるように
+  $('btn-sample').addEventListener('click', function () {
+    var btn = $('btn-sample');
+    btn.disabled = true;
+    btn.textContent = 'サンプルを読み込み中…';
+    function restore() { btn.disabled = false; btn.textContent = 'サンプル動画で試す'; }
+    fetch('video-sample.mp4')
+      .then(function (res) {
+        if (!res.ok) { throw new Error('サンプル動画を読み込めませんでした'); }
+        return res.blob();
+      })
+      .then(function (blob) {
+        state.file = new File([blob], 'sample-game.mp4', { type: 'video/mp4' });
+        $('file-info').textContent = 'サンプル対局動画（21秒・冒頭5手）';
+        restore();
+        run();
+      })
+      .catch(function (err) { restore(); showError(err); });
+  });
+  $('btn-copy').addEventListener('click', function () {
+    var ta = $('kif-out');
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    if (navigator.clipboard) { navigator.clipboard.writeText(ta.value).catch(function () {}); }
+    $('btn-copy').textContent = 'コピーしました';
+    setTimeout(function () { $('btn-copy').textContent = 'KIFをコピー'; }, 1500);
+  });
+  // ビューワー操作
+  $('btn-first').addEventListener('click', function () { showPosition(0); });
+  $('btn-prev').addEventListener('click', function () { showPosition(viewer.idx - 1); });
+  $('btn-next').addEventListener('click', function () { showPosition(viewer.idx + 1); });
+  $('btn-last').addEventListener('click', function () {
+    if (viewer.positions) { showPosition(viewer.positions.length - 1); }
+  });
+  // 訂正モードの操作
+  $('btn-correct').addEventListener('click', enterCorrection);
+  $('btn-correct-cancel').addEventListener('click', function () {
+    if (correction.busy) { return; }
+    var p = correction.ply;
+    exitCorrection();
+    showPosition(p);
+  });
+  $('board').addEventListener('click', function (ev) {
+    if (!correction.active || correction.busy) { return; }
+    var t = ev.target;
+    if (!t || !t.getAttribute || t.getAttribute('data-s') == null) { return; }
+    onSquareTap(Number(t.getAttribute('data-s')), Number(t.getAttribute('data-d')));
+  });
+  function handTapHandler(ev) {
+    if (!correction.active || correction.busy) { return; }
+    var t = ev.target;
+    if (!t || !t.classList || !t.classList.contains('hand-piece')) { return; }
+    onHandTap(t);
+  }
+  $('hands-sente').addEventListener('click', handTapHandler);
+  $('hands-gote').addEventListener('click', handTapHandler);
+  // 実映像パネルのコマ送り(訂正中もロック対象外)と、読み込み時の盤領域クロップ適用
+  $('photo-prev').addEventListener('click', function () {
+    if (photo.frames && photo.idx > 0) { photo.idx--; renderPhotoPanel(); }
+  });
+  $('photo-next').addEventListener('click', function () {
+    if (photo.frames && photo.idx < photo.frames.length - 1) { photo.idx++; renderPhotoPanel(); }
+  });
+  $('photo-img').addEventListener('load', applyPhotoCrop);
+
+  $('btn-sfen').addEventListener('click', function () {
+    if (!viewer.positions) { return; }
+    var sfen = toSfen(viewer.positions[viewer.idx], viewer.idx + 1);
+    if (navigator.clipboard) { navigator.clipboard.writeText(sfen).catch(function () {}); }
+    $('btn-sfen').textContent = 'コピーしました';
+    setTimeout(function () { $('btn-sfen').textContent = 'この局面のSFENをコピー'; }, 1500);
+  });
+
+  $('btn-save').addEventListener('click', function () {
+    var blob = new Blob([$('kif-out').value], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'kifu_' + Date.now() + '.kif';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  $('btn-retry').addEventListener('click', function () {
+    state.file = null; state.jobId = null;
+    clearJob();
+    $('resume-box').hidden = true;
+    $('file-input').value = '';
+    $('file-info').textContent = '';
+    $('btn-start').disabled = true;
+    $('progress-bar').style.width = '0%';
+    setStep(1);
+  });
+
+  // ---- 前回ジョブの復帰 ----
+  var saved = loadJob();
+  if (saved && saved.jobId) {
+    $('resume-name').textContent = saved.name || '前回の動画';
+    $('resume-box').hidden = false;
+  }
+  $('btn-resume').addEventListener('click', function () {
+    setStep(2);
+    setProgress('前回の変換結果を確認しています…', 60);
+    state.jobId = saved.jobId;
+    pollJob(saved.jobId, showResult)
+      .then(applyEvals)
+      .catch(function (err) {
+        console.error(err);
+        alert(err.message || '結果を取得できませんでした');
+        clearJob();
+        $('resume-box').hidden = true;
+        setStep(1);
+      });
+  });
+  $('btn-resume-dismiss').addEventListener('click', function () {
+    clearJob();
+    $('resume-box').hidden = true;
+  });
+})();
+</script>
+
+<footer style="max-width:640px;margin:32px auto 0;padding:20px 16px 32px;border-top:1px solid #e5e0d6;
+               text-align:center;font-size:13.5px;color:#666;line-height:1.8">
+  <p style="margin:0 0 12px">
+    <a href="/">写真から棋譜化（トップ）</a> ・
+    <a href="/beta.html">写真認識 新エンジン版（β）</a> ・
+    <a href="/faq.html">FAQ</a>
+  </p>
+  <p style="margin:0 0 14px;font-size:12px;color:#888">
+    この画面で変換したデータは保存しません（<a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>）。
+  </p>
+  <p style="margin:0 0 8px">開発：えぬっくま</p>
+  <p style="margin:0 0 8px;font-size:11.5px;color:#999">形勢判断エンジン：<a href="https://ngs436.booth.pm/" target="_blank" rel="noopener" style="color:#999">NAGISA_V3（nagisa 様）</a></p>
+  <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
+     class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a>
+  <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+  <div style="margin-top:16px">
+    <p style="margin:0 0 8px;font-size:13px">このサービスが役立ったら<br>コーヒーで応援していただけると嬉しいです ☕</p>
+    <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
+      <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
+           alt="Buy Me A Coffee" height="36" width="150" style="opacity:.9">
+    </a>
+  </div>
+</footer>
+</body>
+</html>
