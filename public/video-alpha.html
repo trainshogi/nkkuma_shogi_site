@@ -122,6 +122,30 @@
                            border-top-color: transparent; border-radius: 50%;
                            animation: board-spin .9s linear infinite; }
     @keyframes board-spin { to { transform: rotate(360deg); } }
+    /* 検討パネル(α): この局面の最善手・候補手・読み筋。
+       最善手と深さは kif.json の evals[] に既に入っている値なので追加のAPI呼び出しはゼロ。
+       候補手(MultiPV)だけが POST /eval を叩く */
+    #study-panel { max-width: 342px; margin: 10px auto 0; }
+    #study-panel .study-box { background: #fbfaf7; border: 1px solid #eee;
+                              border-radius: 8px; padding: 8px 10px; font-size: 13px; }
+    #study-panel .study-head { font-size: 12.5px; color: #888; margin-bottom: 5px; }
+    #study-best { font-size: 14px; line-height: 1.6; }
+    #study-best .move { font-weight: 600; }
+    #study-cands { list-style: none; margin: 6px 0 0; padding: 0; }
+    #study-cands li { display: flex; gap: 8px; align-items: baseline; padding: 6px;
+                      border-top: 1px solid #f2f2f2; }
+    #study-cands li.pick { cursor: pointer; }
+    #study-cands li.pick:hover { background: #f4f1e9; }
+    #study-cands li.active { background: #fdecec; }
+    #study-cands .rank { color: #aaa; min-width: 1.3em; }
+    #study-cands .move { font-weight: 600; min-width: 5.5em; }
+    #study-cands .cp { color: #666; font-size: 12px; }
+    #study-pv { margin-top: 6px; color: #555; font-size: 12.5px; line-height: 2; }
+    #study-pv.previewing { background: #fff8e6; border-radius: 6px; padding: 6px 8px; }
+    .pv-move { font: inherit; color: #444; background: #fff; border: 1px solid #e2ddd2;
+               border-radius: 5px; padding: 2px 6px; margin: 0 3px 3px 0; cursor: pointer; }
+    .pv-move:hover { background: #f4f1e9; }
+    .pv-move.active { background: #e9dfc4; border-color: #cdbf99; }
     /* PCレイアウト(900px以上): 盤と実映像を左右に並べ、常時比較しやすくする。
        スマホ(既定)は従来どおり縦積み */
     @media (min-width: 900px) {
@@ -146,7 +170,9 @@
       #move-list   { grid-row: 5 / span 2; grid-column: 2; max-width: 380px; width: 100%;
                      max-height: 230px; margin: 10px 0 6px; }
       #eval-wrap   { grid-row: 7; grid-column: 1 / -1; }
-      #tools-row   { grid-row: 8; grid-column: 1 / -1; justify-content: center; }
+      #study-panel { grid-row: 8; grid-column: 1 / -1; max-width: 560px;
+                     justify-self: center; width: 100%; }
+      #tools-row   { grid-row: 9; grid-column: 1 / -1; justify-content: center; }
     }
   </style>
 </head>
@@ -286,6 +312,21 @@
         <div style="font-size:12.5px;color:#888;margin:10px auto 4px;max-width:342px">形勢グラフ（上＝先手有利。点をタップでその局面へ）</div>
         <svg id="eval-graph" viewBox="0 0 342 110"
              style="width:100%;max-width:342px;display:block;margin:0 auto;background:#fcfbf8;border:1px solid #eee;border-radius:8px"></svg>
+      </div>
+      <!-- 検討パネル(α実験): 「動画→棋譜」の続きとして、この局面の最善手・候補手・読み筋を出す。
+           最善手と深さは kif.json の evals[] に既に入っている値で、追加のAPI呼び出しはゼロ。
+           「候補手を調べる」だけが POST /eval (MultiPV) を叩く -->
+      <div id="study-panel" hidden>
+        <div class="study-box">
+          <div class="study-head">この局面の検討<span id="study-depth"></span></div>
+          <div id="study-best"></div>
+          <div class="row" style="margin-top:8px">
+            <button class="btn btn-sm" id="btn-study">候補手を調べる</button>
+            <button class="btn btn-sm" id="btn-study-close" hidden>盤を戻す</button>
+          </div>
+          <ol id="study-cands"></ol>
+          <div id="study-pv"></div>
+        </div>
       </div>
       <div class="row" id="tools-row" style="margin:10px 0 14px">
         <button class="btn btn-sm" id="btn-sfen">この局面のSFENをコピー</button>
@@ -669,6 +710,186 @@
     return url;
   }
 
+  // ---- 検討パネル(α実験) ----
+  // ねらい: 「撮る→棋譜→形勢が見える」の次に「この局面はどう指すのか」まで自前で出す。
+  // 二段構えにしている:
+  //   (無料・API呼び出しゼロ) kif.json の evals[] に最善手(bestmove)・深さ(depth)・
+  //     読み筋(pv)が既に入っている。棋譜を進めるだけで出せる
+  //   (押したときだけ) POST /eval を MultiPV で叩いて候補手を複数もらう
+  // 形勢判断API(EvalServiceStack)は動画APIとは別のゲートウェイ。写真β(site-beta.js)と同じ口。
+  var EVAL_URL = 'https://2f7pfcr1z3.execute-api.ap-northeast-1.amazonaws.com/eval';
+
+  var ZEN_SUJI = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
+  var KAN_DAN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  var USI_KIND = { P: 'fu', L: 'ky', N: 'ke', S: 'gi', G: 'ki', B: 'ka', R: 'hi', K: 'ou' };
+
+  // USI文字列 → 内部の指し手オブジェクト(plyToUsi の逆)。
+  // 動かす駒の種類は盤から読むので、局面(pos)は「その手を指す直前」を渡すこと。
+  function usiToMove(usi, pos) {
+    if (typeof usi !== 'string' || usi.length < 4) { return null; }
+    function sq(t) {
+      var f = Number(t.charAt(0));
+      var r = t.charCodeAt(1) - 96; // 'a'=1 … 'i'=9
+      if (!(f >= 1 && f <= 9) || !(r >= 1 && r <= 9)) { return null; }
+      return [f, r];
+    }
+    if (usi.charAt(1) === '*') { // 駒打ち (例: P*7f)
+      var kind = USI_KIND[usi.charAt(0).toUpperCase()];
+      var dropTo = sq(usi.substr(2, 2));
+      if (!kind || !dropTo) { return null; }
+      return { to: dropTo, kind: kind, promote: false };
+    }
+    var from = sq(usi.substr(0, 2));
+    var to = sq(usi.substr(2, 2));
+    if (!from || !to) { return null; }
+    var v = pos.ban[String(from[0]) + String(from[1])];
+    if (!v || v === ' * ') { return null; } // 盤と食い違う手(壊れたpv)は描かない
+    return { from: from, to: to, kind: v.substr(1), promote: usi.charAt(4) === '+' };
+  }
+
+  // 表示用の日本語表記。同じ駒が2枚利いているときの「右/左/直」は付けない
+  // (候補手は盤で再生して確かめる前提。行き先の座標は必ず出るので誤読はしない)
+  function usiToJp(usi, pos) {
+    var m = usiToMove(usi, pos);
+    if (!m) { return usi || ''; }
+    return (pos.teban === 'sente' ? '▲' : '△') +
+           ZEN_SUJI[m.to[0]] + KAN_DAN[m.to[1]] + (KANJI_1[m.kind] || '') +
+           (m.promote ? '成' : '') + (m.from ? '' : '打');
+  }
+
+  // pvMoves: いま盤に再生できる読み筋。previewStep: 何手目まで進めて見せているか
+  var study = { cands: null, forIdx: null, busy: false, pvMoves: null, previewStep: 0 };
+
+  // 読み筋を「押せる手」の並びとして描く。押すとその手数まで盤が進む
+  function renderPvChips(moves) {
+    var box = $('study-pv');
+    box.innerHTML = '';
+    box.classList.remove('previewing');
+    study.pvMoves = null;
+    study.previewStep = 0;
+    $('btn-study-close').hidden = true;
+    if (!moves || !moves.length || !viewer.positions) { return; }
+    var pos = viewer.positions[viewer.idx];
+    var frag = document.createDocumentFragment();
+    frag.appendChild(document.createTextNode('読み筋（押すとその手まで盤が進みます）: '));
+    var usable = [];
+    for (var i = 0; i < moves.length; i++) {
+      var mv = usiToMove(moves[i], pos);
+      if (!mv) { break; }
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pv-move';
+      b.setAttribute('data-step', String(i + 1));
+      b.textContent = usiToJp(moves[i], pos);
+      frag.appendChild(b);
+      usable.push(moves[i]);
+      pos = applyMoveLocal(pos, mv);
+    }
+    if (!usable.length) { return; }
+    study.pvMoves = usable;
+    box.appendChild(frag);
+  }
+
+  // 読み筋を step手だけ進めた盤を描く。step=0 で本当の局面に戻る
+  function previewTo(step) {
+    if (!viewer.positions) { return; }
+    var moves = study.pvMoves || [];
+    var pos = viewer.positions[viewer.idx];
+    var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
+    for (var i = 0; i < step && i < moves.length; i++) {
+      var mv = usiToMove(moves[i], pos);
+      if (!mv) { step = i; break; }
+      pos = applyMoveLocal(pos, mv);
+      lastTo = mv.to;
+    }
+    renderBoard(pos, lastTo);
+    study.previewStep = step;
+    $('btn-study-close').hidden = step === 0;
+    $('study-pv').classList.toggle('previewing', step > 0);
+    var chips = document.querySelectorAll('#study-pv .pv-move');
+    for (var k = 0; k < chips.length; k++) {
+      chips[k].classList.toggle('active', Number(chips[k].getAttribute('data-step')) <= step);
+    }
+  }
+
+  // 手を動かす/訂正に入るときは、読み筋の仮の盤を必ず畳む
+  function resetStudyPreview() {
+    study.pvMoves = null;
+    study.previewStep = 0;
+    var box = $('study-pv');
+    if (box) { box.innerHTML = ''; box.classList.remove('previewing'); }
+    var close = $('btn-study-close');
+    if (close) { close.hidden = true; }
+  }
+
+  function renderStudyCands() {
+    var ol = $('study-cands');
+    ol.innerHTML = '';
+    if (!study.cands || !viewer.positions) { return; }
+    var pos = viewer.positions[viewer.idx];
+    if (!study.cands.length) {
+      var none = document.createElement('li');
+      none.style.color = '#888';
+      none.textContent = '候補手が得られませんでした（詰み・投了などの局面かもしれません）';
+      ol.appendChild(none);
+      return;
+    }
+    study.cands.forEach(function (c, i) {
+      var li = document.createElement('li');
+      li.className = 'pick';
+      li.setAttribute('data-i', String(i));
+      var rank = document.createElement('span');
+      rank.className = 'rank';
+      rank.textContent = (i + 1) + '.';
+      var mv = document.createElement('span');
+      mv.className = 'move';
+      mv.textContent = usiToJp(c.move, pos);
+      var cp = document.createElement('span');
+      cp.className = 'cp';
+      cp.textContent = evalLabel(c) + (c.depth ? ' 深さ' + c.depth : '');
+      li.appendChild(rank);
+      li.appendChild(mv);
+      li.appendChild(cp);
+      ol.appendChild(li);
+    });
+  }
+
+  // showPosition から毎手呼ばれる。局面が変われば候補手は作り直し
+  function renderStudy() {
+    var panel = $('study-panel');
+    if (!viewer.positions) { panel.hidden = true; return; }
+    panel.hidden = false;
+    var sameIdx = (study.forIdx === viewer.idx);
+    if (!sameIdx) { study.cands = null; study.forIdx = null; $('study-cands').innerHTML = ''; }
+    // showPosition が本当の盤を描き直した直後なので、読み筋の仮の盤は必ず畳む
+    resetStudyPreview();
+    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
+    var pos = viewer.positions[viewer.idx];
+    var best = $('study-best');
+    best.innerHTML = '';
+    $('study-depth').textContent = (ev && ev.depth) ? '（深さ ' + ev.depth + '）' : '';
+    if (sameIdx) { renderStudyCands(); } // 同じ局面のままなら取得済みの候補手は残す
+    if (!ev) {
+      best.style.color = '#999';
+      best.textContent = 'この局面の形勢を計算中です…';
+      return;
+    }
+    best.style.color = '';
+    if (!ev.bestmove) {
+      best.style.color = '#888';
+      best.textContent = '（この局面では最善手が出ていません）';
+      return;
+    }
+    best.appendChild(document.createTextNode('最善手: '));
+    var span = document.createElement('span');
+    span.className = 'move';
+    span.textContent = usiToJp(ev.bestmove, pos);
+    best.appendChild(span);
+    best.appendChild(document.createTextNode(' ' + evalLabel(ev)));
+    // pv はバックエンドがMultiPV対応版(aws PR#42)になってから入る。無ければ出さない
+    if (ev.pv && ev.pv.length) { renderPvChips(ev.pv); }
+  }
+
   // 持ち駒は駒ごとに span で描く（訂正モードで「打つ駒」をタップ選択できるように）
   function renderHandLine(el, hand, mark, side) {
     el.innerHTML = '';
@@ -730,6 +951,7 @@
     var active = document.querySelector('#move-list li.active');
     if (active) { active.scrollIntoView({ block: 'nearest' }); }
     $('btn-kento').href = kentoGameUrl(viewer.idx);
+    renderStudy();       // 検討パネル(最善手・読み筋)を現在手に追従させる
     updatePhotoForPly(); // 実映像パネルを現在手に追従させる
   }
 
@@ -866,6 +1088,7 @@
     }
     $('move-list').classList.toggle('locked', locked);
     $('eval-wrap').classList.toggle('locked', locked);
+    $('study-panel').classList.toggle('locked', locked);
   }
 
   // ---- 実映像パネル(常設) ----
@@ -985,6 +1208,7 @@
     correction.active = true;
     correction.ply = viewer.idx;
     clearSel();
+    resetStudyPreview(); // 訂正は盤をタップして使うので、読み筋の仮の盤は畳んでおく
     var side = correctionSide();
     renderBoard(viewer.positions[correction.ply - 1], null); // 訂正する手の直前局面
     $('board').classList.add('correcting');
@@ -1445,6 +1669,62 @@
   $('btn-last').addEventListener('click', function () {
     if (viewer.positions) { showPosition(viewer.positions.length - 1); }
   });
+  // 検討パネル(α)
+  $('btn-study').addEventListener('click', function () {
+    if (study.busy || !viewer.positions) { return; }
+    var btn = $('btn-study');
+    var label = btn.textContent;
+    var idx = viewer.idx;
+    study.busy = true;
+    btn.disabled = true;
+    btn.textContent = '調べています…';
+    fetch(EVAL_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      // multipv/byoyomi はサーバー側でclampされる。未対応版のバックエンドでも
+      // 余分なキーは無視されて従来どおり最善手1本が返るだけなので安全に投げられる
+      body: JSON.stringify({ sfen: toSfen(viewer.positions[idx], idx + 1), multipv: 3, byoyomi: 2000 })
+    }).then(function (r) {
+      if (!r.ok) { throw new Error('HTTP ' + r.status); }
+      return r.json();
+    }).then(function (r) {
+      if (idx !== viewer.idx) { return; } // 待っている間に手が動いたら結果は捨てる
+      study.forIdx = idx;
+      // candidates が無ければバックエンドがまだMultiPV未対応(aws PR#42の前)。
+      // その場合は返ってきた最善手1本を候補手として見せる
+      study.cands = (r.candidates && r.candidates.length) ? r.candidates
+        : (r.bestmove ? [{ move: r.bestmove, cp: r.cp, mate: r.mate, depth: r.depth, pv: r.pv || null }] : []);
+      renderStudyCands();
+    }).catch(function (e) {
+      var ol = $('study-cands');
+      ol.innerHTML = '';
+      var li = document.createElement('li');
+      li.style.color = '#b00';
+      li.textContent = '検討に失敗しました（' + e.message + '）。少し待って試してください';
+      ol.appendChild(li);
+    }).then(function () {
+      study.busy = false;
+      btn.disabled = false;
+      btn.textContent = label;
+    });
+  });
+  $('study-cands').addEventListener('click', function (e) {
+    var li = e.target.closest ? e.target.closest('li.pick') : null;
+    if (!li || !study.cands) { return; }
+    var i = Number(li.getAttribute('data-i'));
+    var c = study.cands[i];
+    if (!c) { return; }
+    var items = document.querySelectorAll('#study-cands li');
+    for (var k = 0; k < items.length; k++) { items[k].classList.toggle('active', k === i); }
+    renderPvChips(c.pv && c.pv.length ? c.pv : [c.move]);
+    previewTo(1); // 選んだ候補手を1手だけ指して見せる
+  });
+  $('study-pv').addEventListener('click', function (e) {
+    var b = e.target;
+    if (!b || !b.classList || !b.classList.contains('pv-move')) { return; }
+    previewTo(Number(b.getAttribute('data-step')));
+  });
+  $('btn-study-close').addEventListener('click', function () { previewTo(0); });
   // 訂正モードの操作
   $('btn-correct').addEventListener('click', enterCorrection);
   $('btn-correct-cancel').addEventListener('click', function () {
