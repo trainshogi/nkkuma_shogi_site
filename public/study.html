@@ -141,12 +141,14 @@
     <div id="board"></div>
     <div class="hands" id="hands-sente"></div>
     <div class="nav-row">
-      <button class="btn btn-sm" id="btn-first">|◀</button>
-      <button class="btn btn-sm" id="btn-prev">◀ 前へ</button>
+      <button class="btn btn-sm" id="btn-first" title="最初へ (↑)">|◀</button>
+      <button class="btn btn-sm" id="btn-prev" title="1手戻る (←)">◀</button>
       <span id="ply-label">開始局面</span>
-      <button class="btn btn-sm" id="btn-next">次へ ▶</button>
-      <button class="btn btn-sm" id="btn-last">▶|</button>
+      <button class="btn btn-sm" id="btn-next" title="1手進む (→)">▶</button>
+      <button class="btn btn-sm" id="btn-last" title="最後へ (↓)">▶|</button>
+      <button class="btn btn-sm" id="btn-play" title="自動再生">▶ 再生</button>
     </div>
+    <p class="note" style="text-align:center;margin:0 0 6px" id="nav-hint">盤の右半分タップで進む・左半分で戻る（←→キー、盤の上でホイールも）</p>
     <ol id="move-list"></ol>
     <div id="study-panel">
       <div class="study-box">
@@ -780,13 +782,78 @@
     } catch (e) {}
   }
 
-  // ビューワー操作
-  $('btn-first').addEventListener('click', function () { showPosition(0); });
-  $('btn-prev').addEventListener('click', function () { showPosition(viewer.idx - 1); });
-  $('btn-next').addEventListener('click', function () { showPosition(viewer.idx + 1); });
+  // ---- ビューワー操作 ----
+  // ボタン連打は操作感が硬いので、他サイトの定番を揃える:
+  //   lishogi流: ←→キー / 盤の上でマウスホイール
+  //   KENTO流:   盤の右半分タップで進む・左半分で戻る
+  //   ぴよ将棋流: 自動再生
+  var autoplay = { timer: null };
+
+  function stopAutoplay() {
+    if (autoplay.timer) {
+      clearInterval(autoplay.timer);
+      autoplay.timer = null;
+      $('btn-play').textContent = '▶ 再生';
+    }
+  }
+  function step(d) {
+    stopAutoplay();
+    showPosition(viewer.idx + d);
+  }
+  $('btn-first').addEventListener('click', function () { stopAutoplay(); showPosition(0); });
+  $('btn-prev').addEventListener('click', function () { step(-1); });
+  $('btn-next').addEventListener('click', function () { step(1); });
   $('btn-last').addEventListener('click', function () {
+    stopAutoplay();
     if (viewer.positions) { showPosition(viewer.positions.length - 1); }
   });
+
+  // 自動再生(0.9秒/手。最後まで行ったら止まる。手動操作でも止まる)
+  $('btn-play').addEventListener('click', function () {
+    if (autoplay.timer) { stopAutoplay(); return; }
+    if (!viewer.positions) { return; }
+    if (viewer.idx >= viewer.positions.length - 1) { showPosition(0); }
+    $('btn-play').textContent = '⏸ 停止';
+    autoplay.timer = setInterval(function () {
+      if (!viewer.positions || viewer.idx >= viewer.positions.length - 1) {
+        stopAutoplay();
+        return;
+      }
+      showPosition(viewer.idx + 1);
+    }, 900);
+  });
+
+  // キーボード: ←→で1手、↑で最初、↓で最後(lishogiと同じ割り当て)
+  document.addEventListener('keydown', function (e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'TEXTAREA' || tag === 'INPUT' || !viewer.positions) { return; }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); stopAutoplay(); showPosition(0); }
+    else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      stopAutoplay();
+      showPosition(viewer.positions.length - 1);
+    }
+  });
+
+  // 盤タップ: 右半分=進む / 左半分=戻る。読み筋プレビュー中は誤爆しないよう無効
+  $('board').addEventListener('click', function (e) {
+    if (!viewer.positions || study.previewStep > 0) { return; }
+    var rect = $('board').getBoundingClientRect();
+    step(e.clientX - rect.left < rect.width / 2 ? -1 : 1);
+  });
+
+  // 盤の上でホイール: 下に回すと進む(ページスクロールは止める)
+  var wheelLast = 0;
+  $('board').addEventListener('wheel', function (e) {
+    if (!viewer.positions) { return; }
+    e.preventDefault();
+    var now = Date.now();
+    if (now - wheelLast < 120) { return; } // 慣性スクロールで飛びすぎないように
+    wheelLast = now;
+    step(e.deltaY > 0 ? 1 : -1);
+  }, { passive: false });
 })();
 </script>
 </body>
