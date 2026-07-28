@@ -1395,8 +1395,21 @@
     if (f && f.size > limit) {
       state.file = null;
       $('btn-start').disabled = true;
-      $('file-info').textContent = f.name + '（' + fmtSize(f.size) + '）は上限を超えています。'
-        + 'カメラの設定を 720p / 30fps にして撮り直すか、動画を前半・後半に分けてお試しください。';
+      // なぜ弾かれたかで案内を変える。「圧縮をオンにすれば送れる」のに
+      // 「撮り直せ」と言ってしまう事故が実際に起きた(2026-07-28、3.73GBのMOV)
+      var supported = !!(window.VideoCompress && window.VideoCompress.isSupported());
+      var msg;
+      if (!compressEnabled() && supported && f.size <= MAX_RAW_BYTES_WITH_COMPRESS) {
+        msg = '「アップロード前にブラウザ内で圧縮」をオンにすると、この動画('
+          + fmtSize(f.size) + ')も送れます。上のチェックを入れて選び直してください。';
+      } else if (!supported && f.size <= MAX_RAW_BYTES_WITH_COMPRESS) {
+        msg = 'このブラウザは動画圧縮に対応していないため、2GBまでの動画のみ'
+          + 'アップロードできます。PCのChromeをお試しください。';
+      } else {
+        msg = f.name + '（' + fmtSize(f.size) + '）は上限を超えています。'
+          + 'カメラの設定を 720p / 30fps にして撮り直すか、動画を前半・後半に分けてお試しください。';
+      }
+      $('file-info').textContent = msg;
       e.target.value = '';
       return;
     }
