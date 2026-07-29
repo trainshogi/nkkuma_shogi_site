@@ -766,9 +766,62 @@
     initViewer({ startPos: pos, plies: [], labels: [] });
   });
 
-  // URLパラメータ: ?sfen=... / ?kif=...(encodeURIComponent済み)
+  // #u=USI手順(「7g7f_3c3d」区切りは _ か空白)。大会でQRから棋譜を持ち帰る用。
+  // クエリでなくフラグメントなのは、棋譜をサーバのアクセスログに残さないため。
+  // KIF全文の ?kif= はエンコードでQR容量(約3KB)を超えるが、USIなら83手で約500字
+  function loadUsiMoves(str) {
+    var mvs = String(str || '').split(/[_\s]+/).filter(Boolean);
+    if (!mvs.length) { return false; }
+    var start = startPosFor('平手');
+    var pos = { ban: cloneBan(start.ban), hands: cloneHands(start.hands), teban: start.teban };
+    var plies = [];
+    var labels = [];
+    for (var i = 0; i < mvs.length; i++) {
+      var t = mvs[i];
+      var m = { promote: false };
+      var mm;
+      if ((mm = t.match(/^([A-Z])\*([1-9])([a-i])$/))) {
+        m.from = null;
+        m.kind = USI_KIND[mm[1]];
+        m.to = [Number(mm[2]), mm[3].charCodeAt(0) - 96];
+        if (!m.kind) { return false; }
+      } else if ((mm = t.match(/^([1-9])([a-i])([1-9])([a-i])(\+?)$/))) {
+        m.from = [Number(mm[1]), mm[2].charCodeAt(0) - 96];
+        m.to = [Number(mm[3]), mm[4].charCodeAt(0) - 96];
+        m.promote = mm[5] === '+';
+        var v = pos.ban[String(m.from[0]) + String(m.from[1])];
+        if (!v || v === ' * ') { return false; }
+        m.kind = v.substr(1);
+      } else {
+        return false;
+      }
+      labels.push(String(i + 1) + ' ' + (pos.teban === 'sente' ? '▲' : '△') +
+                  ZEN_SUJI[m.to[0]] + KAN_DAN[m.to[1]] +
+                  (KANJI_1[m.kind] || '') + (m.promote ? '成' : '') +
+                  (m.from ? '' : '打'));
+      plies.push({ move: m, side: pos.teban });
+      pos = applyMoveLocal(pos, m);
+    }
+    // 貼り付け欄にKIFも入れておく(コピーして他アプリへ持っていける)
+    var kifLines = ['手合割：平手'];
+    plies.forEach(function (p, k) {
+      var mv = p.move;
+      kifLines.push('   ' + (k + 1) + ' ' + ZEN_SUJI[mv.to[0]] + KAN_DAN[mv.to[1]] +
+                    (KANJI_1[mv.kind] || '') + (mv.promote ? '成' : '') +
+                    (mv.from ? '(' + mv.from[0] + mv.from[1] + ')' : '打'));
+    });
+    $('kif-in').value = kifLines.join('\n');
+    initViewer({ startPos: start, plies: plies, labels: labels });
+    showPosition(plies.length);
+    return true;
+  }
+
+  // URLパラメータ: #u=... / ?sfen=... / ?kif=...(encodeURIComponent済み)
   var params = new URLSearchParams(location.search);
-  if (params.get('sfen')) {
+  var hashU = location.hash.match(/^#u=(.+)$/);
+  if (hashU && loadUsiMoves(decodeURIComponent(hashU[1]))) {
+    // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
+  } else if (params.get('sfen')) {
     var p0 = parseSfen(params.get('sfen'));
     if (p0) { initViewer({ startPos: p0, plies: [], labels: [] }); }
   } else if (params.get('kif')) {
