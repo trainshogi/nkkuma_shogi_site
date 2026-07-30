@@ -1515,8 +1515,23 @@
   });
 
   // ---- 前回ジョブの復帰 ----
+  // ?job=<jobId> は処理済みジョブを直接開く(結果の答え合わせ・サポート用)。
+  // 結果APIはもともとjobIdを知っている人だけが叩ける設計なので、公開範囲は変わらない。
+  // 実映像パネル(各手の着地静止画)と訂正UIがそのまま使えるので、
+  // 棋譜が合っているかを映像と突き合わせて確認できる
+  var jobParam = new URLSearchParams(location.search).get('job');
   var saved = loadJob();
-  if (saved && saved.jobId) {
+  if (jobParam) {
+    setStep(2);
+    setProgress('変換結果を取得しています…', 60);
+    state.jobId = jobParam;
+    pollJob(jobParam, showResult)
+      .then(applyEvals)
+      .catch(function (err) {
+        console.error(err);
+        alert(err.message || '結果を取得できませんでした(ジョブIDを確認してください)');
+      });
+  } else if (saved && saved.jobId) {
     $('resume-name').textContent = saved.name || '前回の動画';
     $('resume-box').hidden = false;
   }
