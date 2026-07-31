@@ -1286,6 +1286,23 @@
         '間違っていたら「この手が違う（訂正する）」から正しい手を入力すると、以降の手も自動で直ります。';
       box.appendChild(hint);
     }
+    // 要確認が多すぎる結果には、正直に「うまく読めていない」と言い、原因の当たりを付けてもらう。
+    // 実ユーザーの失敗動画の分析(2026-07-31)で、原因はほぼ次の4パターンに集約された:
+    // 横向き/斜め撮影・字体・影や手の写り込み(+超早指し)・盤の見切れ
+    var plyCount = (result.plies || []).length;
+    if (plyCount > 0 && warns.length > Math.max(3, plyCount * 0.25)) {
+      var diag = document.createElement('div');
+      diag.style.cssText = 'margin-top:10px;padding:10px 12px;background:#fdf6ec;' +
+        'border:1px solid #e8cfa0;border-radius:10px;font-size:12.5px;color:#6b5836;';
+      diag.innerHTML = '<b>うまく読み取れていない可能性があります。</b>よくある原因:<br>' +
+        '・カメラが横向き・斜めから撮っている（真上からが最も正確です）<br>' +
+        '・駒の字体が読み取りの苦手な種類（手書き風・変わり書体など）<br>' +
+        '・影や手が盤を覆う時間が長い、またはかなりの早指し<br>' +
+        '・盤の一部が画面から見切れている<br>' +
+        '当てはまる場合は、真上・盤全体・影が落ちない位置で撮り直すと大きく改善します。' +
+        'このままでも、⚠の手を訂正して仕上げることができます。';
+      box.appendChild(diag);
+    }
     box.hidden = warns.length === 0;
     // 新backendで実行継続中(RUNNING)かつ evals 未着なら「計算中」を出す。
     // 旧backendは SUCCEEDED 時に evals 込みで来るため pending にはならない。
