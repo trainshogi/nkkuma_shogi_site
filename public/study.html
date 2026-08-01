@@ -141,14 +141,10 @@
     <div id="board"></div>
     <div class="hands" id="hands-sente"></div>
     <div class="nav-row">
-      <button class="btn btn-sm" id="btn-first" title="最初へ (↑)">|◀</button>
-      <button class="btn btn-sm" id="btn-prev" title="1手戻る (←)">◀</button>
       <span id="ply-label">開始局面</span>
-      <button class="btn btn-sm" id="btn-next" title="1手進む (→)">▶</button>
-      <button class="btn btn-sm" id="btn-last" title="最後へ (↓)">▶|</button>
       <button class="btn btn-sm" id="btn-play" title="自動再生">▶ 再生</button>
     </div>
-    <p class="note" style="text-align:center;margin:0 0 6px" id="nav-hint">盤の右半分タップで進む・左半分で戻る（←→キー、盤の上でホイールも）</p>
+    <p class="note" style="text-align:center;margin:0 0 6px" id="nav-hint">盤の右半分タップで進む・左半分で戻る（←→キーも）。候補手を出すと、そのまま読み筋の中を進めます</p>
     <ol id="move-list"></ol>
     <div id="study-panel">
       <div class="study-box">
@@ -463,9 +459,7 @@
     var pos = viewer.positions[viewer.idx];
     var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
     renderBoard(pos, lastTo);
-    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
-    $('ply-label').textContent =
-      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') + evalLabel(ev);
+    showPositionLabel();
     var items = document.querySelectorAll('#move-list li');
     for (var k = 0; k < items.length; k++) {
       items[k].classList.toggle('active', k === viewer.idx - 1);
@@ -567,7 +561,10 @@
            (m.promote ? '成' : '') + (m.from ? '' : '打');
   }
 
-  var study = { cands: null, forIdx: null, busy: false, pvMoves: null, previewStep: 0 };
+  // armed: 盤タップの前後を「読み筋の中を歩く」に切り替えるフラグ。
+  // 候補手を調べた直後・候補やチップに触れた時に立ち、局面移動や「盤を戻す」で下りる
+  var study = { cands: null, forIdx: null, busy: false, pvMoves: null,
+                previewStep: 0, armed: false };
 
   function renderPvChips(moves) {
     var box = $('study-pv');
@@ -579,7 +576,7 @@
     if (!moves || !moves.length || !viewer.positions) { return; }
     var pos = viewer.positions[viewer.idx];
     var frag = document.createDocumentFragment();
-    frag.appendChild(document.createTextNode('読み筋（押すとその手まで盤が進みます）: '));
+    frag.appendChild(document.createTextNode('読み筋（盤タップでこの中を進めます）: '));
     var usable = [];
     for (var i = 0; i < moves.length; i++) {
       var mv = usiToMove(moves[i], pos);
@@ -611,17 +608,33 @@
     }
     renderBoard(pos, lastTo);
     study.previewStep = step;
+    if (step > 0) { study.armed = true; }
     $('btn-study-close').hidden = step === 0;
     $('study-pv').classList.toggle('previewing', step > 0);
     var chips = document.querySelectorAll('#study-pv .pv-move');
     for (var k = 0; k < chips.length; k++) {
       chips[k].classList.toggle('active', Number(chips[k].getAttribute('data-step')) <= step);
     }
+    if (step > 0) {
+      $('ply-label').textContent = '読み筋を再生中 ' + step + '/' + moves.length +
+        '（左タップで戻る）';
+    } else {
+      showPositionLabel();
+    }
+  }
+
+  function showPositionLabel() {
+    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
+    var total = viewer.positions ? viewer.positions.length - 1 : 0;
+    $('ply-label').textContent =
+      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') +
+      (total ? ' / 全' + total + '手' : '') + evalLabel(ev);
   }
 
   function resetStudyPreview() {
     study.pvMoves = null;
     study.previewStep = 0;
+    study.armed = false;
     $('study-pv').innerHTML = '';
     $('study-pv').classList.remove('previewing');
     $('btn-study-close').hidden = true;
@@ -707,8 +720,13 @@
                            pv: r.pv || null }] : []);
       renderStudy();
       renderEvalGraph();
-      $('ply-label').textContent =
-        (idx === 0 ? '開始局面' : idx + '手目') + evalLabel(r);
+      showPositionLabel();
+      // 調べた直後から、盤タップの「進む」がそのまま読み筋を歩く(候補1が既定)
+      if (study.pvMoves && study.pvMoves.length) {
+        study.armed = true;
+        var first = document.querySelector('#study-cands li.pick');
+        if (first) { first.classList.add('active'); }
+      }
     }).catch(function (e) {
       var ol = $('study-cands');
       ol.innerHTML = '';
@@ -851,16 +869,19 @@
   }
   function step(d) {
     stopAutoplay();
+    // 候補手を出した直後は、同じ前後操作がそのまま読み筋の中を歩く。
+    // ボタンを押させない(オーナー方針 2026-08-02)。読み筋の頭より前に戻ると本譜に復帰
+    if (study.armed && study.pvMoves && study.forIdx === viewer.idx) {
+      var next = study.previewStep + d;
+      if (next >= 0 && next <= study.pvMoves.length) {
+        if (next !== study.previewStep) { previewTo(next); }
+        return;
+      }
+      if (d > 0) { return; }  // 読み筋の末端で止まる
+      previewTo(0);           // 頭より前へ→プレビュー解除して本譜へ
+    }
     showPosition(viewer.idx + d);
   }
-  $('btn-first').addEventListener('click', function () { stopAutoplay(); showPosition(0); });
-  $('btn-prev').addEventListener('click', function () { step(-1); });
-  $('btn-next').addEventListener('click', function () { step(1); });
-  $('btn-last').addEventListener('click', function () {
-    stopAutoplay();
-    if (viewer.positions) { showPosition(viewer.positions.length - 1); }
-  });
-
   // 自動再生(0.9秒/手。最後まで行ったら止まる。手動操作でも止まる)
   $('btn-play').addEventListener('click', function () {
     if (autoplay.timer) { stopAutoplay(); return; }
@@ -890,9 +911,9 @@
     }
   });
 
-  // 盤タップ: 右半分=進む / 左半分=戻る。読み筋プレビュー中は誤爆しないよう無効
+  // 盤タップ: 右半分=進む / 左半分=戻る。読み筋プレビュー中も同じ操作で中を歩ける
   $('board').addEventListener('click', function (e) {
-    if (!viewer.positions || study.previewStep > 0) { return; }
+    if (!viewer.positions) { return; }
     var rect = $('board').getBoundingClientRect();
     step(e.clientX - rect.left < rect.width / 2 ? -1 : 1);
   });
