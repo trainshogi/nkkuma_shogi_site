@@ -158,6 +158,12 @@
         <div id="study-pv"></div>
       </div>
     </div>
+    <p class="note" id="external-links" style="text-align:center; margin:10px 0 4px">
+      この局面を他のツールで:
+      <a id="ext-kento" href="#" target="_blank" rel="noopener">KENTO</a> ・
+      <a id="ext-lishogi" href="#" target="_blank" rel="noopener">lishogi</a> ・
+      <a id="ext-piyo" href="#">ぴよ将棋アプリ</a>
+    </p>
     <div id="eval-wrap">
       <p id="eval-note">形勢グラフ（調べた局面から埋まっていきます。上＝先手有利）</p>
       <svg id="eval-graph" viewBox="0 0 342 110"></svg>
@@ -757,6 +763,44 @@
     previewTo(Number(b.getAttribute('data-step')));
   });
   $('btn-study-close').addEventListener('click', function () { previewTo(0); });
+
+  // ---- 外部ツール連携(自前メイン+逃がし道。オーナー方針 2026-08-02) ----
+  // KENTO/lishogiは「いま見ている局面」をSFENで渡す。ぴよ将棋は棋譜全体を
+  // save_kif(β写真ページと同じCloud Function)経由でアプリに渡す
+  var PIYO_SAVE_URL = 'https://us-central1-shogiban2kif.cloudfunctions.net/save_kif';
+  function currentSfen() {
+    if (!viewer.positions) { return null; }
+    return toSfen(viewer.positions[viewer.idx], viewer.idx + 1);
+  }
+  $('ext-kento').addEventListener('click', function (e) {
+    e.preventDefault();
+    var sfen = currentSfen();
+    if (!sfen) { return; }
+    window.open('https://www.kento-shogi.com/?initpos=' + sfen.split('+').join('%2B'),
+                '_blank', 'noopener');
+  });
+  $('ext-lishogi').addEventListener('click', function (e) {
+    e.preventDefault();
+    var sfen = currentSfen();
+    if (!sfen) { return; }
+    // lishogiはlichess系のパス埋め込み: スラッシュ素のまま・空白は _ ・成駒の+は%2B
+    // (encodeURIComponentで丸ごと encode すると初期局面へリダイレクトされる。実地確認済み)
+    window.open('https://lishogi.org/analysis/' +
+                sfen.split('+').join('%2B').split(' ').join('_'),
+                '_blank', 'noopener');
+  });
+  $('ext-piyo').addEventListener('click', function (e) {
+    e.preventDefault();
+    var kif = $('kif-in').value;
+    if (!kif.trim()) { alert('棋譜がないため連携できません(局面だけの検討中です)'); return; }
+    fetch(PIYO_SAVE_URL + '?message=' + encodeURIComponent(kif))
+      .then(function (res) {
+        if (!res.ok) { throw new Error('save_kif failed'); }
+        return res.text();
+      })
+      .then(function (data) { location.href = 'piyoshogi://?url=' + data; })
+      .catch(function () { alert('ぴよ将棋との連携に失敗しました。'); });
+  });
 
   // ---- 入力 ----
   function showError(msg) {
