@@ -141,14 +141,10 @@
     <div id="board"></div>
     <div class="hands" id="hands-sente"></div>
     <div class="nav-row">
-      <button class="btn btn-sm" id="btn-first" title="最初へ (↑)">|◀</button>
-      <button class="btn btn-sm" id="btn-prev" title="1手戻る (←)">◀</button>
       <span id="ply-label">開始局面</span>
-      <button class="btn btn-sm" id="btn-next" title="1手進む (→)">▶</button>
-      <button class="btn btn-sm" id="btn-last" title="最後へ (↓)">▶|</button>
       <button class="btn btn-sm" id="btn-play" title="自動再生">▶ 再生</button>
     </div>
-    <p class="note" style="text-align:center;margin:0 0 6px" id="nav-hint">盤の右半分タップで進む・左半分で戻る（←→キー、盤の上でホイールも）</p>
+    <p class="note" style="text-align:center;margin:0 0 6px" id="nav-hint">盤の右半分タップで進む・左半分で戻る（←→キーも）。候補手を出すと、そのまま読み筋の中を進めます</p>
     <ol id="move-list"></ol>
     <div id="study-panel">
       <div class="study-box">
@@ -162,6 +158,12 @@
         <div id="study-pv"></div>
       </div>
     </div>
+    <p class="note" id="external-links" style="text-align:center; margin:10px 0 4px">
+      この局面を他のツールで:
+      <a id="ext-kento" href="#" target="_blank" rel="noopener">KENTO</a> ・
+      <a id="ext-lishogi" href="#" target="_blank" rel="noopener">lishogi</a> ・
+      <a id="ext-piyo" href="#">ぴよ将棋アプリ</a>
+    </p>
     <div id="eval-wrap">
       <p id="eval-note">形勢グラフ（調べた局面から埋まっていきます。上＝先手有利）</p>
       <svg id="eval-graph" viewBox="0 0 342 110"></svg>
@@ -463,9 +465,7 @@
     var pos = viewer.positions[viewer.idx];
     var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
     renderBoard(pos, lastTo);
-    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
-    $('ply-label').textContent =
-      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') + evalLabel(ev);
+    showPositionLabel();
     var items = document.querySelectorAll('#move-list li');
     for (var k = 0; k < items.length; k++) {
       items[k].classList.toggle('active', k === viewer.idx - 1);
@@ -567,7 +567,10 @@
            (m.promote ? '成' : '') + (m.from ? '' : '打');
   }
 
-  var study = { cands: null, forIdx: null, busy: false, pvMoves: null, previewStep: 0 };
+  // armed: 盤タップの前後を「読み筋の中を歩く」に切り替えるフラグ。
+  // 候補手を調べた直後・候補やチップに触れた時に立ち、局面移動や「盤を戻す」で下りる
+  var study = { cands: null, forIdx: null, busy: false, pvMoves: null,
+                previewStep: 0, armed: false };
 
   function renderPvChips(moves) {
     var box = $('study-pv');
@@ -579,7 +582,7 @@
     if (!moves || !moves.length || !viewer.positions) { return; }
     var pos = viewer.positions[viewer.idx];
     var frag = document.createDocumentFragment();
-    frag.appendChild(document.createTextNode('読み筋（押すとその手まで盤が進みます）: '));
+    frag.appendChild(document.createTextNode('読み筋（盤タップでこの中を進めます）: '));
     var usable = [];
     for (var i = 0; i < moves.length; i++) {
       var mv = usiToMove(moves[i], pos);
@@ -611,17 +614,33 @@
     }
     renderBoard(pos, lastTo);
     study.previewStep = step;
+    if (step > 0) { study.armed = true; }
     $('btn-study-close').hidden = step === 0;
     $('study-pv').classList.toggle('previewing', step > 0);
     var chips = document.querySelectorAll('#study-pv .pv-move');
     for (var k = 0; k < chips.length; k++) {
       chips[k].classList.toggle('active', Number(chips[k].getAttribute('data-step')) <= step);
     }
+    if (step > 0) {
+      $('ply-label').textContent = '読み筋を再生中 ' + step + '/' + moves.length +
+        '（左タップで戻る）';
+    } else {
+      showPositionLabel();
+    }
+  }
+
+  function showPositionLabel() {
+    var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
+    var total = viewer.positions ? viewer.positions.length - 1 : 0;
+    $('ply-label').textContent =
+      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') +
+      (total ? ' / 全' + total + '手' : '') + evalLabel(ev);
   }
 
   function resetStudyPreview() {
     study.pvMoves = null;
     study.previewStep = 0;
+    study.armed = false;
     $('study-pv').innerHTML = '';
     $('study-pv').classList.remove('previewing');
     $('btn-study-close').hidden = true;
@@ -707,8 +726,13 @@
                            pv: r.pv || null }] : []);
       renderStudy();
       renderEvalGraph();
-      $('ply-label').textContent =
-        (idx === 0 ? '開始局面' : idx + '手目') + evalLabel(r);
+      showPositionLabel();
+      // 調べた直後から、盤タップの「進む」がそのまま読み筋を歩く(候補1が既定)
+      if (study.pvMoves && study.pvMoves.length) {
+        study.armed = true;
+        var first = document.querySelector('#study-cands li.pick');
+        if (first) { first.classList.add('active'); }
+      }
     }).catch(function (e) {
       var ol = $('study-cands');
       ol.innerHTML = '';
@@ -739,6 +763,44 @@
     previewTo(Number(b.getAttribute('data-step')));
   });
   $('btn-study-close').addEventListener('click', function () { previewTo(0); });
+
+  // ---- 外部ツール連携(自前メイン+逃がし道。オーナー方針 2026-08-02) ----
+  // KENTO/lishogiは「いま見ている局面」をSFENで渡す。ぴよ将棋は棋譜全体を
+  // save_kif(β写真ページと同じCloud Function)経由でアプリに渡す
+  var PIYO_SAVE_URL = 'https://us-central1-shogiban2kif.cloudfunctions.net/save_kif';
+  function currentSfen() {
+    if (!viewer.positions) { return null; }
+    return toSfen(viewer.positions[viewer.idx], viewer.idx + 1);
+  }
+  $('ext-kento').addEventListener('click', function (e) {
+    e.preventDefault();
+    var sfen = currentSfen();
+    if (!sfen) { return; }
+    window.open('https://www.kento-shogi.com/?initpos=' + sfen.split('+').join('%2B'),
+                '_blank', 'noopener');
+  });
+  $('ext-lishogi').addEventListener('click', function (e) {
+    e.preventDefault();
+    var sfen = currentSfen();
+    if (!sfen) { return; }
+    // lishogiはlichess系のパス埋め込み: スラッシュ素のまま・空白は _ ・成駒の+は%2B
+    // (encodeURIComponentで丸ごと encode すると初期局面へリダイレクトされる。実地確認済み)
+    window.open('https://lishogi.org/analysis/' +
+                sfen.split('+').join('%2B').split(' ').join('_'),
+                '_blank', 'noopener');
+  });
+  $('ext-piyo').addEventListener('click', function (e) {
+    e.preventDefault();
+    var kif = $('kif-in').value;
+    if (!kif.trim()) { alert('棋譜がないため連携できません(局面だけの検討中です)'); return; }
+    fetch(PIYO_SAVE_URL + '?message=' + encodeURIComponent(kif))
+      .then(function (res) {
+        if (!res.ok) { throw new Error('save_kif failed'); }
+        return res.text();
+      })
+      .then(function (data) { location.href = 'piyoshogi://?url=' + data; })
+      .catch(function () { alert('ぴよ将棋との連携に失敗しました。'); });
+  });
 
   // ---- 入力 ----
   function showError(msg) {
@@ -851,16 +913,19 @@
   }
   function step(d) {
     stopAutoplay();
+    // 候補手を出した直後は、同じ前後操作がそのまま読み筋の中を歩く。
+    // ボタンを押させない(オーナー方針 2026-08-02)。読み筋の頭より前に戻ると本譜に復帰
+    if (study.armed && study.pvMoves && study.forIdx === viewer.idx) {
+      var next = study.previewStep + d;
+      if (next >= 0 && next <= study.pvMoves.length) {
+        if (next !== study.previewStep) { previewTo(next); }
+        return;
+      }
+      if (d > 0) { return; }  // 読み筋の末端で止まる
+      previewTo(0);           // 頭より前へ→プレビュー解除して本譜へ
+    }
     showPosition(viewer.idx + d);
   }
-  $('btn-first').addEventListener('click', function () { stopAutoplay(); showPosition(0); });
-  $('btn-prev').addEventListener('click', function () { step(-1); });
-  $('btn-next').addEventListener('click', function () { step(1); });
-  $('btn-last').addEventListener('click', function () {
-    stopAutoplay();
-    if (viewer.positions) { showPosition(viewer.positions.length - 1); }
-  });
-
   // 自動再生(0.9秒/手。最後まで行ったら止まる。手動操作でも止まる)
   $('btn-play').addEventListener('click', function () {
     if (autoplay.timer) { stopAutoplay(); return; }
@@ -890,9 +955,9 @@
     }
   });
 
-  // 盤タップ: 右半分=進む / 左半分=戻る。読み筋プレビュー中は誤爆しないよう無効
+  // 盤タップ: 右半分=進む / 左半分=戻る。読み筋プレビュー中も同じ操作で中を歩ける
   $('board').addEventListener('click', function (e) {
-    if (!viewer.positions || study.previewStep > 0) { return; }
+    if (!viewer.positions) { return; }
     var rect = $('board').getBoundingClientRect();
     step(e.clientX - rect.left < rect.width / 2 ? -1 : 1);
   });
