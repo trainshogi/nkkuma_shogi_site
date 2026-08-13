@@ -242,7 +242,7 @@
     selectedPos: null,   // 編集中のマス "<筋><段>"
     points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
     wakuVersion: 'v2',      // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
-    modelVersion: 'v2',     // α: 駒認識モデル切替（v1/v2/v3。API推奨はv2）
+    modelVersion: 'v3',     // β: 駒認識モデル切替（v3=r5世代。2026-08-14切替、旧はv2）
     mochiCropVersion: 'v2', // α: 持ち駒認識エンジン（v1=旧 / v2=新・盤周囲タイル検出。API推奨はv2）
     mochiOcr: true,         // α: 持ち駒の個数数字OCR（アプリ画面向け。API推奨は1）
     mochiPostproc: false,   // α: 持ち駒を駒数保存則で補正（実験的・実物写真では既定OFF推奨）
