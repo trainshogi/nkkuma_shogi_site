@@ -70,6 +70,89 @@
     return null; // description無しでもデコードできるコーデックもある
   }
 
+  // ---- コーデック事前判定 (moov だけ読む軽量プローブ) ----
+  //
+  // 背景 (docs/hevc-diagnosis.md): iPhone 標準の HEVC(hvc1) は、WebCodecs の
+  // HEVC デコーダを持たない環境 (HWデコーダの無いPCの Chrome、プロプライエタリ
+  // コーデック無しの Chromium ビルド等) では VideoDecoder.isConfigSupported が
+  // false になる。従来の compress() はファイル全体を demux し終えてから
+  // この判定をしていたため、500MB 級の HEVC 動画で「数分かけて全部読んでから
+  // 失敗してフォールバック」という無駄が起きていた (2026-08-13 に実測)。
+  //
+  // ここでは mp4box の appendBuffer が返す「次に読みたいオフセット」に従って
+  // mdat を読み飛ばし、moov (トラック情報) だけを読んでコーデックを確定する。
+  // iPhone 実録 mp4 は moov が末尾にあることが多く、この読み飛ばしが効く。
+  // 読み込み上限 (PROBE_READ_LIMIT) を超えても moov に届かない場合は null を
+  // 返し、呼び出し側は従来どおり demux 後の判定へフォールバックする(挙動不変)。
+  var PROBE_CHUNK = 8 * 1024 * 1024;
+  var PROBE_READ_LIMIT = 64 * 1024 * 1024;
+
+  function probeCodec(file) {
+    return new Promise(function (resolve) {
+      var mp4 = window.MP4Box.createFile();
+      var done = false;
+      var readBytes = 0;
+
+      function finish(info) {
+        if (done) { return; }
+        done = true;
+        resolve(info);
+      }
+
+      mp4.onError = function () { finish(null); };
+      mp4.onReady = function (info) {
+        var track = (info.videoTracks && info.videoTracks[0]) || null;
+        if (!track) { finish(null); return; }
+        var trak = mp4.getTrackById(track.id);
+        var desc = null;
+        try { desc = descriptionFromTrak(trak); } catch (e) { /* description無しで続行 */ }
+        finish({
+          codec: track.codec,
+          codedWidth: track.video ? track.video.width : track.track_width,
+          codedHeight: track.video ? track.video.height : track.track_height,
+          description: desc
+        });
+      };
+
+      function pump(offset) {
+        if (done) { return; }
+        if (offset >= file.size || readBytes >= PROBE_READ_LIMIT) {
+          finish(null);
+          return;
+        }
+        var end = Math.min(offset + PROBE_CHUNK, file.size);
+        file.slice(offset, end).arrayBuffer().then(function (buf) {
+          readBytes += buf.byteLength;
+          buf.fileStart = offset;
+          var next = mp4.appendBuffer(buf);
+          if (done) { return; }
+          // appendBuffer は「次に読みたい位置」を返す (mdat を読み飛ばせる)。
+          // 進まない・不正のときは順読みにフォールバック。
+          if (typeof next !== 'number' || !isFinite(next) || next <= offset) {
+            next = end;
+          }
+          pump(next);
+        }).catch(function () { finish(null); });
+      }
+      pump(0);
+    });
+  }
+
+  // probeCodec の結果でデコード可否を先に確かめる。
+  // 判定できないとき (moov が読めない等) は null を返し、従来経路に任せる。
+  function preflightDecodeSupport(file) {
+    return probeCodec(file).then(function (info) {
+      if (!info || !info.codec) { return null; }
+      var cfg = { codec: info.codec, codedWidth: info.codedWidth, codedHeight: info.codedHeight };
+      if (info.description) { cfg.description = info.description; }
+      return window.VideoDecoder.isConfigSupported(cfg).then(function (sup) {
+        return { codec: info.codec, supported: !!(sup && sup.supported) };
+      }).catch(function () {
+        return { codec: info.codec, supported: false };
+      });
+    }).catch(function () { return null; });
+  }
+
   // 入力ファイルを分割してMP4Boxへ流し込み、映像トラックのサンプルを集める。
   function demux(file) {
     return new Promise(function (resolve, reject) {
@@ -159,7 +242,15 @@
       try { if (encoder && encoder.state !== 'closed') { encoder.close(); } } catch (e) {}
     }
 
-    return demux(file).then(function (dm) {
+    return preflightDecodeSupport(file).then(function (pre) {
+      if (pre && !pre.supported) {
+        // 全量読み込み前に確定失敗させる (500MB級HEVCを読み切ってから
+        // 失敗していたのを、moovだけ読んだ時点の即失敗に変える)。
+        // メッセージは従来の demux 後判定と同一 (video.html の表示互換)。
+        throw new Error('この動画のコーデックはブラウザで変換できません: ' + pre.codec);
+      }
+      return demux(file);
+    }).then(function (dm) {
       var track = dm.track;
       var trak = dm.mp4.getTrackById(track.id);
       var rot = rotationFromMatrix(trak && trak.tkhd && trak.tkhd.matrix);
