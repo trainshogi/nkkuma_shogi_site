@@ -159,6 +159,13 @@
   </style>
 </head>
 <body data-step="1">
+<div style="border-bottom:1px solid #e5e5e5;padding:6px 12px;font-size:13px;background:#fff;font-family:'Hiragino Sans',sans-serif;">
+  <a href="/" style="color:#555;text-decoration:none;margin-right:14px;">写真をKIFに</a>
+  <a href="/taikai.html" style="color:#555;text-decoration:none;margin-right:14px;">大会・教室</a>
+  <a href="/blog.html" style="color:#555;text-decoration:none;margin-right:14px;">ブログ</a>
+  <a href="/about.html" style="color:#555;text-decoration:none;">About</a>
+</div>
+
 <main>
   <h1>動画まるごと棋譜化 <span class="beta">β版</span></h1>
   <p class="lead">対局を撮った動画1本から、指し手つきの棋譜（KIF）を自動で復元します。
@@ -185,7 +192,7 @@
     <div class="row">
       <label class="btn btn-primary">
         動画を選ぶ
-        <input type="file" id="file-input" accept="video/mp4,video/quicktime" hidden>
+        <input type="file" id="file-input" accept="video/mp4,video/quicktime" multiple hidden>
       </label>
       <button class="btn" id="btn-start" disabled>変換スタート</button>
       <button class="btn" id="btn-sample">サンプル動画で試す</button>
@@ -338,7 +345,7 @@
   // 以下なら現行どおり直接アップロード。非対応・失敗時も直接アップロードにフォールバックする。
   var COMPRESS_THRESHOLD_BYTES = 80 * 1000 * 1000; // 80MB
 
-  var state = { file: null, jobId: null };
+  var state = { file: null, files: null, jobId: null };  // files: 複数選択(分割録画の結合)時
   function $(id) { return document.getElementById(id); }
 
   // 圧縮のオン/オフ(既定オン)。WebCodecsエンコードはCPU/GPUを占有し、同じPCで
@@ -1370,12 +1377,26 @@
     });
   }
 
+  function joinCompress(files) {
+    setProgress('分割ファイルを結合しながら圧縮しています… 0%', 0);
+    return window.VideoCompress.compressMany(files, function (pct) {
+      setProgress('分割ファイルを結合しながら圧縮しています… ' + pct + '%', pct);
+    }).then(function (blob) {
+      if (!blob || blob.size === 0) { throw new Error('結合圧縮の結果が空でした'); }
+      var base = files[0].name.replace(/\.[^.]+$/, '');
+      return new File([blob], base + '_joined_720p.mp4', { type: 'video/mp4' });
+    });
+  }
+
   function run() {
-    if (!state.file) { return; }
+    if (!state.file && !(state.files && state.files.length)) { return; }
     $('error-box').hidden = true;
     setStep(2);
     setProgress('アップロードを準備中…', 2);
-    maybeCompress(state.file)
+    var prep = (state.files && state.files.length > 1)
+      ? joinCompress(state.files)
+      : maybeCompress(state.file);
+    prep
       .then(function (fileToUpload) { return uploadFile(fileToUpload); })
       .then(function () { return pollJob(state.jobId, showResult); })
       .then(applyEvals)   // 棋譜はshowResultで先出し済み。ここで形勢グラフを差し込む
@@ -1406,6 +1427,37 @@
     }
   });
   $('file-input').addEventListener('change', function (e) {
+    var list = Array.prototype.slice.call(e.target.files || []);
+    if (list.length > 1) {
+      // 分割録画(アクションカメラの4GB分割)をまとめて選んだ場合:
+      // ファイル名順=撮影順に結合してから1本として送る。結合には圧縮経路が必須
+      var supported = !!(window.VideoCompress && window.VideoCompress.isSupported());
+      if (!supported) {
+        state.file = null; state.files = null;
+        $('btn-start').disabled = true;
+        $('file-info').textContent = '複数ファイルの結合はこのブラウザでは使えません。PCのChromeで開くか、1本ずつお試しください。';
+        e.target.value = '';
+        return;
+      }
+      list.sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+      var total = 0;
+      list.forEach(function (f2) { total += f2.size; });
+      if (total > MAX_RAW_BYTES_WITH_COMPRESS) {
+        state.file = null; state.files = null;
+        $('btn-start').disabled = true;
+        $('file-info').textContent = '合計' + fmtSize(total) + 'は大きすぎます(上限20GB)。';
+        e.target.value = '';
+        return;
+      }
+      state.file = null;
+      state.files = list;
+      $('btn-start').disabled = false;
+      $('file-info').textContent = list.length + '本を撮影順(ファイル名順)に結合します: '
+        + list.map(function (f2) { return f2.name; }).join(' → ')
+        + '（合計 ' + fmtSize(total) + '。720pに圧縮して1本で送ります）';
+      return;
+    }
+    state.files = null;
     var f = e.target.files[0] || null;
     var canCompress = compressEnabled() && !!(window.VideoCompress && window.VideoCompress.isSupported());
     var limit = canCompress ? MAX_RAW_BYTES_WITH_COMPRESS : MAX_UPLOAD_BYTES;

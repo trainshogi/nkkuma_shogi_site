@@ -325,5 +325,171 @@
     });
   }
 
-  window.VideoCompress = { isSupported: isSupported, compress: compress, DEFAULTS: DEFAULTS };
+
+  // ---- 複数ファイルの結合圧縮 ----
+  // アクションカメラ(EK7000等)はFAT32の4GB制限で長い対局が複数ファイルに割れる。
+  // 各ファイルを順に同じエンコーダ+muxerへ流し、タイムスタンプを累積オフセットして
+  // 1本のMP4にする。1ファイル版 compress() には手を入れない(既存経路の無変更)。
+  // 前提: 全パートが同一カメラの連続録画(コーデック・寸法・fpsが同じ)。
+  function compressMany(files, onProgress, opts) {
+    if (!files || files.length === 0) { return Promise.reject(new Error('ファイルがありません')); }
+    if (files.length === 1) { return compress(files[0], onProgress, opts); }
+    var o = Object.assign({}, DEFAULTS, opts || {});
+    if (!isSupported()) { return Promise.reject(new Error('WebCodecs/依存ライブラリ非対応')); }
+    onProgress = onProgress || function () {};
+
+    var totalBytes = 0;
+    for (var i = 0; i < files.length; i++) { totalBytes += files[i].size; }
+
+    var encoder = null, muxer = null, canvas = null, ctx = null;
+    var target = null, encInput = 0, keyEvery = 30;
+    var offsetUs = 0;        // これまでのパートの累積尺
+    var doneBytes = 0;
+    var fps = 30, rot = 0, encCfgReady = null;
+    var decodeError = null;
+
+    function setupEncoder(frame) {
+      var fw = frame.displayWidth, fh = frame.displayHeight;
+      var uw = (rot % 180 === 0) ? fw : fh;
+      var uh = (rot % 180 === 0) ? fh : fw;
+      var scale = Math.min(1, o.longEdge / Math.max(uw, uh));
+      var tw = Math.max(2, even(uw * scale)), th = Math.max(2, even(uh * scale));
+      target = { w: tw, h: th };
+      canvas = document.createElement('canvas');
+      canvas.width = tw; canvas.height = th;
+      ctx = canvas.getContext('2d', { alpha: false });
+      muxer = new window.Mp4Muxer.Muxer({
+        target: new window.Mp4Muxer.ArrayBufferTarget(),
+        video: { codec: 'avc', width: tw, height: th },
+        fastStart: 'in-memory',
+        firstTimestampBehavior: 'offset'
+      });
+      encoder = new window.VideoEncoder({
+        output: function (chunk, meta) { muxer.addVideoChunk(chunk, meta); },
+        error: function (e) { decodeError = e; }
+      });
+      encoder.configure(encCfgReady);
+    }
+
+    function drawUpright(frame) {
+      var fw = frame.displayWidth, fh = frame.displayHeight;
+      var s = target.w / ((rot % 180 === 0) ? fw : fh);
+      ctx.save();
+      ctx.translate(target.w / 2, target.h / 2);
+      if (rot) { ctx.rotate(rot * Math.PI / 180); }
+      ctx.drawImage(frame, -fw * s / 2, -fh * s / 2, fw * s, fh * s);
+      ctx.restore();
+    }
+
+    function transcodeOne(file, isFirst) {
+      return demux(file).then(function (dm) {
+        var track = dm.track;
+        var trak = dm.mp4.getTrackById(track.id);
+        if (isFirst) {
+          rot = rotationFromMatrix(trak && trak.tkhd && trak.tkhd.matrix);
+          var durSec = track.duration && track.timescale ? track.duration / track.timescale : 0;
+          fps = durSec > 0 ? Math.max(1, Math.round(track.nb_samples / durSec)) : 30;
+          keyEvery = Math.max(1, Math.round(fps * o.keyframeIntervalSec));
+        }
+        var decCfg = {
+          codec: track.codec,
+          codedWidth: track.video ? track.video.width : track.track_width,
+          codedHeight: track.video ? track.video.height : track.track_height
+        };
+        var desc = descriptionFromTrak(trak);
+        if (desc) { decCfg.description = desc; }
+
+        var samples = dm.samples;
+        var partEndUs = 0;
+        var fileBytes = file.size;
+        var decoder = new window.VideoDecoder({
+          output: function (frame) {
+            try {
+              if (!target) { setupEncoder(frame); }
+              drawUpright(frame);
+              var vf = new window.VideoFrame(canvas, {
+                timestamp: frame.timestamp,
+                duration: frame.duration || Math.round(1e6 / fps)
+              });
+              encoder.encode(vf, { keyFrame: (encInput % keyEvery === 0) });
+              encInput++;
+              vf.close();
+            } catch (e) { decodeError = e; }
+            finally { frame.close(); }
+          },
+          error: function (e) { decodeError = e; }
+        });
+
+        var codecSel = isFirst
+          ? (function () {
+              var probeW = decCfg.codedWidth || 1280, probeH = decCfg.codedHeight || 720;
+              var uw0 = (rot % 180 === 0) ? probeW : probeH;
+              var uh0 = (rot % 180 === 0) ? probeH : probeW;
+              var sc0 = Math.min(1, o.longEdge / Math.max(uw0, uh0));
+              var tw0 = Math.max(2, even(uw0 * sc0)), th0 = Math.max(2, even(uh0 * sc0));
+              var br0 = Math.max(o.minBitrate, Math.min(o.maxBitrate,
+                Math.round(tw0 * th0 * fps * o.bitsPerPixelPerFrame)));
+              return pickEncoderCodec(tw0, th0, fps, br0).then(function (cfg) {
+                if (!cfg) { throw new Error('H.264エンコーダを構成できません'); }
+                encCfgReady = cfg;
+              });
+            })()
+          : Promise.resolve();
+
+        return codecSel.then(function () {
+          decoder.configure(decCfg);
+          var i = 0;
+          function step() {
+            if (decodeError) { return Promise.reject(decodeError); }
+            if (i >= samples.length) {
+              return decoder.flush().then(function () {
+                try { decoder.close(); } catch (e) {}
+                if (decodeError) { throw decodeError; }
+                offsetUs += partEndUs;
+                doneBytes += fileBytes;
+              });
+            }
+            var sm = samples[i++];
+            var ts = Math.round(sm.cts * 1e6 / sm.timescale) + offsetUs;
+            var du = Math.round(sm.dur * 1e6 / sm.timescale);
+            if (ts + du - offsetUs > partEndUs) { partEndUs = ts + du - offsetUs; }
+            decoder.decode(new window.EncodedVideoChunk({
+              type: sm.isSync ? 'key' : 'delta',
+              timestamp: ts,
+              duration: du,
+              data: sm.data
+            }));
+            sm.data = null;
+            if (i % 30 === 0) {
+              onProgress(Math.min(99, Math.round(
+                (doneBytes + fileBytes * (i / samples.length)) / totalBytes * 100)));
+            }
+            if (decoder.decodeQueueSize > 24 || (i % 60 === 0)) {
+              return tick().then(step);
+            }
+            return step();
+          }
+          return step();
+        });
+      });
+    }
+
+    var chain = Promise.resolve();
+    files.forEach(function (f, idx) {
+      chain = chain.then(function () { return transcodeOne(f, idx === 0); });
+    });
+    return chain.then(function () {
+      if (!encoder) { throw new Error('フレームがありませんでした'); }
+      return encoder.flush();
+    }).then(function () {
+      muxer.finalize();
+      try { encoder.close(); } catch (e) {}
+      return new Blob([muxer.target.buffer], { type: 'video/mp4' });
+    }).catch(function (err) {
+      try { if (encoder && encoder.state !== 'closed') { encoder.close(); } } catch (e) {}
+      throw err;
+    });
+  }
+
+  window.VideoCompress = { isSupported: isSupported, compress: compress, compressMany: compressMany, DEFAULTS: DEFAULTS };
 })();
