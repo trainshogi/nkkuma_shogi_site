@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /mentenanse/
+Disallow: /review/
 
 Sitemap: https://shogi.nkkuma.tokyo/sitemap.xml
