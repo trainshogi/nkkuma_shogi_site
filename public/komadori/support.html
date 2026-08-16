@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>サポート | コマドリ（iOSアプリ）</title>
+  <meta name="description" content="iOSアプリ「コマドリ」のサポートページ。お問い合わせ先、動作環境、うまく変換できないときの確認ポイント。" />
+  <style>
+    :root{ --bg:#ffffff; --card:#f9f9f9; --text:#111111; --muted:#555555; --accent:#0077cc; --border:#dddddd; }
+    *{ box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", Meiryo, "Noto Sans JP", sans-serif; line-height:1.8; }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    header{ padding:48px 20px 12px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px }
+    .title{ font-size:clamp(22px, 2.6vw, 32px); font-weight:800; letter-spacing:0.2px }
+    .sub{ color:var(--muted); margin-top:6px; font-size:14px }
+    main{ padding:28px 0 80px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin:16px 0 }
+    h2{ font-size:20px; margin:32px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border) }
+    h3{ font-size:16px; margin:22px 0 4px }
+    ul{ padding-left:1.2em; margin:6px 0 }
+    li{ margin:8px 0 }
+    p{ margin:10px 0 }
+    .muted{ color:var(--muted) }
+    .small{ font-size:13px }
+    footer{ border-top:1px solid var(--border); padding:20px; color:var(--muted); font-size:12px }
+    dl.contact dt{ font-weight:700; margin-top:10px }
+    dl.contact dd{ margin:2px 0 0 0 }
+  </style>
+</head>
+<body>
+<div style="border-bottom:1px solid #e5e5e5;padding:6px 12px;font-size:13px;background:#fff;font-family:'Hiragino Sans',sans-serif;">
+  <a href="/" style="color:#555;text-decoration:none;margin-right:14px;">写真をKIFに</a>
+  <a href="/taikai.html" style="color:#555;text-decoration:none;margin-right:14px;">大会・教室</a>
+  <a href="/blog.html" style="color:#555;text-decoration:none;margin-right:14px;">ブログ</a>
+  <a href="/about.html" style="color:#555;text-decoration:none;">About</a>
+</div>
+
+  <header>
+    <div class="wrap">
+      <h1 class="title">コマドリ サポート</h1>
+      <div class="sub">対局を撮った動画から棋譜（KIF）を作るiOSアプリです。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <div class="card">
+      <dl class="contact">
+        <dt>お問い合わせ</dt>
+        <dd><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></dd>
+        <dt>プライバシーポリシー</dt>
+        <dd><a href="/komadori/privacy.html">コマドリ プライバシーポリシー</a></dd>
+      </dl>
+      <p class="small muted" style="margin-bottom:0">個人で開発・運営しています。返信までお時間をいただくことがあります。</p>
+    </div>
+
+    <h2>動作環境</h2>
+    <ul>
+      <li>iOS 17 以降（iPhone XR / XS / SE（第2世代）以降）</li>
+      <li>変換には通信が必要です。駒の読み取りはサーバーで行うため、オフラインでは棋譜を作れません。</li>
+      <li>すでに作った棋譜の閲覧・修正・KIFの書き出しは、通信なしでもできます。</li>
+    </ul>
+
+    <h2>うまく棋譜にならないとき</h2>
+
+    <h3>盤が見つからない・変換が途中で止まる</h3>
+    <ul>
+      <li><strong>盤の真上から撮れているか。</strong>斜めから撮ると、駒の字が読めず精度が落ちます。</li>
+      <li><strong>盤全体と、その外側にひと駒分の余白が映っているか。</strong>盤が画面からはみ出していると盤の位置を取れません。</li>
+      <li><strong>撮影中にカメラが動いていないか。</strong>途中で構図が変わると追従できません。</li>
+      <li><strong>白く飛んで字が読めないマスがないか。</strong>照明の反射で字が消えているマスは、読み取りでも読めません。盤を10〜20cmずらすか、直射光を遮ってから撮り直してください。</li>
+    </ul>
+
+    <h3>手が抜けている・違う手になっている</h3>
+    <p>読み取りに自信がない手は、結果画面に「要確認」として並びます。その手をタップするとその局面に飛べるので、その場で直せます。直した棋譜はKIFとして書き出せます。</p>
+
+    <h3>変換が終わらない</h3>
+    <p>1局あたりおおよそ30〜90秒かかります。しばらく使われていないと、サーバーが動き出すまで数秒待つことがあります。失敗した場合は一度だけ再試行してください。それでも変わらない場合は、上記の連絡先までお知らせください。</p>
+
+    <h2>撮影と、写る方への配慮について</h2>
+    <p>動画そのものがアプリの外に出ることはありませんが、盤の位置を調べるために、映像全体を縮小した静止画を最初に数枚だけ送ります。撮り方によっては人が写り込むことがあります。対局相手や周囲の方が映る場所で撮るときは一声かけてから、お子さまを撮る場合は保護者の方の了解を得てからお使いください。</p>
+    <p class="small">詳しくは <a href="/komadori/privacy.html">プライバシーポリシー</a> をご覧ください。</p>
+
+  </main>
+
+  <footer>
+    <div class="wrap">コマドリ（iOSアプリ）／ 運営者：佐藤 旭 ／ <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></div>
+  </footer>
+</body>
+</html>
