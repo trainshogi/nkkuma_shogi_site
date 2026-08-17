@@ -84,6 +84,8 @@ jobs:
         # deploy.sh と同一の除外リスト。ACL 無しは CloudFront が AccessDenied になるので必須。
         # video-alpha.html はα実験レーン(alphaブランチ + deploy-alpha.yml)が正本のため、
         # masterデプロイでは触らない(masterにはファイル自体を置かない。2026-07-22〜)
+        # review/* は次のステップが Content-Disposition 付きで送る担当なので、ここでは触らない
+        # (sync はヘッダを付けられない。二重に上げるとヘッダ無しの状態が一瞬できる)
         run: |
           aws s3 sync public/ s3://shogi.nkkuma.tokyo \
             --exclude "firebase.json" \
@@ -92,7 +94,94 @@ jobs:
             --exclude "*.DS_Store" \
             --exclude ".git/*" \
             --exclude "video-alpha.html" \
+            --exclude "review/*" \
             --acl public-read
+
+      - name: Upload public/review/ with Content-Disposition (審査用の配布ファイル)
+        # なぜ要るか: review/ 配下は「ブラウザで再生させたい」ではなく
+        # 「端末に保存させたい」ファイルの置き場。iOS Safari は video/mp4 を
+        # インライン再生してしまい、審査員が『写真に保存』にたどり着けない
+        # (2026-08-16 実機で3分以上詰まり、Braveでしか保存できなかった)。
+        # Content-Disposition: attachment を付けると Safari でも保存ダイアログになる。
+        # aws s3 sync はこのヘッダを付けられないため、このステップが唯一の付与点。
+        #
+        # 触るときの注意:
+        #  - 対象は public/review/ 配下のみ。HTML/JS に attachment が付くと
+        #    サイト全体がダウンロードになる(= サイト崩壊)。上位ディレクトリを指さないこと
+        #  - --acl public-read は必須。2026-08-16 に手動でメタデータだけ足したとき
+        #    公開ACLが引き継がれず、審査提出URLが403になった
+        #  - review/ を廃止するときはこのステップと次の検証ステップも一緒に消すこと
+        #    (消し忘れるとデプロイが「対象0件」で落ちる = 黙って戻らない設計)
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUCKET=shogi.nkkuma.tokyo
+          SRC=public/review
+
+          if [ ! -d "$SRC" ]; then
+            echo "::error::$SRC がありません。審査用の配布ファイル置き場が消えています。意図的な廃止ならこのステップも削除してください"
+            exit 1
+          fi
+
+          count=0
+          while IFS= read -r -d '' f; do
+            key="review/${f#public/review/}"
+            base="$(basename "$f")"
+            # ヘッダは ASCII のみ安全。日本語ファイル名等では filename を省く
+            # (省いてもブラウザは URL 末尾をファイル名に使う)
+            case "$base" in
+              *[!A-Za-z0-9._-]*) disp="attachment" ;;
+              *)                 disp="attachment; filename=\"$base\"" ;;
+            esac
+            echo "attachment 付与: s3://$BUCKET/$key  [$disp]"
+            aws s3 cp "$f" "s3://$BUCKET/$key" \
+              --content-disposition "$disp" \
+              --acl public-read \
+              --only-show-errors
+            count=$((count + 1))
+          done < <(find "$SRC" -type f ! -name '.DS_Store' -print0)
+
+          if [ "$count" -eq 0 ]; then
+            echo "::error::$SRC にファイルが1件もありません。審査用サンプルが消えている可能性があります"
+            exit 1
+          fi
+          echo "Content-Disposition: attachment を付けて $count 件を送りました"
+
+      - name: Verify headers (attachment が付いた / 他へ漏れていない)
+        # CloudFront の無効化より前に確認する。ここで落とせば CDN は旧キャッシュを
+        # 出し続けるので、壊れた状態が公開されない
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUCKET=shogi.nkkuma.tokyo
+          ng=0
+
+          # 1) review/ 配下には attachment が付いていること
+          while IFS= read -r -d '' f; do
+            key="review/${f#public/review/}"
+            info=$(aws s3api head-object --bucket "$BUCKET" --key "$key" \
+                     --query '[ContentDisposition,ContentType,ContentLength]' --output text)
+            disp=$(printf '%s' "$info" | cut -f1)
+            case "$disp" in
+              attachment*) echo "OK   $key  [$info]" ;;
+              *) echo "::error::$key に Content-Disposition: attachment が付いていません (実際: $disp)"; ng=1 ;;
+            esac
+          done < <(find public/review -type f ! -name '.DS_Store' -print0)
+
+          # 2) review/ 以外へ漏れていないこと(サイトが全部ダウンロードになる事故のカナリア)
+          for key in index.html js/site.js video-sample.mp4; do
+            if ! disp=$(aws s3api head-object --bucket "$BUCKET" --key "$key" \
+                          --query 'ContentDisposition' --output text 2>/dev/null); then
+              echo "::warning::カナリア $key を確認できませんでした(キー名が変わった?)"
+              continue
+            fi
+            case "$disp" in
+              attachment*) echo "::error::$key にまで attachment が漏れています。review/ 以外に付けてはいけません"; ng=1 ;;
+              *) echo "OK   $key  Content-Disposition=$disp" ;;
+            esac
+          done
+
+          [ "$ng" -eq 0 ]
 
       - name: Invalidate CloudFront
         run: |

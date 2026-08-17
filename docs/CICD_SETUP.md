@@ -127,6 +127,27 @@ Enabled）に任せ、GHA側はデプロイ前の簡易な健全性チェック�
 
 ---
 
+## `public/review/` は「保存させる」置き場（Content-Disposition: attachment）
+
+審査提出用のサンプル動画など、**ブラウザで再生させたいのではなく端末に保存させたい**ファイルは
+`public/review/` 配下に置く。この prefix だけは `aws s3 sync` ではなく、専用ステップが
+`aws s3 cp --content-disposition "attachment; filename=..." --acl public-read` で送る。
+
+- **なぜ**: iOS Safari は `video/mp4` をインライン再生してしまい、「写真に保存」に到達できない
+  （2026-08-16、実機で3分以上詰まった。Brave では保存できた）。`attachment` を付けると Safari でも保存できる
+- **なぜ sync ではだめか**: `aws s3 sync` は `Content-Disposition` を付けられない。さらに sync の
+  再アップロード条件は「ローカルの mtime が S3 より新しい」で、git checkout 直後の mtime は常に新しいので
+  **CI が走るたびに全ファイルが上書きされる**。手でヘッダを足しても次のデプロイで黙って消える
+- **絶対に守る**: 対象は `public/review/` 配下のみ。HTML/JS/CSS に attachment が付くとサイト全体が
+  ダウンロードになる。`--acl public-read` も必須（メタデータだけ差し替えると公開ACLが引き継がれず403になる。
+  2026-08-16 に審査提出URLが1分間403になった実例あり）
+- ワークフローには検証ステップがあり、(1) review/ 配下に attachment が付いたか (2) `index.html` /
+  `js/site.js` / `video-sample.mp4` に漏れていないか を CloudFront 無効化の**前**に確認して落とす
+- 審査終了後に `public/review/` を廃止するときは、workflow の該当2ステップも一緒に削除する
+  （対象0件でデプロイが落ちる設計＝黙って無効化されない）
+
+---
+
 ## 触ってはいけない点
 
 - Actions の secrets/variables は**ログにマスクされて出力される**が、workflow の run コマンドで `echo $SHOGI_API_KEY` は絶対に書かない（マスクはあくまで既知の文字列に対する後処理）
