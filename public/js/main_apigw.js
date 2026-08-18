@@ -7,6 +7,13 @@ $(function(){
   // サーバーのWarmUp -> deleted
 });
 
+// 認識APIの送信先: βページ(site-beta.js)と同じ alpha API(shogiapi-green直結)。
+// 従来の api.nkkuma.tokyo(gamma行き)は BLUE_COMPAT=1 が model パラメータを検証ごと破棄するため、
+// model=v3/decoder=1 を送っても効かない(2026-08-19 実測・応答バイト一致)。
+// 審査明けのgamma整理で経路を正式化するまでのつなぎ。
+var RECOGNIZE_API_URL = 'https://scv8fb0ca0.execute-api.ap-northeast-1.amazonaws.com/alpha/recognize';
+var RECOGNIZE_API_KEY = '__ALPHA_API_KEY__'; // デプロイ時に注入(deploy.sh / GitHub Actions deploy-s3.yml)
+
 var fix_place = 'done';
 
 function ban_click(string){
@@ -129,10 +136,10 @@ function file_upload(){
 
     // POSTでアップロード
     $.ajax({
-        url : "https://api.nkkuma.tokyo/recognize",
+        url : RECOGNIZE_API_URL,
         type : "POST",
         headers: {
-          "x-api-key": "__API_KEY__"
+          "x-api-key": RECOGNIZE_API_KEY
         },
         data : formdata,
         cache       : false,
