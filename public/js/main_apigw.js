@@ -7,6 +7,13 @@ $(function(){
   // サーバーのWarmUp -> deleted
 });
 
+// 認識APIの送信先: βページ(site-beta.js)と同じ alpha API(shogiapi-green直結)。
+// 従来の api.nkkuma.tokyo(gamma行き)は BLUE_COMPAT=1 が model パラメータを検証ごと破棄するため、
+// model=v3/decoder=1 を送っても効かない(2026-08-19 実測・応答バイト一致)。
+// 審査明けのgamma整理で経路を正式化するまでのつなぎ。
+var RECOGNIZE_API_URL = 'https://scv8fb0ca0.execute-api.ap-northeast-1.amazonaws.com/alpha/recognize';
+var RECOGNIZE_API_KEY = '__ALPHA_API_KEY__'; // デプロイ時に注入(deploy.sh / GitHub Actions deploy-s3.yml)
+
 var fix_place = 'done';
 
 function ban_click(string){
@@ -118,14 +125,21 @@ function file_upload(){
     // フォームデータを取得
     var result_place = document.getElementById('board');
     var formdata = new FormData($('#myform').get(0));
-    formdata.set('upfile',blobdata)    
+    formdata.set('upfile',blobdata)
+    // 駒認識モデルをv3(再学習モデルr5世代)に指定する。
+    // 未指定だとAPI既定の旧v1が動く(golden104実測: v1=完全一致57.69% / v3+デコーダ=94.23%)
+    formdata.set('model','v3');
+    // 制約付きデコーダ(最小費用流)。model=v3のときのみ有効。
+    // golden104実測: v3単体 93.27% → v3+デコーダ 94.23%(盤ごと崩れる写真が0枚になる)
+    // レイテンシは1枚あたり約+0.6秒(ローカル計測)
+    formdata.set('decoder','1');
 
     // POSTでアップロード
     $.ajax({
-        url : "https://api.nkkuma.tokyo/recognize",
+        url : RECOGNIZE_API_URL,
         type : "POST",
         headers: {
-          "x-api-key": "__API_KEY__"
+          "x-api-key": RECOGNIZE_API_KEY
         },
         data : formdata,
         cache       : false,
