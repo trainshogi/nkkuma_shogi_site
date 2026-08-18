@@ -260,6 +260,7 @@ body[data-state="error"] [data-role="reset"] { display: flex; }
 .hand--gote .chip .koma { transform: rotate(180deg); }
 .chip .cnt { font-size: 11px; color: var(--muted); }
 .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chip.selected { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* ---------- 編集パレット ---------- */
 .palette {
@@ -296,6 +297,17 @@ body[data-state="error"] [data-role="reset"] { display: flex; }
 .pcell.current { outline: 2px solid var(--accent); outline-offset: -2px; }
 .pcell.empty { color: var(--muted); }
 .palette-close { margin-top: 6px; width: 100%; }
+
+/* 持駒の枚数ピッカー（chipタップで#paletteに表示） */
+.picker-head {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.pnum {
+  font-family: inherit; /* 数字はゴシックのまま */
+  font-size: 16px;
+}
 
 /* ---------- 手番セグメント ---------- */
 .segment {

@@ -158,7 +158,8 @@
     result: null,        // APIレスポンスと同形 { ban_result, sente_mochi, gote_mochi, teban }
     photoUrl: null,      // objectURL
     blob: null,          // 圧縮後Blob
-    selectedPos: null    // 編集中のマス "<筋><段>"
+    selectedPos: null,   // 編集中のマス "<筋><段>"
+    selectedHand: null   // 編集中の持駒 { side: 'sente'|'gote', koma: 'fu'.. }
   };
 
   var els = {};
@@ -236,6 +237,9 @@
       var chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'chip' + (cnt === 0 ? ' zero' : '');
+      if (state.selectedHand && state.selectedHand.side === side && state.selectedHand.koma === code) {
+        chip.classList.add('selected');
+      }
       chip.setAttribute('data-side', side);
       chip.setAttribute('data-koma', code);
       var koma = document.createElement('span');
@@ -286,6 +290,7 @@
   // ===== 盤マス編集 =====
   function openPalette(pos) {
     state.selectedPos = pos;
+    state.selectedHand = null;
     var cur = state.result.ban_result[pos];
     var pal = els.palette;
     pal.innerHTML = '';
@@ -354,11 +359,23 @@
   function closePalette() {
     els.palette.hidden = true;
     state.selectedPos = null;
+    state.selectedHand = null;
     renderBoard();
   }
 
   // ===== 持駒編集 =====
-  function bumpMochi(side, code) {
+  // タップで+1のインクリメント式をやめ、枚数(0〜上限)を直接タップで選ぶ。
+  // 認識結果が上限超え(例: 角×3)で来ても表示はそのまま維持し、
+  // 選択肢にはルール上ありえる枚数(0〜上限)だけを出す。
+  function openHandPicker(side, code) {
+    // 同じチップの再タップで閉じる（トグル）
+    if (state.selectedHand && state.selectedHand.side === side && state.selectedHand.koma === code) {
+      closePalette();
+      return;
+    }
+    state.selectedPos = null;
+    state.selectedHand = { side: side, koma: code };
+
     var key = side === 'sente' ? 'sente_mochi' : 'gote_mochi';
     var mochi = state.result[key];
     var cur = 0;
@@ -366,13 +383,58 @@
       cur = mochi[code] === '' ? 1 : Number(mochi[code]);
     }
     var max = HAND_MAX[code];
-    var next = (cur + 1) % (max + 1);
-    if (next === 0) {
-      delete mochi[code];
-    } else {
-      mochi[code] = next;
+    var kanji = HAND_KANJI[HAND_KOMA.indexOf(code)];
+
+    var pal = els.palette;
+    pal.innerHTML = '';
+
+    var head = document.createElement('div');
+    head.className = 'picker-head';
+    head.textContent = (side === 'sente' ? '先手' : '後手') + 'の持駒「' + kanji + '」の枚数を選ぶ';
+    if (cur > max) {
+      head.textContent += '（いま×' + cur + '、ルール上の上限は' + max + '枚）';
     }
-    renderHand(side);
+    pal.appendChild(head);
+
+    var grid = document.createElement('div');
+    grid.className = 'palette-row numgrid';
+    for (var n = 0; n <= max; n++) {
+      grid.appendChild(makeNcell(n, cur));
+    }
+    pal.appendChild(grid);
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'btn palette-close';
+    close.textContent = '閉じる';
+    close.addEventListener('click', closePalette);
+    pal.appendChild(close);
+
+    pal.hidden = false;
+    renderBoard(); // チップのハイライト反映
+  }
+
+  function makeNcell(n, cur) {
+    var cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'pcell pnum';
+    cell.textContent = String(n);
+    if (n === cur) { cell.classList.add('current'); }
+    cell.addEventListener('click', function () { applyHandCount(n); });
+    return cell;
+  }
+
+  function applyHandCount(n) {
+    var sel = state.selectedHand;
+    if (!sel) { return; }
+    var key = sel.side === 'sente' ? 'sente_mochi' : 'gote_mochi';
+    var mochi = state.result[key];
+    if (n === 0) {
+      delete mochi[sel.koma];
+    } else {
+      mochi[sel.koma] = n;
+    }
+    closePalette();
   }
 
   // ===== 手番 =====
@@ -551,6 +613,7 @@
       teban: data.teban || 'sente'
     };
     state.selectedPos = null;
+    state.selectedHand = null;
     els.palette.hidden = true;
     renderAll();
     setState('done');
@@ -561,6 +624,7 @@
     clearPhoto();
     state.result = null;
     state.selectedPos = null;
+    state.selectedHand = null;
     els.palette.hidden = true;
     els.fileInput.value = '';
     setState('empty');
@@ -610,11 +674,11 @@
       openPalette(sq.getAttribute('data-pos'));
     });
 
-    // 持駒クリック（委譲）
+    // 持駒クリック（委譲）: 枚数ピッカーを開く
     document.querySelector('.board-unit').addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
       if (!chip) { return; }
-      bumpMochi(chip.getAttribute('data-side'), chip.getAttribute('data-koma'));
+      openHandPicker(chip.getAttribute('data-side'), chip.getAttribute('data-koma'));
     });
 
     // 手番セグメント
@@ -655,6 +719,13 @@
 
     // デバッグフック（本番でも無害）
     window.__debugSetResult = function (json) { applyResult(json); };
+    window.__debugGetResult = function () {
+      return {
+        result: state.result,
+        kif: state.result ? json_to_kif(state.result) : null,
+        sfen: state.result ? json_to_sfen(state.result) : null
+      };
+    };
   }
 
   if (document.readyState === 'loading') {
