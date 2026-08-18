@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!-- 公式使い方ガイド(現行トップ=新デザイン向け)。
+     記載している撮影条件は 2026-08-19 に現行エンジン(v3+制約デコーダ)で実測確認したものだけに限る。
+     根拠: 正解ラベル付き実会場写真5枚 × 回転/余白の統制実験(横長フレーム可・横倒し不可・余白30%増可・盤縮小で劣化)。 -->
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-BG7XXMB0B1');
+    </script>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="使い方ガイド | ShogiBan to Kif">
+    <meta property="og:description" content="将棋盤の写真からKIF・SFENを作るまでの公式ガイド。撮り方のコツ、結果の直し方、書き出しまで。">
+    <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+    <meta property="og:url" content="https://shogi.nkkuma.tokyo/howto.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="将棋盤認識サイト">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@nkkuma_service">
+
+    <title>使い方ガイド | Shogiban to Kif</title>
+    <meta name="description" content="将棋盤の写真からKIF・SFENを作るまでの公式ガイド。撮り方のコツ、認識結果の直し方、書き出し方法を説明します。">
+
+    <link href="css/site.css" rel="stylesheet">
+    <style>
+      /* このページ専用のスタイル。site.css には手を入れない */
+      .guide-head { margin: 16px 0 8px; }
+      .backlink {
+        display: inline-block;
+        font-size: 14px;
+        color: var(--muted);
+        text-decoration: none;
+        margin-bottom: 12px;
+      }
+      .backlink:active { color: var(--text); }
+      .guide-head h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        line-height: 1.3;
+      }
+      .lead {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.8;
+        color: var(--text);
+      }
+      .g-sec {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 16px;
+        margin: 16px 0;
+        background: #fff;
+      }
+      .g-sec h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 10px;
+        font-size: 18px;
+        line-height: 1.4;
+      }
+      .g-no {
+        flex: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .g-sec p {
+        margin: 10px 0;
+        font-size: 14.5px;
+        line-height: 1.9;
+      }
+      .g-sec h3 {
+        margin: 16px 0 4px;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .g-sec ul {
+        margin: 8px 0;
+        padding-left: 20px;
+        font-size: 14.5px;
+        line-height: 1.9;
+      }
+      .g-sec li { margin: 4px 0; }
+      .g-note {
+        margin: 12px 0 2px;
+        padding: 10px 12px;
+        border-left: 3px solid var(--accent);
+        background: var(--soft);
+        border-radius: 0 8px 8px 0;
+        font-size: 13.5px;
+        line-height: 1.8;
+      }
+      .g-ok { color: #1a7f37; font-weight: 700; }
+      .g-ng { color: var(--accent); font-weight: 700; }
+      .g-kw { font-weight: 700; }
+      .g-btnname {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--soft);
+        padding: 1px 7px;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .guide-foot {
+        text-align: center;
+        margin: 24px 0 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .guide-foot a { color: var(--muted); }
+      .guide-cta { margin: 20px 0; }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="guide-head">
+        <a class="backlink" href="./">← トップへ戻る</a>
+        <h1>使い方ガイド</h1>
+        <p class="lead">
+          対局が終わった盤を、崩す前に1枚撮っておく。その写真から盤面を読み取って、KIFやSFENの局面データにできます。うまく読めるかどうかは、実は変換ボタンを押す前にほぼ決まっています。気をつけることは3つだけです。
+        </p>
+      </header>
+
+      <section class="g-sec">
+        <h2><span class="g-no">1</span>盤の撮り方</h2>
+
+        <h3>盤全体を入れる</h3>
+        <p>
+          9×9のマスがすべて写っていることが前提です。盤のわきの駒台まで入れておくと、持ち駒の読み取りも試みます。
+        </p>
+
+        <h3>盤の向きをまっすぐに</h3>
+        <p>
+          自分の側から、駒の文字が画面の上下と合う向きで撮ります。写真が縦長でも横長でもかまいません。ただし、盤が横に倒れた向きで写っていると読めません。真上から見下ろす位置が撮りやすいですが、少しななめからの写真でも読めます。
+        </p>
+
+        <h3>寄って撮る</h3>
+        <p>
+          盤のまわりに机や畳が写っていても問題ありません。切り取ってから送る必要もありません。ただし、遠くから撮って盤が小さく写ると間違いが増えます。盤が画面の大半を占めるくらいが目安です。
+        </p>
+
+        <div class="g-note">
+          以前は「写真は縦向きで」「盤のまわりを切り取ってから」と案内されることがありました。現在の認識エンジンでは、どちらも必要ありません。<span class="g-ok">横長の写真も、余白のある写真も、そのまま送れます。</span>
+        </div>
+      </section>
+
+      <section class="g-sec">
+        <h2><span class="g-no">2</span>アップロードして変換する</h2>
+        <p>
+          トップページの<span class="g-btnname">📷 撮影する</span>を押すと、その場でカメラが起動します。撮ってあった写真を使うなら<span class="g-btnname">🖼 画像を選ぶ</span>です。
+        </p>
+        <p>
+          選んだ写真が画面に表示されたら、<span class="g-btnname">変換する</span>を押してください。読み取りが終わると盤面が表示されます。「認識できませんでした」と表示されたときは、<span class="g-kw">1</span>の要領で撮り直してみてください。
+        </p>
+      </section>
+
+      <section class="g-sec">
+        <h2><span class="g-no">3</span>結果を確かめる</h2>
+        <p>
+          表示されるのは、盤面・持ち駒・手番の3つです。ここで一度、元の写真と見比べてください。認識は間違えることがあります。書き出す前にその場で直せるのが、この画面の役どころです。
+        </p>
+      </section>
+
+      <section class="g-sec">
+        <h2><span class="g-no">4</span>間違いを直す</h2>
+
+        <h3>盤上の駒</h3>
+        <p>
+          違っているマスをタップすると、駒の一覧が開きます。正しい駒を選ぶと置き換わります。駒のないマスにしたいときは、一覧の先頭にある空白を選びます。
+        </p>
+
+        <h3>持ち駒</h3>
+        <p>
+          駒台の駒をタップすると、枚数の一覧が開きます。正しい枚数の数字を選んで直せます。
+        </p>
+
+        <h3>手番</h3>
+        <p>
+          <span class="g-btnname">先手番</span>と<span class="g-btnname">後手番</span>のボタンで、どちらが指す番かを選びます。
+        </p>
+      </section>
+
+      <section class="g-sec">
+        <h2><span class="g-no">5</span>書き出す</h2>
+        <ul>
+          <li><span class="g-kw">検討アプリで開く</span> — <span class="g-btnname">ぴよ将棋</span>または<span class="g-btnname">KENTO</span>のボタンを押すと、直した局面をそのまま検討に持ち込めます。</li>
+          <li><span class="g-kw">KIF / SFEN</span> — 形式を選んで<span class="g-btnname">コピー</span>か<span class="g-btnname">ファイル保存</span>。他の将棋アプリに局面を渡せます。</li>
+          <li><span class="g-kw">局面画像</span> — <span class="g-btnname">📤 画像でシェア</span>や<span class="g-btnname">画像を保存</span>で、局面図を画像として残せます。</li>
+        </ul>
+      </section>
+
+      <section class="g-sec">
+        <h2><span class="g-no">6</span>認識できないとき</h2>
+        <p>読み取りに失敗する、または間違いが多いときは、次の順に確かめてから撮り直してください。</p>
+        <ul>
+          <li>盤の一部が写真から切れていないか</li>
+          <li>盤が<span class="g-ng">横倒し・上下逆</span>に写っていないか</li>
+          <li>盤が小さく写りすぎていないか（寄って撮る）</li>
+          <li>駒が手や物で隠れていないか</li>
+        </ul>
+        <p>
+          それでも読めない写真があれば、<a href="/faq.html">FAQ</a>もあわせてご覧ください。
+        </p>
+      </section>
+
+      <div class="actions guide-cta">
+        <a class="btn btn-cta" href="./" style="text-decoration:none;">トップへ戻って試す</a>
+      </div>
+
+      <p class="lead" style="font-size:14px; color:var(--muted);">
+        このページは現在のトップページの説明です。以前のデザインをお使いの場合は、<a href="./classic.html">こちら</a>から同じ機能を利用できます（画面と操作が異なります）。
+      </p>
+
+      <footer class="guide-foot">
+        <p>
+          &copy; 2025 Shogiban to Kif |
+          <a href="/privacy.html">プライバシーポリシー・利用規約</a>
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
