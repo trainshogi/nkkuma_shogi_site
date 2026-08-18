@@ -17,7 +17,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta property="og:title" content="将棋盤認識サイト | ShogiBan to Kif">
+    <meta property="og:title" content="将棋盤認識サイト | Shogiban to Kif">
     <meta property="og:description" content="将棋盤の写真から自動で盤面を認識してKIFに変換します。無料・登録不要。">
     <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
     <meta property="og:url" content="https://shogi.nkkuma.tokyo/">
@@ -26,8 +26,43 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@nkkuma_service">
 
-    <title>Shogiban to Kif developed by えぬっくま</title>
-    <meta name="description" content="将棋盤画像認識サイト。写真を撮ってKIF形式局面を作成しよう！">
+    <title>Shogiban to Kif — 将棋盤の写真をKIFに変換・kif解析/確認 | えぬっくま</title>
+    <meta name="description" content="将棋盤の写真を撮るだけでKIF形式・SFENに自動変換する無料サービス。登録不要。認識結果はタップで修正でき、作ったkifはそのままKENTOやぴよ将棋で解析・検討できます。">
+    <link rel="canonical" href="https://shogi.nkkuma.tokyo/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Shogiban to Kif",
+      "alternateName": "将棋盤認識サイト",
+      "url": "https://shogi.nkkuma.tokyo/",
+      "description": "将棋盤の写真から盤面を自動認識してKIF形式・SFEN形式に変換する無料のWebサービス。登録不要。認識結果はタップで修正でき、ぴよ将棋・KENTOへそのまま連携できる。",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "JavaScriptが有効なスマートフォン・PCのブラウザ",
+      "inLanguage": "ja",
+      "image": "https://shogi.nkkuma.tokyo/ogp.png",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      },
+      "featureList": [
+        "将棋盤の写真からの盤面自動認識",
+        "KIF形式・SFEN形式での出力(コピー・ファイル保存)",
+        "認識結果のタップ修正",
+        "ぴよ将棋・KENTOへの連携(解析・検討)",
+        "局面画像の保存・シェア"
+      ],
+      "author": {
+        "@type": "Person",
+        "name": "佐藤旭",
+        "alternateName": "えぬっくま",
+        "url": "https://shogi.nkkuma.tokyo/about.html"
+      }
+    }
+    </script>
 
     <link href="css/site.css" rel="stylesheet">
   </head>
@@ -136,6 +171,60 @@
       <div class="actions" data-role="reset">
         <button type="button" class="btn" id="btn-reset">最初からやり直す</button>
       </div>
+
+      <!-- サービス説明とFAQ(静的テキスト。認識機能のJSとは無関係・全状態で常時表示) -->
+      <section class="site-about" style="margin:36px auto 0; max-width:640px; padding:0 8px; font-size:14px; line-height:1.9; color:#444; text-align:left;">
+        <h2 style="font-size:16px; margin:0 0 8px;">Shogiban to Kif とは</h2>
+        <p style="margin:0 0 10px;">Shogiban to Kif（将棋盤認識サイト）は、将棋盤の写真から盤面を自動で読み取り、KIF形式・SFEN形式に変換する無料のWebサービスです。感想戦の局面を検討アプリに移したいとき、詰将棋や次の一手の図面を残したいとき、盤を一マスずつ入力し直す必要はありません。写真を1枚撮って、変換ボタンを押すだけです。</p>
+        <p style="margin:0 0 10px;">認識結果はその場で盤面として表示され、違っている駒はタップで直せます。できあがった局面はKIFやSFENでコピー・保存できるほか、ぴよ将棋やKENTOにそのまま送って解析・検討を続けられます。</p>
+
+        <h2 style="font-size:16px; margin:24px 0 8px;">よくある質問</h2>
+        <dl style="margin:0;">
+          <dt style="font-weight:bold; margin:12px 0 4px;">利用は無料ですか？登録は必要ですか？</dt>
+          <dd style="margin:0;">無料で、会員登録も不要です。アプリのインストールもいらず、スマートフォンやPCのブラウザだけで使えます。</dd>
+          <dt style="font-weight:bold; margin:12px 0 4px;">どんな形式で書き出せますか？</dt>
+          <dd style="margin:0;">KIF形式とSFEN形式に対応しています。テキストのコピー・ファイル保存のほか、局面を画像として保存・シェアすることもできます。</dd>
+          <dt style="font-weight:bold; margin:12px 0 4px;">作ったkifの解析はできますか？</dt>
+          <dd style="margin:0;">変換した局面は、ボタンひとつでKENTOやぴよ将棋に渡せます。エンジンによる解析や検討はそちらでそのまま続けられます。</dd>
+          <dt style="font-weight:bold; margin:12px 0 4px;">写真1枚から指し手つきの棋譜も作れますか？</dt>
+          <dd style="margin:0;">写真1枚から作れるのは、その時点の局面です。1局分の指し手つき棋譜が必要な場合は、対局を動画で撮って変換する<a href="/video.html">動画まるごと棋譜化（β版）</a>をお使いください。</dd>
+          <dt style="font-weight:bold; margin:12px 0 4px;">認識が間違っていたらどうすればいいですか？</dt>
+          <dd style="margin:0;">盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは<a href="/howto.html">使い方ガイド</a>と<a href="/blog/photo-tips.html">撮り方のコツ</a>をご覧ください。</dd>
+        </dl>
+      </section>
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "利用は無料ですか？登録は必要ですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "無料で、会員登録も不要です。アプリのインストールもいらず、スマートフォンやPCのブラウザだけで使えます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "どんな形式で書き出せますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "KIF形式とSFEN形式に対応しています。テキストのコピー・ファイル保存のほか、局面を画像として保存・シェアすることもできます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "作ったkifの解析はできますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "変換した局面は、ボタンひとつでKENTOやぴよ将棋に渡せます。エンジンによる解析や検討はそちらでそのまま続けられます。" }
+          },
+          {
+            "@type": "Question",
+            "name": "写真1枚から指し手つきの棋譜も作れますか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "写真1枚から作れるのは、その時点の局面です。1局分の指し手つき棋譜が必要な場合は、対局を動画で撮って変換する「動画まるごと棋譜化（β版）」をお使いください。" }
+          },
+          {
+            "@type": "Question",
+            "name": "認識が間違っていたらどうすればいいですか？",
+            "acceptedAnswer": { "@type": "Answer", "text": "盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは使い方ガイドと撮り方のコツの記事をご覧ください。" }
+          }
+        ]
+      }
+      </script>
 
       <!-- 7. フッター -->
       <footer class="site-foot">
