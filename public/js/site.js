@@ -4,8 +4,12 @@
   'use strict';
 
   // ===== 定数 =====
-  var API_URL = 'https://api.nkkuma.tokyo/recognize';
-  var API_KEY = '__API_KEY__';
+  // 認識APIの送信先: index(main_apigw.js)/β(site-beta.js)と同じ alpha API(shogiapi-green直結)。
+  // 従来の api.nkkuma.tokyo(gamma行き)は BLUE_COMPAT=1 が model パラメータを検証ごと破棄するため、
+  // model=v3/decoder=1 を送っても効かない(2026-08-19 実測・応答バイト一致)。
+  // 審査明けのgamma整理で経路を正式化するまでのつなぎ。
+  var API_URL = 'https://scv8fb0ca0.execute-api.ap-northeast-1.amazonaws.com/alpha/recognize';
+  var API_KEY = '__ALPHA_API_KEY__'; // デプロイ時に注入(deploy.sh / GitHub Actions deploy-s3.yml)
   var PIYO_SAVE_URL = 'https://us-central1-shogiban2kif.cloudfunctions.net/save_kif';
   var KENTO_URL = 'https://www.kento-shogi.com/?initpos=';
 
@@ -512,6 +516,13 @@
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
     fd.append('hidden_sengo', 'true');
+    // 駒認識モデルをv3(再学習モデルr5世代)に指定する。
+    // 未指定だとAPI既定の旧v1が動く(golden104実測: v1=完全一致57.69% / v3+デコーダ=94.23%)
+    fd.append('model', 'v3');
+    // 制約付きデコーダ(最小費用流)。model=v3のときのみ有効。
+    // golden104実測: v3単体 93.27% → v3+デコーダ 94.23%(盤ごと崩れる写真が0枚になる)
+    // レイテンシは1枚あたり約+0.6秒(ローカル計測)
+    fd.append('decoder', '1');
 
     fetch(API_URL, {
       method: 'POST',
