@@ -118,7 +118,10 @@ function file_upload(){
     // フォームデータを取得
     var result_place = document.getElementById('board');
     var formdata = new FormData($('#myform').get(0));
-    formdata.set('upfile',blobdata)    
+    formdata.set('upfile',blobdata)
+    // 駒認識モデルをv3(再学習モデルr5世代)に指定する。
+    // 未指定だとAPI既定の旧v1が動く(golden104実測: v1=完全一致57.69% / v3+デコーダ=94.23%)
+    formdata.set('model','v3');
 
     // POSTでアップロード
     $.ajax({
