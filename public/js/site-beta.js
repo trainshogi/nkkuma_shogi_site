@@ -641,6 +641,7 @@
     fd.append('hidden_sengo', '0');       // API仕様更新: 手番は0固定(先手基準)
     fd.append('mode', 'all');             // API仕様更新: mode 必須
     fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替(API推奨v2)
+    fd.append('decoder', '1'); // 制約付きデコーダ(最小費用流。model=v3のみ有効)。golden104実測: v3単体93.27%→v3+デコーダ94.23%。本番写真ページ(PR#64)と同構成
     fd.append('waku', state.wakuVersion);   // 枠検出 v1/v2
     fd.append('mochi_crop', state.mochiCropVersion); // 持ち駒認識エンジン v1/v2(API推奨v2)
     fd.append('mochi_ocr', state.mochiOcr ? '1' : '0'); // 持ち駒個数OCR(API推奨1)
