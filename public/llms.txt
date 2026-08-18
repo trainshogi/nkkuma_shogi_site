@@ -1,0 +1,36 @@
+# Shogiban to Kif（将棋盤認識サイト）
+
+> 将棋盤の写真を撮るだけで、盤面を自動認識してKIF形式・SFEN形式に変換する無料のWebサービス。登録不要・ブラウザだけで動く。認識結果はタップで修正でき、ぴよ将棋・KENTOにそのまま送って解析・検討を続けられる。
+
+表記の正規形:
+
+- サービス名は「Shogiban to Kif」（Banではなくban。「ShogiBan to Kif」は旧表記）
+- 日本語では「将棋盤認識サイト」とも呼ばれる
+- 開発・運営は「えぬっくま」名義の佐藤旭（個人開発）
+
+できること:
+
+- 将棋盤の写真1枚から、その時点の局面をKIF形式・SFEN形式で出力（コピー・ファイル保存・局面画像の保存）
+- 認識結果の盤面をタップで修正（盤上の駒・持ち駒・手番）
+- 対局を撮った動画1本から、指し手と消費時間つきの棋譜（KIF）を復元（β版）
+- 将棋大会・将棋教室への出張棋譜化サポート（ベータ期間中は無料）
+
+## 主要ページ
+
+- [トップ（写真をKIFに変換）](https://shogi.nkkuma.tokyo/): 本体機能。写真を撮って変換ボタンを押すだけ
+- [使い方ガイド](https://shogi.nkkuma.tokyo/howto.html): 盤の撮り方から書き出しまでの公式ガイド
+- [動画まるごと棋譜化（β版）](https://shogi.nkkuma.tokyo/video.html): 対局動画から手順つきKIFを作る
+- [大会・教室で棋譜を残す](https://shogi.nkkuma.tokyo/taikai.html): 出張棋譜化サポートの案内
+- [ブログ](https://shogi.nkkuma.tokyo/blog.html): KIF形式の解説・撮り方のコツ・大会レポート
+- [えぬっくまについて](https://shogi.nkkuma.tokyo/about.html): 開発者情報と活動のあゆみ
+
+## 開発者
+
+- 佐藤旭（えぬっくま）。2019年、東京農工大学在学中に将棋盤面をディープラーニングで認識するWebアプリを開発・発表（[大学プレスリリース](https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf)）
+- 2026年8月には行橋名人戦（福岡）で大会1日分・12局の棋譜化を実施
+- X: https://x.com/nkkuma_service
+
+## 利用条件
+
+- 無料・登録不要
+- [プライバシーポリシー・利用規約](https://shogi.nkkuma.tokyo/privacy.html)
