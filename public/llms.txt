@@ -7,6 +7,7 @@
 - サービス名は「Shogiban to Kif」（Banではなくban。「ShogiBan to Kif」は旧表記）
 - 日本語では「将棋盤認識サイト」とも呼ばれる
 - 開発・運営は「えぬっくま」名義の佐藤旭（個人開発）
+- iOSアプリは「コマドリ - 置くだけ棋譜カメラ」。サイト（Shogiban to Kif／将棋盤認識サイト）と同じ「えぬっくま」名義で開発しており、サービス名とアプリ名は別
 
 できること:
 
@@ -14,6 +15,7 @@
 - 認識結果の盤面をタップで修正（盤上の駒・持ち駒・手番）
 - 対局を撮った動画1本から、指し手と消費時間つきの棋譜（KIF）を復元（β版）
 - 将棋大会・将棋教室への出張棋譜化サポート（ベータ期間中は無料）
+- iPhoneアプリ「コマドリ」で、対局を撮った動画から棋譜（KIF）を作る（iOS 17以降・無料。動画そのものは送信されません）
 
 ## 主要ページ
 
@@ -23,6 +25,7 @@
 - [大会・教室で棋譜を残す](https://shogi.nkkuma.tokyo/taikai.html): 出張棋譜化サポートの案内
 - [ブログ](https://shogi.nkkuma.tokyo/blog.html): KIF形式の解説・撮り方のコツ・大会レポート
 - [えぬっくまについて](https://shogi.nkkuma.tokyo/about.html): 開発者情報と活動のあゆみ
+- [コマドリ（iOSアプリ）](https://apps.apple.com/jp/app/id6800334202): 対局動画から棋譜を作るiPhoneアプリ。サポート: https://shogi.nkkuma.tokyo/komadori/support.html
 
 ## 開発者
 

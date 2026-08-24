@@ -64,6 +64,21 @@
     }
     </script>
 
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MobileApplication",
+      "name": "コマドリ - 置くだけ棋譜カメラ",
+      "operatingSystem": "iOS 17.0以降",
+      "applicationCategory": "UtilitiesApplication",
+      "inLanguage": "ja",
+      "installUrl": "https://apps.apple.com/jp/app/id6800334202",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+      "author": { "@type": "Person", "name": "佐藤旭", "alternateName": "えぬっくま",
+                  "url": "https://shogi.nkkuma.tokyo/about.html" }
+    }
+    </script>
+
     <link href="css/site.css" rel="stylesheet">
   </head>
   <body data-state="empty">
@@ -174,23 +189,33 @@
 
       <!-- サービス説明とFAQ(静的テキスト。認識機能のJSとは無関係・全状態で常時表示) -->
       <section class="site-about" style="margin:36px auto 0; max-width:640px; padding:0 8px; font-size:14px; line-height:1.9; color:#444; text-align:left;">
-        <h2 style="font-size:16px; margin:0 0 8px;">Shogiban to Kif とは</h2>
-        <p style="margin:0 0 10px;">Shogiban to Kif（将棋盤認識サイト）は、将棋盤の写真から盤面を自動で読み取り、KIF形式・SFEN形式に変換する無料のWebサービスです。感想戦の局面を検討アプリに移したいとき、詰将棋や次の一手の図面を残したいとき、盤を一マスずつ入力し直す必要はありません。写真を1枚撮って、変換ボタンを押すだけです。</p>
-        <p style="margin:0 0 10px;">認識結果はその場で盤面として表示され、違っている駒はタップで直せます。できあがった局面はKIFやSFENでコピー・保存できるほか、ぴよ将棋やKENTOにそのまま送って解析・検討を続けられます。</p>
+        <details>
+          <summary style="font-size:16px; font-weight:bold; margin:0 0 8px; cursor:pointer;">Shogiban to Kif とは</summary>
+          <p style="margin:8px 0 10px;">Shogiban to Kif（将棋盤認識サイト）は、将棋盤の写真から盤面を自動で読み取り、KIF形式・SFEN形式に変換する無料のWebサービスです。感想戦の局面を検討アプリに移したいとき、詰将棋や次の一手の図面を残したいとき、盤を一マスずつ入力し直す必要はありません。写真を1枚撮って、変換ボタンを押すだけです。</p>
+          <p style="margin:0 0 10px;">認識結果はその場で盤面として表示され、違っている駒はタップで直せます。できあがった局面はKIFやSFENでコピー・保存できるほか、ぴよ将棋やKENTOにそのまま送って解析・検討を続けられます。</p>
+        </details>
 
         <h2 style="font-size:16px; margin:24px 0 8px;">よくある質問</h2>
-        <dl style="margin:0;">
-          <dt style="font-weight:bold; margin:12px 0 4px;">利用は無料ですか？登録は必要ですか？</dt>
-          <dd style="margin:0;">無料で、会員登録も不要です。アプリのインストールもいらず、スマートフォンやPCのブラウザだけで使えます。</dd>
-          <dt style="font-weight:bold; margin:12px 0 4px;">どんな形式で書き出せますか？</dt>
-          <dd style="margin:0;">KIF形式とSFEN形式に対応しています。テキストのコピー・ファイル保存のほか、局面を画像として保存・シェアすることもできます。</dd>
-          <dt style="font-weight:bold; margin:12px 0 4px;">作ったkifの解析はできますか？</dt>
-          <dd style="margin:0;">変換した局面は、ボタンひとつでKENTOやぴよ将棋に渡せます。エンジンによる解析や検討はそちらでそのまま続けられます。</dd>
-          <dt style="font-weight:bold; margin:12px 0 4px;">写真1枚から指し手つきの棋譜も作れますか？</dt>
-          <dd style="margin:0;">写真1枚から作れるのは、その時点の局面です。1局分の指し手つき棋譜が必要な場合は、対局を動画で撮って変換する<a href="/video.html">動画まるごと棋譜化（β版）</a>をお使いください。</dd>
-          <dt style="font-weight:bold; margin:12px 0 4px;">認識が間違っていたらどうすればいいですか？</dt>
-          <dd style="margin:0;">盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは<a href="/howto.html">使い方ガイド</a>と<a href="/blog/photo-tips.html">撮り方のコツ</a>をご覧ください。</dd>
-        </dl>
+        <details style="margin:12px 0 0;">
+          <summary style="font-weight:bold; cursor:pointer;">利用は無料ですか？登録は必要ですか？</summary>
+          <p style="margin:4px 0 0;">無料で、会員登録も不要です。アプリのインストールもいらず、スマートフォンやPCのブラウザだけで使えます。</p>
+        </details>
+        <details style="margin:12px 0 0;">
+          <summary style="font-weight:bold; cursor:pointer;">どんな形式で書き出せますか？</summary>
+          <p style="margin:4px 0 0;">KIF形式とSFEN形式に対応しています。テキストのコピー・ファイル保存のほか、局面を画像として保存・シェアすることもできます。</p>
+        </details>
+        <details style="margin:12px 0 0;">
+          <summary style="font-weight:bold; cursor:pointer;">作ったkifの解析はできますか？</summary>
+          <p style="margin:4px 0 0;">変換した局面は、ボタンひとつでKENTOやぴよ将棋に渡せます。エンジンによる解析や検討はそちらでそのまま続けられます。</p>
+        </details>
+        <details style="margin:12px 0 0;">
+          <summary style="font-weight:bold; cursor:pointer;">写真1枚から指し手つきの棋譜も作れますか？</summary>
+          <p style="margin:4px 0 0;">写真1枚から作れるのは、その時点の局面です。1局分の指し手つき棋譜が必要な場合は、対局を動画で撮って変換する<a href="/video.html">動画まるごと棋譜化（β版）</a>をお使いください。iPhoneアプリ版「コマドリ」もあります — <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Storeで見る</a></p>
+        </details>
+        <details style="margin:12px 0 0;">
+          <summary style="font-weight:bold; cursor:pointer;">認識が間違っていたらどうすればいいですか？</summary>
+          <p style="margin:4px 0 0;">盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは<a href="/howto.html">使い方ガイド</a>と<a href="/blog/photo-tips.html">撮り方のコツ</a>をご覧ください。</p>
+        </details>
       </section>
       <script type="application/ld+json">
       {
@@ -232,6 +257,7 @@
         <nav style="margin:12px 0; font-size:13.5px; line-height:2;">
           <a href="/video.html">動画まるごと棋譜化（β）</a> ・
           <a href="/beta.html">写真認識 新エンジン版（β）</a><br>
+          <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ(iPhoneアプリ) — App Storeで見る</a><br>
           <a href="/taikai.html">大会・教室で棋譜を残す</a> ・
           <a href="/howto.html">使い方ガイド</a> ・
           <a href="/blog.html">ブログ</a> ・
