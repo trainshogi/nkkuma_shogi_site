@@ -8,6 +8,20 @@
   <!-- 公開判断が出るまで検索には載せない -->
   <meta name="robots" content="noindex, nofollow">
 
+  <!-- Google tag (gtag.js) — 他ページと同じ測定ID (G-BG7XXMB0B1)。
+       ただし page_location はパスだけに固定する: このページのURLは ?kif= / ?sfen= / #u= に
+       棋譜そのものが入り得るため、既定のままだと棋譜がGoogleに送られてしまう。
+       イベントのパラメータにも棋譜・SFEN・USIは一切載せない(件数と流入区別のみ) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1', {
+      page_location: location.origin + location.pathname
+    });
+  </script>
+
   <style>
     /* 見た目は video.html 系と同じデザイン言語(色・角丸・書体)を使う。
        検討室は独立プロダクトだが、行き来する動線を密にするためトーンは揃える */
@@ -191,6 +205,18 @@
   // 形勢判断API(EvalServiceStack)。写真β・動画αと同じ口
   var EVAL_URL = 'https://2f7pfcr1z3.execute-api.ap-northeast-1.amazonaws.com/eval';
   var KIF_KEY = 'studyKif';
+
+  // ---- 計測 (GA4) ----
+  // 送ってよいのは「イベント名・件数・流入区別・何回目か」だけ。
+  // 棋譜(KIF/SFEN/USI)・局面・手数の中身は、どのパラメータにも絶対に載せない。
+  //   entry: この棋譜がどこから来たか (u_hash=アプリ/QR, paste_kif, paste_sfen, url_sfen, url_kif, direct)
+  //   nth:   いま読み込んでいる棋譜で何回目の「候補手を調べる」か(1始まり。分布を後で取る用)
+  var metrics = { entry: 'direct', evalClicks: 0 };
+  function track(name, params) {
+    try {
+      if (typeof window.gtag === 'function') { window.gtag('event', name, params || {}); }
+    } catch (e) {}
+  }
 
   // ---- 将棋の基礎データ (video系と同一の局面表現: ban['75']=' fu' / 'vfu') ----
   var KANJI_1 = { fu: '歩', ky: '香', ke: '桂', gi: '銀', ki: '金', ka: '角', hi: '飛', ou: '玉',
@@ -495,6 +521,7 @@
       viewer.positions.push(cur);
     });
     viewer.evals = new Array(viewer.positions.length).fill(null);
+    metrics.evalClicks = 0; // 棋譜を読み込み直したら「何回目か」を数え直す
     var list = $('move-list');
     list.innerHTML = '';
     viewer.labels.forEach(function (label, i) {
@@ -713,6 +740,8 @@
     var btn = $('btn-study');
     var label = btn.textContent;
     var idx = viewer.idx;
+    metrics.evalClicks += 1;
+    track('study_eval_click', { entry: metrics.entry, nth: metrics.evalClicks });
     study.busy = true;
     btn.disabled = true;
     btn.textContent = '調べています…';
@@ -826,12 +855,18 @@
   $('btn-load').addEventListener('click', function () {
     var t = $('kif-in').value;
     if (!t.trim()) { showError('棋譜が空です。KIFを貼り付けてください。'); return; }
-    if (loadKifText(t)) { showPosition(viewer.positions.length - 1); }
+    if (loadKifText(t)) {
+      metrics.entry = 'paste_kif';
+      track('study_load_kif', { method: 'paste_kif' });
+      showPosition(viewer.positions.length - 1);
+    }
   });
   $('btn-load-sfen').addEventListener('click', function () {
     $('error-box').hidden = true;
     var pos = parseSfen($('sfen-in').value);
     if (!pos) { showError('SFENが読めませんでした。'); return; }
+    metrics.entry = 'paste_sfen';
+    track('study_load_kif', { method: 'paste_sfen' });
     initViewer({ startPos: pos, plies: [], labels: [] });
   });
 
@@ -888,14 +923,28 @@
   // URLパラメータ: #u=... / ?sfen=... / ?kif=...(encodeURIComponent済み)
   var params = new URLSearchParams(location.search);
   var hashU = location.hash.match(/^#u=(.+)$/);
+  // 流入区別: #u= があればアプリ/QR経由。棋譜の中身は送らない(有無だけ)
+  track('study_open', {
+    entry: hashU ? 'u_hash' : params.get('sfen') ? 'url_sfen' :
+           params.get('kif') ? 'url_kif' : 'direct'
+  });
   if (hashU && loadUsiMoves(decodeURIComponent(hashU[1]))) {
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
+    metrics.entry = 'u_hash';
+    track('study_load_kif', { method: 'u_hash' });
   } else if (params.get('sfen')) {
     var p0 = parseSfen(params.get('sfen'));
-    if (p0) { initViewer({ startPos: p0, plies: [], labels: [] }); }
+    if (p0) {
+      metrics.entry = 'url_sfen';
+      track('study_load_kif', { method: 'url_sfen' });
+      initViewer({ startPos: p0, plies: [], labels: [] });
+    }
   } else if (params.get('kif')) {
     $('kif-in').value = params.get('kif');
-    loadKifText(params.get('kif'));
+    if (loadKifText(params.get('kif'))) {
+      metrics.entry = 'url_kif';
+      track('study_load_kif', { method: 'url_kif' });
+    }
   } else {
     // 前回の棋譜を復元(貼り直しの手間を省く)
     try {
