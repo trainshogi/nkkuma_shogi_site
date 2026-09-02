@@ -105,6 +105,13 @@
     .pv-move:hover { background: #f0f5f3; }
     .pv-move.active { background: #cfe5de; border-color: #9ec7bb; }
 
+    /* 壁(検討パス準備中の案内)。売らない段階: 決済導線は置かない */
+    #wall-box { margin-top: 8px; padding: 8px 10px; background: #f2f7f5;
+                border: 1px solid #d5e2dd; border-radius: 8px;
+                font-size: 12.5px; color: #444; line-height: 1.7; }
+    #wall-box p { margin: 0 0 8px; }
+    #wall-box p:last-child { margin-bottom: 0; }
+
     /* PC(900px以上): 盤と指し手/検討を左右に */
     @media (min-width: 900px) {
       main { max-width: 880px; }
@@ -177,6 +184,22 @@
           <button class="btn btn-sm btn-primary" id="btn-study">候補手を調べる</button>
           <button class="btn btn-sm" id="btn-study-close" hidden>盤を戻す</button>
         </div>
+        <!-- 残り回数は最初から見せる(鍵は付けない)。線を見せない無料が毒
+             (.company/marketing/2026-08-29-study-room-pricing.md §5-2 原則2) -->
+        <p class="note" id="study-quota" style="margin:6px 0 0"></p>
+        <!-- 壁(第1段=壁だけ立てて売らない)。文言は同メモ §5-2 の4文構成:
+             1.できた事実 2.続きにあるもの+値段 3.意思表明の頼み 4.何も取り上げないこと。
+             原価・精度・切迫の語は書かない。決済リンクは置かない。
+             文中の「3局面」はスクリプトの FREE_EVAL_POSITIONS と一致させること -->
+        <div id="wall-box" hidden>
+          <p>この棋譜では、無料ぶんの3局面を調べました。ここから先の局面も同じように調べられる「検討パス」(30日300円・自動更新なし)を準備中です。</p>
+          <p>使ってみたい(買うつもりがある)方は、下のボタンで教えてください。押された数を見て、用意するかどうかを決めます。ボタンを押しても、購入や支払いにはなりません。</p>
+          <div class="row">
+            <button class="btn btn-sm" id="btn-wall-intent">検討パスを使うつもり</button>
+            <span class="note" id="wall-intent-done" hidden>ありがとうございます。参考にします。</span>
+          </div>
+          <p>買わなくても、この棋譜の再生・KIFの書き出し・調べた局面の結果は、これまでどおり無料でお使いいただけます。</p>
+        </div>
         <ol id="study-cands"></ol>
         <div id="study-pv"></div>
       </div>
@@ -218,6 +241,41 @@
     try {
       if (typeof window.gtag === 'function') { window.gtag('event', name, params || {}); }
     } catch (e) {}
+  }
+
+  // ---- 壁 (第1段: 壁だけ立てて売らない。.company/marketing/2026-08-29-study-room-pricing.md §6-2) ----
+  // 1棋譜(読み込み単位)につき、無料で調べられるのは3局面まで。
+  // ・数えるのは「局面」: 一度調べた局面をもう一度調べても消費しない
+  // ・数えはブラウザ内のみ。リロードで戻るのは仕様として受け入れる(同メモ §2 案B。
+  //   厳密化にはアカウント基盤が要り、この規模では作らない。サーバー側の暴走上限は別にある)
+  // ・壁では意思表明(study_wall_intent)だけを取る。決済リンクは置かない
+  // ・イベントに棋譜・SFEN・USIは載せない(計測の原則と同じ)
+  var FREE_EVAL_POSITIONS = 3; // #wall-box 文中の「3局面」と一致させる
+  var wall = { used: {}, usedCount: 0, gen: 0, reachedTracked: false, intentSent: false };
+
+  function updateQuotaNote() {
+    var el = $('study-quota');
+    if (!viewer.positions) { el.textContent = ''; return; }
+    var left = FREE_EVAL_POSITIONS - wall.usedCount;
+    if (left > 1) {
+      el.textContent = 'この棋譜は、あと' + left + '局面まで無料で調べられます';
+    } else if (left === 1) {
+      el.textContent = 'この棋譜で無料で調べられるのは、あと1局面です';
+    } else {
+      // 「使い切った」「上限に達した」とは書かない(取り上げの言い方をしない)
+      el.textContent = '無料ぶんの' + FREE_EVAL_POSITIONS +
+        '局面を調べました。調べた局面の結果は引き続き見られます';
+    }
+  }
+
+  function showWall() {
+    $('wall-box').hidden = false;
+    $('btn-wall-intent').hidden = wall.intentSent;
+    $('wall-intent-done').hidden = !wall.intentSent;
+    if (!wall.reachedTracked) {
+      wall.reachedTracked = true; // 壁到達は1棋譜につき1回だけ数える
+      track('study_wall_reach', { entry: metrics.entry });
+    }
   }
 
   // ---- 将棋の基礎データ (video系と同一の局面表現: ban['75']=' fu' / 'vfu') ----
@@ -524,6 +582,10 @@
     });
     viewer.evals = new Array(viewer.positions.length).fill(null);
     metrics.evalClicks = 0; // 棋譜を読み込み直したら「何回目か」を数え直す
+    // 壁も棋譜単位で数え直す(意思表明intentSentだけはページ滞在中は保持し、二重に数えない)
+    wall.used = {}; wall.usedCount = 0; wall.reachedTracked = false; wall.gen += 1;
+    $('wall-box').hidden = true;
+    updateQuotaNote();
     var list = $('move-list');
     list.innerHTML = '';
     viewer.labels.forEach(function (label, i) {
@@ -711,6 +773,7 @@
     var sameIdx = (study.forIdx === viewer.idx);
     if (!sameIdx) { study.cands = null; study.forIdx = null; $('study-cands').innerHTML = ''; }
     resetStudyPreview();
+    $('wall-box').hidden = true; // 壁の案内は出しっぱなしにしない(局面を移ったら畳む)
     var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
     var pos = viewer.positions[viewer.idx];
     var best = $('study-best');
@@ -742,6 +805,14 @@
     var btn = $('btn-study');
     var label = btn.textContent;
     var idx = viewer.idx;
+    var gen = wall.gen; // この取得がどの棋譜に対するものかを覚えておく
+    // 壁: 新しい局面が無料枠(3局面)を超えるならAPIを呼ばず案内を出す。
+    // 調べたことのある局面をもう一度調べるのは枠内として通す
+    if (!wall.used[idx] && wall.usedCount >= FREE_EVAL_POSITIONS) {
+      showWall();
+      return;
+    }
+    // study_eval_click の nth は「実際に検討が走った回数」を保つ(壁で止めたクリックは数えない)
     metrics.evalClicks += 1;
     track('study_eval_click', { entry: metrics.entry, nth: metrics.evalClicks });
     study.busy = true;
@@ -756,6 +827,13 @@
       if (!r.ok) { throw new Error('HTTP ' + r.status); }
       return r.json();
     }).then(function (r) {
+      // 枠の消費は「検討が実際に成功した局面」だけ数える(失敗した回は消費しない)。
+      // gen で「取得中に棋譜が読み替えられた」場合に新しい棋譜の枠を食わないよう守る
+      if (gen === wall.gen && !wall.used[idx]) {
+        wall.used[idx] = true;
+        wall.usedCount += 1;
+        updateQuotaNote();
+      }
       if (idx !== viewer.idx || !viewer.evals) { return; }
       viewer.evals[idx] = r;
       study.forIdx = idx;
@@ -801,6 +879,16 @@
     previewTo(Number(b.getAttribute('data-step')));
   });
   $('btn-study-close').addEventListener('click', function () { previewTo(0); });
+
+  // 意思表明: 「押された数を見て用意するか決める」ための数取り。購入・支払いではない。
+  // ページ滞在中は一度だけ数える(棋譜を読み替えても二重には送らない)
+  $('btn-wall-intent').addEventListener('click', function () {
+    if (wall.intentSent) { return; }
+    wall.intentSent = true;
+    track('study_wall_intent', { entry: metrics.entry });
+    $('btn-wall-intent').hidden = true;
+    $('wall-intent-done').hidden = false;
+  });
 
   // ---- 外部ツール連携(自前メイン+逃がし道。オーナー方針 2026-08-02) ----
   // KENTO/lishogiは「いま見ている局面」をSFENで渡す。ぴよ将棋は棋譜全体を
