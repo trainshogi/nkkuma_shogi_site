@@ -927,7 +927,7 @@
   // 読み込みスクリプト全体が止まる。既存のエラー表示に落として空文字を返す
   function decodeHashU(s) {
     try { return decodeURIComponent(s); }
-    catch (e) { showError('URLの棋譜(#u=)が読めませんでした。'); return ''; }
+    catch (e) { showError('リンクの棋譜(#u=)が読めませんでした。'); return ''; }
   }
   function loadKifText(text) {
     $('error-box').hidden = true;
@@ -1056,7 +1056,7 @@
     if (!h) { return; }
     $('error-box').hidden = true;
     stopAutoplay();
-    if (loadUsiMoves(decodeURIComponent(h[1]))) {
+    if (loadUsiMoves(decodeHashU(h[1]))) {
       metrics.entry = 'u_hash';
       track('study_load_kif', { method: 'u_hash' });
       scrollToBoard();
