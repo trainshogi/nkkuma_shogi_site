@@ -47,6 +47,8 @@
     }
     .btn-primary { background:#00695c; border-color:#00695c; color:#fff; font-weight:bold; }
     .btn:disabled { opacity:.4; cursor: default; }
+    /* display:inline-blockがUAの[hidden]に勝ってしまい「盤を戻す」が常時見えていた既存バグの修正 */
+    .btn[hidden] { display:none; }
     .btn-sm { padding: 6px 10px; font-size: 13.5px; }
     .row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
     .note { font-size: 12.5px; color: #888; }
@@ -56,6 +58,24 @@
                border:1px solid #ddd; border-radius: 8px; padding: 8px; }
     #error-box { background:#fdf2f0; border:1px solid #ecc8c0; border-radius:10px;
                  padding:10px 14px; margin-bottom:12px; font-size:14px; }
+
+    /* 入力カードの折り畳み(方向A: 棋譜を読み込んだら盤を主役にする) */
+    .input-toggle { display:block; width:100%; text-align:left; background:none; border:none;
+                    padding:0; font-family:inherit; font-size:13.5px; color:#00695c;
+                    cursor:pointer; }
+    .input-toggle[hidden] { display:none; } /* display:blockがUAのhiddenに勝たないように */
+    #input-card.collapsed { padding:10px 14px; }
+    #input-card.collapsed #input-body { display:none; }
+    #input-card:not(.collapsed) .input-toggle:not([hidden]) { margin-bottom:10px; }
+
+    /* 「考えている感」: 検討API応答待ち(実測3〜4秒)を視界内で示す。トーンは既存の茶緑系 */
+    .spinner { display:inline-block; width:12px; height:12px; border:2px solid #cfe5de;
+               border-top-color:#00695c; border-radius:50%; margin-right:7px;
+               vertical-align:-2px; animation: study-spin .8s linear infinite; }
+    @keyframes study-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+    #study-panel .study-box.thinking { border-color:#9ec7bb; background:#f4faf8; }
+    #nav-hint.thinking { color:#00695c; }
 
     /* 盤・持ち駒・ナビ (video系と同一) */
     #board { display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
@@ -138,23 +158,26 @@
   <div id="error-box" hidden></div>
 
   <div class="card" id="input-card">
-    <div class="card-label">棋譜(KIF)を貼り付け</div>
-    <textarea id="kif-in" placeholder="ここにKIFを貼り付けてください
+    <button type="button" class="input-toggle" id="input-toggle" hidden>▸ 別の棋譜を貼る</button>
+    <div id="input-body">
+      <div class="card-label">棋譜(KIF)を貼り付け</div>
+      <textarea id="kif-in" placeholder="ここにKIFを貼り付けてください
 例:
 手合割：平手
 手数----指手---------消費時間--
    1 ７六歩(77)
    2 ３四歩(33)
    ..."></textarea>
-    <div class="row" style="margin-top:8px">
-      <button class="btn btn-primary" id="btn-load">この棋譜を検討する</button>
-      <span class="note">最後に見た棋譜はこの端末に記憶されます</span>
-    </div>
-    <div style="margin-top:14px">
-      <div class="card-label">局面(SFEN)だけ調べる</div>
-      <input id="sfen-in" placeholder="SFENを貼り付け (例: lnsgkgsnl/1r5b1/... b - 1)">
       <div class="row" style="margin-top:8px">
-        <button class="btn btn-sm" id="btn-load-sfen">この局面を検討する</button>
+        <button class="btn btn-primary" id="btn-load">この棋譜を検討する</button>
+        <span class="note">最後に見た棋譜はこの端末に記憶されます</span>
+      </div>
+      <div style="margin-top:14px">
+        <div class="card-label">局面(SFEN)だけ調べる</div>
+        <input id="sfen-in" placeholder="SFENを貼り付け (例: lnsgkgsnl/1r5b1/... b - 1)">
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-sm" id="btn-load-sfen">この局面を検討する</button>
+        </div>
       </div>
     </div>
   </div>
@@ -211,7 +234,8 @@
   // ---- 計測 (GA4) ----
   // 送ってよいのは「イベント名・件数・流入区別・何回目か」だけ。
   // 棋譜(KIF/SFEN/USI)・局面・手数の中身は、どのパラメータにも絶対に載せない。
-  //   entry: この棋譜がどこから来たか (u_hash=アプリ/QR, paste_kif, paste_sfen, url_sfen, url_kif, direct)
+  //   entry: この棋譜がどこから来たか (u_hash=アプリ/QR, paste_kif, paste_sfen, url_sfen, url_kif,
+  //          direct, restore=前回棋譜の自動復元。restoreはstudy_load_kifを発火しない=手動読込の指標を薄めない)
   //   nth:   いま読み込んでいる棋譜で何回目の「候補手を調べる」か(1始まり。分布を後で取る用)
   var metrics = { entry: 'direct', evalClicks: 0 };
   function track(name, params) {
@@ -505,8 +529,17 @@
     for (var k = 0; k < items.length; k++) {
       items[k].classList.toggle('active', k === viewer.idx - 1);
     }
+    // 現在手をリスト内に見せる。scrollIntoViewだとページ全体まで動いてしまう
+    // (読み込み直後に視点が盤を通り過ぎる)ため、リストのscrollTopだけ動かす
     var active = document.querySelector('#move-list li.active');
-    if (active) { active.scrollIntoView({ block: 'nearest' }); }
+    if (active) {
+      var list = $('move-list');
+      var rel = active.offsetTop - list.offsetTop;
+      if (rel < list.scrollTop ||
+          rel + active.offsetHeight > list.scrollTop + list.clientHeight) {
+        list.scrollTop = rel - list.clientHeight / 2 + active.offsetHeight / 2;
+      }
+    }
     renderStudy();
     renderEvalGraph();
   }
@@ -533,7 +566,27 @@
       list.appendChild(li);
     });
     $('viewer').hidden = false;
+    // 盤が主役になったので入力カードは畳む(トグルでいつでも開ける)
+    setInputCollapsed(true);
     showPosition(0);
+  }
+
+  // ---- 入力カードの折り畳み(方向A) ----
+  function setInputCollapsed(collapsed) {
+    $('input-card').classList.toggle('collapsed', collapsed);
+    var t = $('input-toggle');
+    t.hidden = false;
+    t.textContent = collapsed ? '▸ 別の棋譜を貼る' : '▾ 貼り付け欄を閉じる';
+  }
+  $('input-toggle').addEventListener('click', function () {
+    setInputCollapsed(!$('input-card').classList.contains('collapsed'));
+  });
+
+  // 読み込み直後に盤の位置まで視点を運ぶ(「押したのに何も起きない」対策)
+  function scrollToBoard() {
+    try {
+      $('viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) { $('viewer').scrollIntoView(); }
   }
 
   // ---- 形勢グラフ (調べた局面だけ埋まる) ----
@@ -747,6 +800,23 @@
     study.busy = true;
     btn.disabled = true;
     btn.textContent = '調べています…';
+    // 「考えている感」: 応答待ち(実測3〜4秒)の間、視界内の2箇所で思考中を示す。
+    //   1) 検討ボックス: スピナー+文言(ボタンの真上なので押した人の視界に必ず入る)
+    //   2) 盤直下のヒント行: 盤を見ている人にも届く
+    // 成否にかかわらず最後のthenで必ず元へ戻す(エラー・タイムアウト時に固まらない)
+    var thinkBox = document.querySelector('#study-panel .study-box');
+    var hint = $('nav-hint');
+    var hintText = hint.textContent;
+    thinkBox.classList.add('thinking');
+    hint.classList.add('thinking');
+    hint.textContent = 'AIがこの局面を考えています…（数秒かかります）';
+    var thinkBest = $('study-best');
+    thinkBest.className = 'note';
+    thinkBest.textContent = '';
+    var sp = document.createElement('span');
+    sp.className = 'spinner';
+    thinkBest.appendChild(sp);
+    thinkBest.appendChild(document.createTextNode('AIが候補手と読み筋を考えています…'));
     fetch(EVAL_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -772,6 +842,10 @@
         if (first) { first.classList.add('active'); }
       }
     }).catch(function (e) {
+      // 思考中表示のまま固まらないよう、案内文へ戻してからエラーを出す
+      var best = $('study-best');
+      best.className = 'note';
+      best.textContent = '「候補手を調べる」を押すと、AIが候補手3つと読み筋を出します。';
       var ol = $('study-cands');
       ol.innerHTML = '';
       var li = document.createElement('li');
@@ -782,6 +856,9 @@
       study.busy = false;
       btn.disabled = false;
       btn.textContent = label;
+      thinkBox.classList.remove('thinking');
+      hint.classList.remove('thinking');
+      hint.textContent = hintText;
     });
   });
   $('study-cands').addEventListener('click', function (e) {
@@ -846,6 +923,12 @@
     box.textContent = msg;
     box.hidden = false;
   }
+  // #u=% のような壊れたパーセントエンコーディングは decodeURIComponent が URIError を投げ、
+  // 読み込みスクリプト全体が止まる。既存のエラー表示に落として空文字を返す
+  function decodeHashU(s) {
+    try { return decodeURIComponent(s); }
+    catch (e) { showError('リンクの棋譜(#u=)が読めませんでした。'); return ''; }
+  }
   function loadKifText(text) {
     $('error-box').hidden = true;
     var parsed = parseKif(text);
@@ -861,6 +944,7 @@
       metrics.entry = 'paste_kif';
       track('study_load_kif', { method: 'paste_kif' });
       showPosition(viewer.positions.length - 1);
+      scrollToBoard();
     }
   });
   $('btn-load-sfen').addEventListener('click', function () {
@@ -870,6 +954,7 @@
     metrics.entry = 'paste_sfen';
     track('study_load_kif', { method: 'paste_sfen' });
     initViewer({ startPos: pos, plies: [], labels: [] });
+    scrollToBoard();
   });
 
   // #u=USI手順(「7g7f_3c3d」区切りは _ か空白)。大会でQRから棋譜を持ち帰る用。
@@ -930,7 +1015,7 @@
     entry: hashU ? 'u_hash' : params.get('sfen') ? 'url_sfen' :
            params.get('kif') ? 'url_kif' : 'direct'
   });
-  if (hashU && loadUsiMoves(decodeURIComponent(hashU[1]))) {
+  if (hashU && loadUsiMoves(decodeHashU(hashU[1]))) {
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
     metrics.entry = 'u_hash';
     track('study_load_kif', { method: 'u_hash' });
@@ -948,12 +1033,37 @@
       track('study_load_kif', { method: 'url_kif' });
     }
   } else {
-    // 前回の棋譜を復元(貼り直しの手間を省く)
+    // 前回の棋譜を復元。「記憶されます」の約束通り、テキストだけでなく盤まで開いて見せる。
+    // 読めない保存データは黙ってテキスト復元だけに留める(開いた瞬間にエラーを見せない)
     try {
       var saved = localStorage.getItem(KIF_KEY);
-      if (saved) { $('kif-in').value = saved; }
+      if (saved) {
+        $('kif-in').value = saved;
+        var savedParsed = parseKif(saved);
+        if (savedParsed && !savedParsed.error) {
+          metrics.entry = 'restore'; // 自動復元はstudy_load_kifを発火しない(計測コメント参照)
+          initViewer(savedParsed);
+          showPosition(viewer.positions.length - 1);
+        }
+      }
     } catch (e) {}
   }
+
+  // #u=リンクを「既に開いているタブで」踏んだときも反応する(従来はページ読み込み時のみ)。
+  // 同一ハッシュの再クリックはブラウザがイベントを出さないため対象外
+  window.addEventListener('hashchange', function () {
+    var h = location.hash.match(/^#u=(.+)$/);
+    if (!h) { return; }
+    $('error-box').hidden = true;
+    stopAutoplay();
+    if (loadUsiMoves(decodeHashU(h[1]))) {
+      metrics.entry = 'u_hash';
+      track('study_load_kif', { method: 'u_hash' });
+      scrollToBoard();
+    } else {
+      showError('リンクの棋譜(#u=)が読めませんでした。');
+    }
+  });
 
   // ---- ビューワー操作 ----
   // ボタン連打は操作感が硬いので、他サイトの定番を揃える:
