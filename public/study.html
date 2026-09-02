@@ -846,6 +846,12 @@
     box.textContent = msg;
     box.hidden = false;
   }
+  // #u=% のような壊れたパーセントエンコーディングは decodeURIComponent が URIError を投げ、
+  // 読み込みスクリプト全体が止まる。既存のエラー表示に落として空文字を返す
+  function decodeHashU(s) {
+    try { return decodeURIComponent(s); }
+    catch (e) { showError('URLの棋譜(#u=)が読めませんでした。'); return ''; }
+  }
   function loadKifText(text) {
     $('error-box').hidden = true;
     var parsed = parseKif(text);
@@ -930,7 +936,7 @@
     entry: hashU ? 'u_hash' : params.get('sfen') ? 'url_sfen' :
            params.get('kif') ? 'url_kif' : 'direct'
   });
-  if (hashU && loadUsiMoves(decodeURIComponent(hashU[1]))) {
+  if (hashU && loadUsiMoves(decodeHashU(hashU[1]))) {
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
     metrics.entry = 'u_hash';
     track('study_load_kif', { method: 'u_hash' });
