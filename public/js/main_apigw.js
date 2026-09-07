@@ -126,6 +126,10 @@ function file_upload(){
     var result_place = document.getElementById('board');
     var formdata = new FormData($('#myform').get(0));
     formdata.set('upfile',blobdata)
+    // 認識エンジンの設定はβ版(site-beta.js buildFormData)と1個も違えない。
+    // hidden_rotate / hidden_sengo だけは classic の <form>(回転ボタン・先手後手トグル)
+    // 由来の値をそのまま使う。変えるときは site.js / site-beta.js / main_apigw.js の3本を同時に直す。
+    formdata.set('mode','all');           // API仕様更新: mode 必須
     // 駒認識モデルをv3(再学習モデルr5世代)に指定する。
     // 未指定だとAPI既定の旧v1が動く(golden104実測: v1=完全一致57.69% / v3+デコーダ=94.23%)
     formdata.set('model','v3');
@@ -133,6 +137,15 @@ function file_upload(){
     // golden104実測: v3単体 93.27% → v3+デコーダ 94.23%(盤ごと崩れる写真が0枚になる)
     // レイテンシは1枚あたり約+0.6秒(ローカル計測)
     formdata.set('decoder','1');
+    // 枠検出v2。PR#83で index(site.js) には入れたが classic は送っておらず、
+    // サーバー既定の v1(旧UNet)のままだった。斜め・ビニール盤・床の板目で四隅が
+    // 大外れする(2026-09-08 ローカル実測: ビニール盤の1枚で盤上27枚→3枚まで落ちる)。
+    formdata.set('waku','v2');
+    // 持ち駒認識エンジン v2(盤周囲タイル検出)。未指定だと既定v1で駒台にない持ち駒を拾う。
+    formdata.set('mochi_crop','v2');
+    formdata.set('mochi_ocr','1');        // 持ち駒個数の数字OCR(API推奨1)
+    formdata.set('mochi_postproc','0');   // 駒数保存則での持ち駒補正(実写では既定OFF)
+    formdata.set('joint','0');            // 統合整合ソルバ(model=v3では無視される)
 
     // POSTでアップロード
     $.ajax({

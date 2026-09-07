@@ -17,6 +17,11 @@
 ## 2. 変更してはいけない外部契約
 
 ### 2.1 認識API
+
+> **注記(2026-09-08)**: 送信先と送るフィールドはこの仕様書を書いた時点から変わっている。
+> 現行の正は `docs/RECOGNITION_PARAMS.md`（index / classic / beta の3ページ分の台帳）。
+> 以下は当時の記録として残す。`hidden_sengo: "true"`（先手番デフォルト）だけは現行も同じ。
+
 ```
 POST https://api.nkkuma.tokyo/recognize
 Header: x-api-key: <APIキー・秘匿。デプロイ時に置換される。site.js内では '__API_KEY__' プレースホルダ>
