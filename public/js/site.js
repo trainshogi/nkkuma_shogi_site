@@ -571,35 +571,69 @@
   }
 
   // ===== API 呼び出し =====
-  function recognize() {
-    if (!state.blob) { return; }
-    setState('busy');
+  // 送るパラメータはβ版(site-beta.js buildFormData)と1個も違えない。
+  // 「本番とβで同じ写真から違う答えが出る」を作らないための取り決め。
+  // 変えるときは site.js / site-beta.js / main_apigw.js の3本を同時に直す。
+  // multipartは毎回作り直す(FormData/Blobは1リクエストで消費されるので、
+  // リトライで使い回すと空ボディになる)
+  function buildFormData() {
     var fd = new FormData();
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
+    // 手番の初期値。APIは文字列 'true' のときだけ先手番を返す(それ以外は後手番)。
     fd.append('hidden_sengo', 'true');
+    fd.append('mode', 'all');             // API仕様更新: mode 必須
     // 駒認識モデルをv3(再学習モデルr5世代)に指定する。
     // 未指定だとAPI既定の旧v1が動く(golden104実測: v1=完全一致57.69% / v3+デコーダ=94.23%)
     fd.append('model', 'v3');
-    // 枠検出をβ版(site-beta.js)と同じ v2 に揃える。通常版は waku を送らず
-    // サーバー既定の v1(旧UNet)で四隅を取っていたため、斜め・ビニール盤・床の板目で
-    // 四隅が大外れし盤がほぼ空で返る事象(2026-09-06 オーナー実機・β版は同じ写真で成功)。
-    fd.append('waku', 'v2');
     // 制約付きデコーダ(最小費用流)。model=v3のときのみ有効。
     // golden104実測: v3単体 93.27% → v3+デコーダ 94.23%(盤ごと崩れる写真が0枚になる)
     // レイテンシは1枚あたり約+0.6秒(ローカル計測)
     fd.append('decoder', '1');
+    // 枠検出をβ版(site-beta.js)と同じ v2 に揃える。通常版は waku を送らず
+    // サーバー既定の v1(旧UNet)で四隅を取っていたため、斜め・ビニール盤・床の板目で
+    // 四隅が大外れし盤がほぼ空で返る事象(2026-09-06 オーナー実機・β版は同じ写真で成功)。
+    fd.append('waku', 'v2');
+    // 持ち駒認識エンジン v2(盤周囲タイル検出)。未指定だとAPI既定のv1が動き、
+    // 駒台にない持ち駒を拾う(2026-09-08 ローカル実測: B01で後手に金1/飛1が湧く・
+    // B02で後手に金1が湧く)。β版はv2固定なのでここも合わせる。
+    fd.append('mochi_crop', 'v2');
+    fd.append('mochi_ocr', '1');          // 持ち駒個数の数字OCR(API推奨1)
+    fd.append('mochi_postproc', '0');     // 駒数保存則での持ち駒補正(実写では既定OFF)
+    fd.append('joint', '0');              // 統合整合ソルバ(model=v3では無視される)
+    return fd;
+  }
 
-    fetch(API_URL, {
+  // コールドスタート時、初回が最大30秒→API Gatewayの30sタイムアウトで503になり得る。
+  // その場合のみ1回だけ自動リトライする(2回目はウォーム済で通る想定)。β版と同じ挙動。
+  function postRecognize(attempt) {
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 32000) : null;
+
+    return fetch(API_URL, {
       method: 'POST',
       headers: { 'x-api-key': API_KEY },
-      body: fd,
-      cache: 'no-store'
-    })
-      .then(function (res) {
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        return res.json();
-      })
+      body: buildFormData(),
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      if (timer) { clearTimeout(timer); }
+      if (res.status === 503 && attempt === 0) {
+        return postRecognize(1);
+      }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      return res.json();
+    }).catch(function (err) {
+      if (timer) { clearTimeout(timer); }
+      if (attempt === 0) { return postRecognize(1); }
+      throw err;
+    });
+  }
+
+  function recognize() {
+    if (!state.blob) { return; }
+    setState('busy');
+    postRecognize(0)
       .then(function (data) {
         applyResult(data);
       })

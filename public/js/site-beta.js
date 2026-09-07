@@ -240,6 +240,7 @@
     photoUrl: null,      // objectURL
     blob: null,          // 圧縮後Blob
     selectedPos: null,   // 編集中のマス "<筋><段>"
+    selectedHand: null,  // 編集中の持駒 { side: 'sente'|'gote', koma: 'fu'.. }
     points: null,        // α: 検出した盤枠の4隅 [[x,y]×4]（アップロード画像のピクセル座標）
     wakuVersion: 'v2',      // α: 枠検出のバージョン切替（v1=旧UNet / v2=新エンジン）
     modelVersion: 'v3',     // β: 駒認識モデル切替（v3=r5世代。2026-08-14切替、旧はv2）
@@ -324,6 +325,9 @@
       var chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'chip' + (cnt === 0 ? ' zero' : '');
+      if (state.selectedHand && state.selectedHand.side === side && state.selectedHand.koma === code) {
+        chip.classList.add('selected');
+      }
       chip.setAttribute('data-side', side);
       chip.setAttribute('data-koma', code);
       var koma = document.createElement('span');
@@ -374,6 +378,7 @@
   // ===== 盤マス編集 =====
   function openPalette(pos) {
     state.selectedPos = pos;
+    state.selectedHand = null;
     var cur = state.result.ban_result[pos];
     var pal = els.palette;
     pal.innerHTML = '';
@@ -443,12 +448,26 @@
   function closePalette() {
     els.palette.hidden = true;
     state.selectedPos = null;
+    state.selectedHand = null;
     renderBoard();
   }
 
   // ===== 持駒編集 =====
-  function bumpMochi(side, code) {
+  // 通常版(site.js・2026-08-18 コミット56a967c)と同じ「枚数を直接タップで選ぶ」方式。
+  // 当時は index のみに入れて beta.html/classic.html は据え置きだったため、β版だけ
+  // タップ+1のループ式が残っていた(=同じサイトで持ち駒の直し方が2通りある状態)。
+  // 認識結果が上限超え(例: 角×3)で来ても表示はそのまま維持し、
+  // 選択肢にはルール上ありえる枚数(0〜上限)だけを出す。
+  function openHandPicker(side, code) {
     hideEval();
+    // 同じチップの再タップで閉じる（トグル）
+    if (state.selectedHand && state.selectedHand.side === side && state.selectedHand.koma === code) {
+      closePalette();
+      return;
+    }
+    state.selectedPos = null;
+    state.selectedHand = { side: side, koma: code };
+
     var key = side === 'sente' ? 'sente_mochi' : 'gote_mochi';
     var mochi = state.result[key];
     var cur = 0;
@@ -456,13 +475,58 @@
       cur = mochi[code] === '' ? 1 : Number(mochi[code]);
     }
     var max = HAND_MAX[code];
-    var next = (cur + 1) % (max + 1);
-    if (next === 0) {
-      delete mochi[code];
-    } else {
-      mochi[code] = next;
+    var kanji = HAND_KANJI[HAND_KOMA.indexOf(code)];
+
+    var pal = els.palette;
+    pal.innerHTML = '';
+
+    var head = document.createElement('div');
+    head.className = 'picker-head';
+    head.textContent = (side === 'sente' ? '先手' : '後手') + 'の持駒「' + kanji + '」の枚数を選ぶ';
+    if (cur > max) {
+      head.textContent += '（いま×' + cur + '、ルール上の上限は' + max + '枚）';
     }
-    renderHand(side);
+    pal.appendChild(head);
+
+    var grid = document.createElement('div');
+    grid.className = 'palette-row numgrid';
+    for (var n = 0; n <= max; n++) {
+      grid.appendChild(makeNcell(n, cur));
+    }
+    pal.appendChild(grid);
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'btn palette-close';
+    close.textContent = '閉じる';
+    close.addEventListener('click', closePalette);
+    pal.appendChild(close);
+
+    pal.hidden = false;
+    renderBoard(); // チップのハイライト反映
+  }
+
+  function makeNcell(n, cur) {
+    var cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'pcell pnum';
+    cell.textContent = String(n);
+    if (n === cur) { cell.classList.add('current'); }
+    cell.addEventListener('click', function () { applyHandCount(n); });
+    return cell;
+  }
+
+  function applyHandCount(n) {
+    var sel = state.selectedHand;
+    if (!sel) { return; }
+    var key = sel.side === 'sente' ? 'sente_mochi' : 'gote_mochi';
+    var mochi = state.result[key];
+    if (n === 0) {
+      delete mochi[sel.koma];
+    } else {
+      mochi[sel.koma] = n;
+    }
+    closePalette();
   }
 
   // ===== 手番 =====
@@ -638,7 +702,11 @@
     var fd = new FormData();
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
-    fd.append('hidden_sengo', '0');       // API仕様更新: 手番は0固定(先手基準)
+    // 手番の初期値。APIは文字列 'true' のときだけ先手番を返す(それ以外はすべて後手番)。
+    // ここは長らく '0' で「先手基準のつもり」だったが、実測(2026-09-08 ローカルAPI)では
+    // '0'/'1'/''/'false' すべて teban='gote' に落ちており、β版だけ毎回「後手番」で
+    // 開いていた。通常版(site.js)と同じ 'true' に揃える。
+    fd.append('hidden_sengo', 'true');
     fd.append('mode', 'all');             // API仕様更新: mode 必須
     fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替(API推奨v2)
     fd.append('decoder', '1'); // 制約付きデコーダ(最小費用流。model=v3のみ有効)。golden104実測: v3単体93.27%→v3+デコーダ94.23%。本番写真ページ(PR#64)と同構成
@@ -701,6 +769,7 @@
     };
     state.points = (data.points && data.points.length === 4) ? data.points : null;
     state.selectedPos = null;
+    state.selectedHand = null;
     els.palette.hidden = true;
     renderAll();
     renderFrame();
@@ -712,6 +781,7 @@
     clearPhoto();
     state.result = null;
     state.selectedPos = null;
+    state.selectedHand = null;
     els.palette.hidden = true;
     els.fileInput.value = '';
     setState('empty');
@@ -767,7 +837,7 @@
     document.querySelector('.board-unit').addEventListener('click', function (e) {
       var chip = e.target.closest('.chip');
       if (!chip) { return; }
-      bumpMochi(chip.getAttribute('data-side'), chip.getAttribute('data-koma'));
+      openHandPicker(chip.getAttribute('data-side'), chip.getAttribute('data-koma'));
     });
 
     // 手番セグメント
@@ -804,6 +874,14 @@
 
     // デバッグフック（本番でも無害）
     window.__debugSetResult = function (json) { applyResult(json); };
+    // 通常版(site.js)と対になる読み出し。持駒編集の検証をβでも同じ手順でやるために足す
+    window.__debugGetResult = function () {
+      return {
+        result: state.result,
+        kif: state.result ? json_to_kif(state.result) : null,
+        sfen: state.result ? json_to_sfen(state.result) : null
+      };
+    };
   }
 
   if (document.readyState === 'loading') {
