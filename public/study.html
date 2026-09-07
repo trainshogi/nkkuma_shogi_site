@@ -256,33 +256,45 @@
   var ZEN_SUJI = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
   var KAN_DAN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
-  function hirateBan() {
-    var b = {};
-    var back = ['ky', 'ke', 'gi', 'ki', 'ou', 'ki', 'gi', 'ke', 'ky'];
-    for (var s = 1; s <= 9; s++) {
-      b[String(s) + '1'] = 'v' + back[s - 1];
-      b[String(s) + '3'] = 'vfu';
-      b[String(s) + '7'] = ' fu';
-      b[String(s) + '9'] = ' ' + back[s - 1];
-    }
-    b['82'] = 'vhi'; b['22'] = 'vka'; b['28'] = ' hi'; b['88'] = ' ka';
-    return b;
-  }
-  // 駒落ち: 上手(後手)の駒を抜き、上手番から始める。KIFの手合割表記に対応
-  var HANDICAPS = {
-    '平手': [], '香落ち': ['11'], '右香落ち': ['91'], '角落ち': ['22'], '飛車落ち': ['82'],
-    '飛香落ち': ['82', '11'], '二枚落ち': ['82', '22'],
-    '四枚落ち': ['82', '22', '11', '91'], '六枚落ち': ['82', '22', '11', '91', '21', '81'],
-    '八枚落ち': ['82', '22', '11', '91', '21', '81', '31', '71'],
-    '十枚落ち': ['82', '22', '11', '91', '21', '81', '31', '71', '41', '61']
+  // 手合割 → 開始局面のSFEN。**python-shogi の shogi/KIF.py `HANDYCAP_SFENS` の写し**で、
+  // iOS の `Komadori/Handicap.swift` の `sfens` とも1文字ずつ同じもの。
+  // 盤を組み直して書き戻さない ―― 端末とサイトが別々に駒を抜くと、
+  // 片方だけ直される日が来る(五枚落ちの左右のように、通称と実配置が食い違う手合がある)。
+  // 開始局面の出どころはこの表ひとつ。#u= が運ぶ `position sfen …` もここに突き合わせる
+  var HANDICAP_SFENS = {
+    '平手':       'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+    '香落ち':     'lnsgkgsn1/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '右香落ち':   '1nsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '角落ち':     'lnsgkgsnl/1r7/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '飛車落ち':   'lnsgkgsnl/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '飛香落ち':   'lnsgkgsn1/7b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '二枚落ち':   'lnsgkgsnl/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '三枚落ち':   'lnsgkgsn1/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '四枚落ち':   '1nsgkgsn1/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '五枚落ち':   '2sgkgsn1/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '左五枚落ち': '1nsgkgs2/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '六枚落ち':   '2sgkgs2/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '八枚落ち':   '3gkg3/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1',
+    '十枚落ち':   '4k4/9/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL w - 1'
   };
+  // SFEN(手数を除く3欄) → 手合割名。表の逆引き1つだけで、駒の数え直しはしない。
+  // #u= が `position sfen …` で運んできた開始局面に名前を付けるために使う
+  // (名前が付かない局面 = 途中図などは、KIFに書き戻せないので貼り付け欄を空にする)
+  var HANDICAP_BY_SFEN = (function () {
+    var m = {};
+    for (var name in HANDICAP_SFENS) {
+      m[HANDICAP_SFENS[name].split(/\s+/).slice(0, 3).join(' ')] = name;
+    }
+    return m;
+  })();
+  function handicapNameFor(sfen) {
+    return HANDICAP_BY_SFEN[String(sfen || '').trim().split(/\s+/).slice(0, 3).join(' ')] || null;
+  }
+  // 駒落ちは上手(後手)の駒を抜き、上手番から始まる。どちらも表のSFENが持っている
   function startPosFor(teai) {
-    var removes = HANDICAPS[teai];
-    if (removes === undefined) { return null; }
-    var ban = hirateBan();
-    removes.forEach(function (sq) { delete ban[sq]; });
-    return { ban: ban, hands: { sente: {}, gote: {} },
-             teban: removes.length ? 'gote' : 'sente' };
+    var sfen = HANDICAP_SFENS[teai];
+    if (!sfen) { return null; }
+    return parseSfen(sfen);
   }
 
   function cloneBan(b) { var o = {}; for (var k in b) { o[k] = b[k]; } return o; }
@@ -337,8 +349,10 @@
   }
 
   // SFEN → 局面 (toSfen の逆。局面だけ調べたい人の入口)
+  // USI の頭(`position sfen …`)を付けたまま貼られても読む ―― 手順つきの
+  // `position sfen … moves …` は呼び出し側が parseUsiPosition へ回す
   function parseSfen(text) {
-    var t = String(text || '').trim().replace(/^sfen\s+/i, '');
+    var t = String(text || '').trim().replace(/^position\s+/i, '').replace(/^sfen\s+/i, '');
     var parts = t.split(/\s+/);
     if (parts.length < 3) { return null; }
     var rows = parts[0].split('/');
@@ -479,7 +493,8 @@
   }
 
   // ---- ビューワー ----
-  var viewer = { positions: null, plies: [], labels: [], idx: 0, evals: null };
+  var viewer = { positions: null, plies: [], labels: [], idx: 0, evals: null,
+                 startName: null };
 
   function renderHandLine(el, hand, mark) {
     var t = mark + '持駒：';
@@ -556,6 +571,17 @@
       viewer.positions.push(cur);
     });
     viewer.evals = new Array(viewer.positions.length).fill(null);
+    // 開始局面の手合割名。**盤そのものから引く**(読み込んだ経路ごとに持ち回らない)。
+    // 平手でも駒落ちでもない局面(途中図など)は null で、名乗らない
+    viewer.startName = handicapNameFor(toSfen(viewer.positions[0], 1));
+    // 駒落ちでも形勢は出る ―― 検討APIは「いま見ている局面のSFEN」を丸ごと受けるので、
+    // 開始局面が平手かどうかを問わない(EvalServiceStack: `position sfen <SFEN>`)。
+    // ただし評価関数(NAGISA_V3)は平手の将棋で作られたもので、駒落ちの
+    // 「上手がどれだけ粘れるか」を知らない。**数字は出るが目安**、と先に言っておく
+    $('eval-note').textContent = (viewer.startName && viewer.startName !== '平手')
+      ? '形勢グラフ（調べた局面から埋まっていきます。上＝下手有利。' +
+        '駒落ちの評価値は平手用のエンジンが出す目安です）'
+      : '形勢グラフ（調べた局面から埋まっていきます。上＝先手有利）';
     metrics.evalClicks = 0; // 棋譜を読み込み直したら「何回目か」を数え直す
     var list = $('move-list');
     list.innerHTML = '';
@@ -721,9 +747,14 @@
   function showPositionLabel() {
     var ev = viewer.evals ? viewer.evals[viewer.idx] : null;
     var total = viewer.positions ? viewer.positions.length - 1 : 0;
+    // 駒落ちは開始局面で手合割を名乗る ―― 盤を見た人が
+    // 「上手の駒が足りない」ではなく「六枚落ちだ」と分かるように
+    var head = viewer.idx === 0
+      ? '開始局面' + (viewer.startName && viewer.startName !== '平手'
+                      ? '（' + viewer.startName + '）' : '')
+      : viewer.idx + '手目';
     $('ply-label').textContent =
-      (viewer.idx === 0 ? '開始局面' : viewer.idx + '手目') +
-      (total ? ' / 全' + total + '手' : '') + evalLabel(ev);
+      head + (total ? ' / 全' + total + '手' : '') + evalLabel(ev);
   }
 
   function resetStudyPreview() {
@@ -947,9 +978,23 @@
       scrollToBoard();
     }
   });
+  // USIの局面表記(`position sfen … moves …` / `position startpos moves …`)か。
+  // 局面だけのSFENと見分けて、手順つきなら #u= と同じ読み口へ回す
+  function looksLikeUsiPosition(text) {
+    return /(^|[_\s])(position|startpos|moves)([_\s]|$)/i.test(String(text || ''));
+  }
   $('btn-load-sfen').addEventListener('click', function () {
     $('error-box').hidden = true;
-    var pos = parseSfen($('sfen-in').value);
+    var text = $('sfen-in').value;
+    // 手順つきを丸ごと貼られたら、開始局面から手順まで並べる(手順を黙って捨てない)
+    if (looksLikeUsiPosition(text)) {
+      if (!loadUsiMoves(text)) { showError('SFENが読めませんでした。'); return; }
+      metrics.entry = 'paste_sfen';
+      track('study_load_kif', { method: 'paste_sfen' });
+      scrollToBoard();
+      return;
+    }
+    var pos = parseSfen(text);
     if (!pos) { showError('SFENが読めませんでした。'); return; }
     metrics.entry = 'paste_sfen';
     track('study_load_kif', { method: 'paste_sfen' });
@@ -957,53 +1002,114 @@
     scrollToBoard();
   });
 
-  // #u=USI手順(「7g7f_3c3d」区切りは _ か空白)。大会でQRから棋譜を持ち帰る用。
+  // #u=USI(「7g7f_3c3d」区切りは _ か空白)。大会でQRから棋譜を持ち帰る用。
   // クエリでなくフラグメントなのは、棋譜をサーバのアクセスログに残さないため。
   // KIF全文の ?kif= はエンコードでQR容量(約3KB)を超えるが、USIなら83手で約500字
-  function loadUsiMoves(str) {
-    var mvs = String(str || '').split(/[_\s]+/).filter(Boolean);
-    if (!mvs.length) { return false; }
-    var start = startPosFor('平手');
+  //
+  // ■ 受ける形は3つ(端末が出すのは1つめか2つめ)
+  //     position sfen <開始局面> moves 7g7f 3c3d …   駒落ち・途中図(1.4系・決定88)
+  //     position startpos moves 7g7f 3c3d …          平手
+  //     7g7f_3c3d …                                  指し手だけ(旧来の #u=。互換維持)
+  //   区切りが `_` でも空白(%20)でもいいのは前からの約束なので、頭も同じ物差しで割る ――
+  //   `position_sfen_lnsgkgsnl_…_w_-_1_moves_7g7f` と
+  //   `position sfen lnsgkgsnl … w - 1 moves 7g7f` は同じものとして読む。
+  //   出どころは iOS の `UsiExport.game`(`position sfen <SFEN> moves …`)ひとつで、
+  //   開始局面のSFENは手合割の表(`HANDICAP_SFENS` = python-shogi の写し)から来る。
+  //
+  // ■ QRは伸びても入る
+  //   頭の `position sfen <SFEN> moves ` は最長でも98字(空白を%20にしたとき)。
+  //   100手の対局で URL 全体は約570字 → 約670字になるが、端末のQR(誤り訂正M・
+  //   バイトモード)の上限は2331字で、まだ3割も使っていない。
+  //   入りきらなくなるのは400手を超えるあたり(平手でも同じ壁で、頭のぶん16手ほど早い)
+  //
+  // ■ 平手の初形に並べ直さない
+  //   駒落ちのUSIを平手の盤に並べると、2手目で非合法になるか、運悪くつながれば
+  //   **別の一局**になる。開始局面が名乗られている以上、名乗られた盤から並べる。
+  //   読めないSFENは false を返す(平手のふりはさせない)
+  function parseUsiPosition(str) {
+    var t = String(str || '').split(/[_\s]+/).filter(Boolean);
+    if (!t.length) { return null; }
+    var i = 0;
+    if (t[i] && t[i].toLowerCase() === 'position') { i++; }
+    var start = null;
+    var declared = false;   // 開始局面が名乗られているか(名乗られていれば0手でも開ける)
+    var head = t[i] ? t[i].toLowerCase() : '';
+    if (head === 'startpos') {
+      i++;
+      declared = true;
+      start = startPosFor('平手');
+    } else if (head === 'sfen') {
+      i++;
+      // 盤・手番・持駒の3欄は必須。手数の欄は付いていれば読み飛ばす(局面は変わらない)
+      if (t.length < i + 3) { return null; }
+      if (!/^[bw]$/.test(t[i + 1])) { return null; }
+      start = parseSfen(t[i] + ' ' + t[i + 1] + ' ' + t[i + 2] + ' 1');
+      if (!start) { return null; }
+      i += 3;
+      if (/^\d+$/.test(t[i] || '')) { i++; }
+      declared = true;
+    } else {
+      start = startPosFor('平手');
+    }
+    if (t[i] && t[i].toLowerCase() === 'moves') { i++; }
+    var mvs = t.slice(i);
+    // 指し手が1手も無いのは、開始局面を名乗ってきたときだけ許す
+    // (`#u=` に何か書いてあるのに1手も読めない、は今までどおり読み取り失敗)
+    if (!mvs.length && !declared) { return null; }
     var pos = { ban: cloneBan(start.ban), hands: cloneHands(start.hands), teban: start.teban };
     var plies = [];
     var labels = [];
-    for (var i = 0; i < mvs.length; i++) {
-      var t = mvs[i];
+    for (var k = 0; k < mvs.length; k++) {
+      var s = mvs[k];
       var m = { promote: false };
       var mm;
-      if ((mm = t.match(/^([A-Z])\*([1-9])([a-i])$/))) {
+      if ((mm = s.match(/^([A-Z])\*([1-9])([a-i])$/))) {
         m.from = null;
         m.kind = USI_KIND[mm[1]];
         m.to = [Number(mm[2]), mm[3].charCodeAt(0) - 96];
-        if (!m.kind) { return false; }
-      } else if ((mm = t.match(/^([1-9])([a-i])([1-9])([a-i])(\+?)$/))) {
+        if (!m.kind) { return null; }
+      } else if ((mm = s.match(/^([1-9])([a-i])([1-9])([a-i])(\+?)$/))) {
         m.from = [Number(mm[1]), mm[2].charCodeAt(0) - 96];
         m.to = [Number(mm[3]), mm[4].charCodeAt(0) - 96];
         m.promote = mm[5] === '+';
         var v = pos.ban[String(m.from[0]) + String(m.from[1])];
-        if (!v || v === ' * ') { return false; }
+        if (!v || v === ' * ') { return null; }
         m.kind = v.substr(1);
       } else {
-        return false;
+        return null;
       }
-      labels.push(String(i + 1) + ' ' + (pos.teban === 'sente' ? '▲' : '△') +
+      labels.push(String(k + 1) + ' ' + (pos.teban === 'sente' ? '▲' : '△') +
                   ZEN_SUJI[m.to[0]] + KAN_DAN[m.to[1]] +
                   (KANJI_1[m.kind] || '') + (m.promote ? '成' : '') +
                   (m.from ? '' : '打'));
       plies.push({ move: m, side: pos.teban });
       pos = applyMoveLocal(pos, m);
     }
-    // 貼り付け欄にKIFも入れておく(コピーして他アプリへ持っていける)
-    var kifLines = ['手合割：平手'];
-    plies.forEach(function (p, k) {
-      var mv = p.move;
-      kifLines.push('   ' + (k + 1) + ' ' + ZEN_SUJI[mv.to[0]] + KAN_DAN[mv.to[1]] +
-                    (KANJI_1[mv.kind] || '') + (mv.promote ? '成' : '') +
-                    (mv.from ? '(' + mv.from[0] + mv.from[1] + ')' : '打'));
-    });
-    $('kif-in').value = kifLines.join('\n');
-    initViewer({ startPos: start, plies: plies, labels: labels });
-    showPosition(plies.length);
+    // 貼り付け欄に入れるKIF(コピーして他アプリへ持っていける)。
+    // **手合割の名前が付く開始局面のときだけ作る** ―― 途中図から始まるUSIを
+    // 「手合割：平手」と書いたKIFにすると、盤と貼り付け欄が別の一局を指す。
+    // 名前は表の逆引き1つで決める(駒を数え直さない)
+    var name = handicapNameFor(toSfen(start, 1));
+    var kif = null;
+    if (name) {
+      var kifLines = ['手合割：' + name];
+      plies.forEach(function (p, n) {
+        var mv = p.move;
+        kifLines.push('   ' + (n + 1) + ' ' + ZEN_SUJI[mv.to[0]] + KAN_DAN[mv.to[1]] +
+                      (KANJI_1[mv.kind] || '') + (mv.promote ? '成' : '') +
+                      (mv.from ? '(' + mv.from[0] + mv.from[1] + ')' : '打'));
+      });
+      kif = kifLines.join('\n');
+    }
+    return { startPos: start, plies: plies, labels: labels, kif: kif };
+  }
+
+  function loadUsiMoves(str) {
+    var parsed = parseUsiPosition(str);
+    if (!parsed) { return false; }
+    $('kif-in').value = parsed.kif || '';
+    initViewer(parsed);
+    showPosition(parsed.plies.length);
     return true;
   }
 
@@ -1019,6 +1125,12 @@
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
     metrics.entry = 'u_hash';
     track('study_load_kif', { method: 'u_hash' });
+  } else if (params.get('sfen') && looksLikeUsiPosition(params.get('sfen'))) {
+    // ?sfen= に手順つきのUSIが来ることもある(#u= と同じ形)。手順を黙って捨てない
+    if (loadUsiMoves(params.get('sfen'))) {
+      metrics.entry = 'url_sfen';
+      track('study_load_kif', { method: 'url_sfen' });
+    }
   } else if (params.get('sfen')) {
     var p0 = parseSfen(params.get('sfen'));
     if (p0) {
