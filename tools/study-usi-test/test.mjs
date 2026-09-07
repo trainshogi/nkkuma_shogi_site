@@ -6,6 +6,7 @@
 //           各局面のSFENを python-shogi の値で書き出す。
 //           それを study.html の中身(dom.mjs が実ページのJSをそのまま読む)に
 //           #u= で流し込み、1局面ずつ突き合わせる。写しは作らない。
+import fs from 'fs';
 import { execFileSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -140,9 +141,12 @@ for (const c of cases) {
   check('駒落ちの形勢注記', /下手有利/.test(t.el('eval-note').textContent) &&
         /目安/.test(t.el('eval-note').textContent), t.el('eval-note').textContent);
   const t2 = run(P, { hash: '#u=7g7f' });
-  check('平手の形勢注記は元のまま',
-        t2.el('eval-note').textContent === '形勢グラフ（調べた局面から埋まっていきます。上＝先手有利）',
-        t2.el('eval-note').textContent);
+  // 平手の文言は**HTMLに書いてある本文と1字も違わない**こと。
+  // JS側が別の言い回しを持ち始めたら(= どちらかだけ直された日)ここで落ちる
+  const html = fs.readFileSync(P, 'utf8');
+  const inHtml = html.match(/<p id="eval-note">([\s\S]*?)<\/p>/)[1].trim();
+  check('平手の形勢注記はHTMLの本文と同じ', t2.el('eval-note').textContent === inHtml,
+        `js=${t2.el('eval-note').textContent} / html=${inHtml}`);
 }
 
 // 10) ?sfen= に手順つきのUSIが来ても並ぶ
