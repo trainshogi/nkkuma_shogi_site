@@ -15,6 +15,6 @@ date: 2026-09-08
 
 あとは、この動画を見てください。置いてから棋譜になるまで、そのまま撮ってあります。
 
-<video controls playsinline preload="metadata" style="max-width:100%;height:auto" src="/komadori/live-demo.mp4"></video>
+<div style="max-width:360px;aspect-ratio:9/16"><iframe src="https://www.youtube.com/embed/WuoZs8yq5so" title="コマドリ: 対局しながら棋譜にする" style="width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
 
 うまくいかないときは[サポートページ](/komadori/support.html)を見てください。
