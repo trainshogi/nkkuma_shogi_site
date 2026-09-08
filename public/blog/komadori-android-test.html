@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- このファイルは blog/build.py が生成しました。直接編集せず articles/*.md を編集してください -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>コマドリ Android版のクローズドテストに参加する方法 | Shogiban to Kif ブログ</title>
+  <meta name="description" content="将棋の対局を棋譜にするアプリ「コマドリ」のAndroid版を、公開前に試してくださる方を募集しています。参加の手順3つと、預かる情報、やめ方をまとめました。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog/komadori-android-test.html">
+
+  <meta property="og:title" content="コマドリ Android版のクローズドテストに参加する方法">
+  <meta property="og:description" content="将棋の対局を棋譜にするアプリ「コマドリ」のAndroid版を、公開前に試してくださる方を募集しています。参加の手順3つと、預かる情報、やめ方をまとめました。">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog/komadori-android-test.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@nkkuma_service">
+
+  <!-- AdSense: 審査通過後、ここに広告コードを貼る -->
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      color: #222; background: #fff;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.9;
+      -webkit-text-size-adjust: 100%;
+    }
+    .site-head {
+      border-bottom: 1px solid #e5e5e5;
+      padding: 10px 16px;
+    }
+    .site-head a { display: inline-block; }
+    .site-head img { height: 34px; width: auto; vertical-align: middle; }
+    .site-head nav { display: inline-block; margin-left: 12px; }
+    .site-head nav a { font-size: 13px; color: #555; margin-right: 12px; text-decoration: none; }
+    .site-head nav a:hover { color: #0b67c2; }
+    main {
+      max-width: 720px; margin: 0 auto; padding: 24px 18px 48px;
+    }
+    h1 { font-size: 26px; line-height: 1.5; margin: 8px 0 4px; }
+    .meta { color: #999; font-size: 13px; margin-bottom: 28px; }
+    h2 {
+      font-size: 21px; margin: 44px 0 12px;
+      padding-bottom: 6px; border-bottom: 2px solid #eee;
+    }
+    h3 { font-size: 17px; margin: 32px 0 8px; }
+    p { margin: 0 0 1.2em; }
+    a { color: #0b67c2; }
+    pre {
+      background: #f6f6f4; border: 1px solid #e8e8e4; border-radius: 6px;
+      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    }
+    /* 和文等幅フォントを指定して、KIFの盤面図（全角の漢字と半角のv・記号）の桝を揃える */
+    pre, pre code {
+      font-family: "ＭＳ ゴシック", "MS Gothic", "Osaka-等幅", Osaka-mono,
+                   "Hiragino Kaku Gothic ProN", Menlo, Consolas, monospace;
+    }
+    code { font-family: Menlo, Consolas, monospace; font-size: 0.92em; }
+    p code, li code { background: #f2f2ef; padding: 1px 5px; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14.5px; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #f7f7f5; }
+    blockquote { margin: 1em 0; padding: 2px 16px; border-left: 4px solid #ddd; color: #555; }
+    img { max-width: 100%; height: auto; }
+    .tool-cta {
+      margin: 40px 0 8px; padding: 18px 16px;
+      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
+      font-size: 15px;
+    }
+    .tool-cta a.btn {
+      display: inline-block; margin-top: 10px;
+      background: #dc3545; color: #fff; text-decoration: none;
+      padding: 10px 18px; border-radius: 6px; font-weight: bold;
+    }
+    .site-foot {
+      border-top: 1px solid #e5e5e5; margin-top: 24px;
+      padding: 18px 16px; text-align: center; color: #888; font-size: 13px;
+    }
+    .site-foot a { color: #0b67c2; }
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <a href="/"><img src="/img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif"></a>
+    <nav>
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <article>
+      <h1>コマドリ Android版のクローズドテストに参加する方法</h1>
+      <div class="meta">2026-09-08　Shogiban to Kif 運営</div>
+      <p>この記事は、テスターを募集している期間のご案内です。無事に公開できたら、ここには Play ストアのリンクだけを残すつもりでいます。</p>
+<p>対局を撮った動画から棋譜をつくるアプリ「コマドリ」の Android 版を、公開の前に試してくださる方をさがしています。お願いすることは3つだけで、どれも数分で終わります。</p>
+<p>ただ、その前に「なぜ12人なのか」「なぜ14日なのか」を書かせてください。ここを飛ばすと、ずいぶん妙な頼みごとに見えると思うので。</p>
+<h2>12人・14日間は、Googleが決めた条件です</h2>
+<p>新しく登録した個人の開発者アカウントから Google Play にアプリを出すには、公開を申請する前にクローズドテストを通すことになっています。条件は、12人以上のテスターが14日間続けてテストに参加している状態をつくること。人数も日数も Google が決めたもので、こちらの都合で減らせません。</p>
+<p>こちらから言えるのは、その14日のあいだ、毎日アプリを開いていただく必要はない、ということくらいです。入れたまま置いておいていただければ日数は進みます。</p>
+<h2>やっていただくこと(3つ)</h2>
+<ol>
+<li><strong>Googleグループに参加します。</strong> <a href="https://groups.google.com/g/komadori-testers">https://groups.google.com/g/komadori-testers</a> を開いて、グループに参加してください。Google アカウントが要ります。</li>
+<li><strong>同じアカウントの Android でアプリを入れます。</strong> そのアカウントでログインしている Android の端末で <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori">Play ストアのコマドリのページ</a>を開いて、インストールしてください。</li>
+<li><strong>14日間は消さずに置いておいてください。</strong> 毎日使わなくて大丈夫です。</li>
+</ol>
+<!-- 図: Googleグループ komadori-testers の画面。「グループに参加」のボタンが見える状態 -->
+
+<!-- 図: Playストアのコマドリのページ。インストールのボタンが見える状態 -->
+
+<h2>ページが見つからない、と出たとき</h2>
+<p>リンクを開いたのに、ページが見つからない旨の表示(404)になることがあります。壊れているように見えますが、この404は次のどれかで出ます。</p>
+<ul>
+<li>グループにまだ参加していないアカウントで開いている</li>
+<li>Google アカウントからログアウトした状態のブラウザで開いている</li>
+<li>グループに参加した直後で、まだ反映されていない</li>
+</ul>
+<p>クローズドテストのページは、テスターとして登録されているアカウントにしか見えません。参加していない人に404を返すのは、Play のふるまいとしては正常です。参加した直後は反映まで数分かかることがあるので、お茶でも飲んでからもう一度開いてみてください。それでも見えないときは、下の連絡先までお知らせください。</p>
+<h2>テスト版でできること</h2>
+<p>撮った動画を選ぶと棋譜になります。それと、対局しながら記録する画面も入っています。こちらはリアルタイム版の初版です。</p>
+<p>認識は万能ではありません。駒の書体や照明によっては、機械が自信を持てない手が残ります。そこで「たしかめ再生」を用意しました。指し手が1手ずつ流れ、機械が心もとないと言った手の手前で速さが落ちて、止まります。止まったところでは、機械の読みを盤の上に矢印で描いてお訊きします。そのとおりなら押して進む。ちがっていたら、ほかの読みの札から選ぶか、盤を押して並べ直せます。</p>
+<p>できあがった棋譜は、KIF で書き出して共有メニューから渡せます。</p>
+<p>iPhone 版は1.3.0まで来ていますが、Android 版はまだ初版です。粗いところは残っています。おかしな挙動を見つけたら、そのまま教えていただけると助かります。</p>
+<h2>お預かりするものと、やめ方</h2>
+<p>グループに参加していただくと、その Google アカウントのメールアドレスがテスターの名簿に載ります。使いみちは、テストに参加していただくことと、必要なときのご案内だけです。テストが終わったら名簿は消します。</p>
+<p>やめたくなったら、Google グループの画面から退会して、アプリを消してください。それで終わりです。理由をお訊きすることはありません。</p>
+<p>映像の扱いは iPhone 版と同じです。動画そのものは送信されません。サーバーに送るのは、盤の位置を確かめるための静止画(最大3枚・保存しません)と、着手の瞬間ごとに切り出した盤面の画像だけです。Android 版は写真や動画にアクセスする権限も求めません。端末の写真選択ツールを通して、選んでいただいた1本だけを受け取ります。細かいところは<a href="/komadori/privacy.html">プライバシーポリシー</a>に書いてあります。</p>
+<h2>感想の送り先</h2>
+<p><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> へ、ひと言で結構です。「入れました」の1行でもありがたいです。うまくいかなかった話は、もっとありがたいです。</p>
+<p>12人と14日を通したあとに Google の審査があるので、公開の日はお約束できません。それでも、この14日を一緒に待ってくださる方が12人集まれば、Android で将棋を撮っている方にコマドリを届けられます。</p>
+    </article>
+
+    <div class="tool-cta">
+      <b>将棋盤の写真から棋譜を作れます</b><br>
+      盤面をスマホで撮るだけで、KIF・SFEN形式に変換できる無料ツールを運営しています。登録不要です。
+      <br><a class="btn" href="/">盤面写真をKIFに変換する</a>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+</body>
+</html>
