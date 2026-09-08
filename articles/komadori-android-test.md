@@ -17,4 +17,4 @@ Android版のコマドリを、公開の前に試してくださる方をさが�
 
 やめるときは、グループから退会してアプリを消すだけです。
 
-感想は [nkkumaservice@gmail.com](mailto:nkkumaservice@gmail.com) へ、ひと言で結構です。
+感想は [nkkumaservice@gmail.com](mailto:nkkumaservice@gmail.com) へ、ひと言で結構です。X の[@nkkuma_service](https://x.com/nkkuma_service)へのリプライやDMでもかまいません。
