@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>対応している盤と駒 | コマドリ</title>
+  <meta name="description" content="iOSアプリ「コマドリ」で、実際に動画から棋譜になることを確かめた盤と駒の一覧です。" />
+  <style>
+    :root{ --bg:#ffffff; --card:#f9f9f9; --text:#111111; --muted:#555555; --accent:#0077cc; --border:#dddddd; }
+    *{ box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", Meiryo, "Noto Sans JP", sans-serif; line-height:1.8; }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    header{ padding:48px 20px 12px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px }
+    .title{ font-size:clamp(22px, 2.6vw, 32px); font-weight:800; letter-spacing:0.2px }
+    .sub{ color:var(--muted); margin-top:6px; font-size:14px }
+    main{ padding:28px 0 80px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin:16px 0 }
+    h2{ font-size:20px; margin:32px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border) }
+    h3{ font-size:16px; margin:22px 0 4px }
+    ul{ padding-left:1.2em; margin:6px 0 }
+    li{ margin:8px 0 }
+    p{ margin:10px 0 }
+    .muted{ color:var(--muted) }
+    .small{ font-size:13px }
+    .scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0 }
+    table{ border-collapse:collapse; width:100%; font-size:14.5px; min-width:560px }
+    th, td{ border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top }
+    th{ background:#f7f7f5; white-space:nowrap }
+    td.mark{ text-align:center; font-size:16px }
+    footer{ border-top:1px solid var(--border); padding:20px; color:var(--muted); font-size:12px }
+  </style>
+</head>
+<body>
+<div style="border-bottom:1px solid #e5e5e5;padding:6px 12px;font-size:13px;background:#fff;font-family:'Hiragino Sans',sans-serif;">
+  <a href="/" style="color:#555;text-decoration:none;margin-right:14px;">写真をKIFに</a>
+  <a href="/taikai.html" style="color:#555;text-decoration:none;margin-right:14px;">大会・教室</a>
+  <a href="/blog.html" style="color:#555;text-decoration:none;margin-right:14px;">ブログ</a>
+  <a href="/about.html" style="color:#555;text-decoration:none;">About</a>
+</div>
+
+  <header>
+    <div class="wrap">
+      <h1 class="title">対応している盤と駒</h1>
+      <div class="sub">対局を撮った動画から棋譜（KIF）を作るiOSアプリ「コマドリ」で確かめた組み合わせです。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <p>この盤とこの駒なら、動画から棋譜になることを確かめました。ここに無い盤や駒で試された方は、教えてください。こちらでも確かめて、この表に足します。</p>
+
+    <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>盤</th><th>駒</th><th>確認した場面</th><th>結果</th><th>確認日</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>塩ビの盤（クリーム・オレンジ）</td><td>標準的な書体のプラ駒</td><td>大会の対局・12局</td><td class="mark">○</td><td>2026-08-02</td></tr>
+        <tr><td>木の折りたたみ盤</td><td>木の駒（成駒が赤字）</td><td>子ども教室の対局・6局</td><td class="mark">○</td><td>2026-08-23</td></tr>
+        <tr><td>塩ビの盤（黄）</td><td>標準的な書体のプラ駒</td><td>支部の方が撮った動画・2本</td><td class="mark">○</td><td>2026-07-21</td></tr>
+        <tr><td>木の折りたたみ盤（白木）</td><td>木の駒（黒字）</td><td>自宅・真上から1局</td><td class="mark">◎</td><td>2026-07-19</td></tr>
+        <tr><td>木目の盤マット</td><td>木の駒（黒字）</td><td>自宅・広角カメラで1局</td><td class="mark">○</td><td>2026-07-27</td></tr>
+        <tr><td>塩ビの盤（オレンジ）</td><td>木の駒（黒字）</td><td>自宅・卓上スタンドで1局</td><td class="mark">◎</td><td>2026-09-01</td></tr>
+        <tr><td>灰色のビニール折り盤</td><td>標準的な書体のプラ駒</td><td>職場の将棋部・1局</td><td class="mark">○</td><td>2026-08-27</td></tr>
+        <tr><td>塩ビの盤（黄）</td><td>標準的な書体のプラ駒</td><td>使ってくださった方の動画・6本</td><td class="mark">○</td><td>2026-07-28〜30</td></tr>
+        <tr><td>木の折り盤</td><td>手書き風の一字駒</td><td>使ってくださった方の動画・1局</td><td class="mark">△</td><td>2026-07-30</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p class="small muted">◎ そのまま棋譜になる ／ ○ 棋譜になるが要確認が多め ／ △ 半分以上落ちる ／ × 盤が見つからない</p>
+
+    <p>まだ確かめていないもの：木製の卓上盤・脚付き盤と彫駒、マグネット盤、紙や布の盤、子ども向けの大きな字や振り仮名つきの駒、一字駒。</p>
+
+    <h2>報告のしかた</h2>
+    <p>最初の10手ぶんの動画（1〜2分）と、盤と駒を写した写真を1枚、<a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> か X の <a href="https://x.com/nkkuma_service">@nkkuma_service</a> までお送りください。</p>
+    <p>成駒を1つ裏返して置いた写真があると助かります。</p>
+
+  </main>
+
+  <footer>
+    <div class="wrap">コマドリ（iOSアプリ）／ 運営者：佐藤 旭 ／ <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></div>
+  </footer>
+</body>
+</html>
