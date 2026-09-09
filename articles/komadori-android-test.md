@@ -13,6 +13,13 @@ Android版のコマドリを、公開の前に試してくださる方をさが�
 
 <!-- 図: Playストアのコマドリのページ -->
 
+## 盤が手元になくても試せます
+
+対局を撮った動画を用意しました。Androidに保存して、コマドリの「動画から棋譜をつくる」で選んでください。
+
+- [短い版(最初の10手・50秒・16MB)](https://drive.google.com/file/d/1_IUyxWlF2E6j6pYzGFJAGkm4xQ8lp2uJ/view) まずはこちらで。正しく読めると10手の棋譜になります。
+- [一局まるごと(83手・9分・167MB)](https://drive.google.com/file/d/1WjaySjr-hgHSWBgg82COH7Pj-S0l6_ck/view) 時間があれば。83手の棋譜になります。
+
 12人が14日間、というのはGoogle Playの決まりで、こちらの都合では減らせません。原文は[Play Consoleヘルプ「新しい個人用デベロッパー アカウント向けのアプリテスト要件」](https://support.google.com/googleplay/android-developer/answer/14151465?hl=ja)にあります。
 
 やめるときは、グループから退会してアプリを消すだけです。
