@@ -42,6 +42,9 @@
     .btn-primary { background:#c62828; border-color:#c62828; color:#fff; font-weight:bold; }
     .btn:disabled { opacity:.4; cursor: default; }
     .row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
+    #window-video { display:block; width:100%; max-width:480px; max-height:320px; background:#000; border-radius:8px; }
+    .window-row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; margin-top:8px; font-size:13.5px; }
+    .window-label { display:inline-block; min-width:4.5em; color:#555; }
     /* step切替 */
     [data-step="1"] .only-2, [data-step="1"] .only-3 { display:none; }
     [data-step="2"] .only-1, [data-step="2"] .only-3 { display:none; }
@@ -198,6 +201,24 @@
       <button class="btn" id="btn-sample">サンプル動画で試す</button>
     </div>
     <div id="file-info"></div>
+    <!-- 対局の窓: はじまりと終局を動画のつまみで指す(任意)。指した外は棋譜にしない -->
+    <div id="window-box" hidden>
+      <p class="note" style="margin:10px 0 6px">対局の前後も映っているときは、はじまりと終局の位置を教えてください。後片付けや感想戦の動きを、指し手として読まなくなります。そのままでも変換できます。</p>
+      <video id="window-video" controls muted playsinline preload="metadata"></video>
+      <div class="window-row">
+        <span class="window-label">はじまり</span>
+        <b id="window-start-text">0:00</b>
+        <button class="btn btn-sm" id="btn-window-start" type="button">いまの位置にする</button>
+        <button class="btn btn-sm" id="btn-window-start-reset" type="button" hidden>動画の頭に戻す</button>
+      </div>
+      <div class="window-row">
+        <span class="window-label">終局</span>
+        <b id="window-end-text">0:00</b>
+        <button class="btn btn-sm" id="btn-window-end" type="button">いまの位置にする</button>
+        <button class="btn btn-sm" id="btn-window-end-reset" type="button" hidden>動画の終わりに戻す</button>
+      </div>
+      <p class="note" style="margin:4px 0 0">終局は、最後の一手を指し終えたところで止めて「いまの位置にする」を押してください。投了のあと片付けが始まるまでの数秒しか余裕がないことがあります。終局の位置から5秒あとまでは読みます。</p>
+    </div>
     <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#666;margin-top:8px;cursor:pointer">
       <input type="checkbox" id="compress-toggle" checked style="width:16px;height:16px;flex:none">
       アップロード前にブラウザで圧縮する（推奨。PCの動作が重くなる場合はオフ）
@@ -339,6 +360,8 @@
   var COMPRESS_THRESHOLD_BYTES = 80 * 1000 * 1000; // 80MB
 
   var state = { file: null, jobId: null };
+  // 対局の窓(秒)。null = 指していない(動画の頭/終わりまで読む)
+  var gameWindow = { start: null, end: null, duration: 0 };
   function $(id) { return document.getElementById(id); }
 
   // 圧縮のオン/オフ(既定オン)。WebCodecsエンコードはCPU/GPUを占有し、同じPCで
@@ -385,6 +408,8 @@
         fileName: file.name,
         contentType: file.type || 'video/mp4',
         fileSizeBytes: file.size,
+        gameStartSec: gameWindow.start,
+        gameEndSec: gameWindow.end,
         // イベント用: サーバー側は jobId に ns- を付け、全成果物を保存対象外にする
         // (音声込み元動画は解析後に削除、archive は作られない。残りは purge-nosave.py で消す)
         noSave: true
@@ -1393,6 +1418,7 @@
     // 圧縮オフでは2GB超を受理できないため、該当ファイルは選び直してもらう
     if (state.file && !compressEnabled() && state.file.size > MAX_UPLOAD_BYTES) {
       state.file = null;
+      resetWindow();
       $('file-input').value = '';
       $('btn-start').disabled = true;
       $('file-info').textContent = '圧縮オフでは2GBまでの動画のみアップロードできます。ファイルを選び直してください。';
@@ -1404,6 +1430,7 @@
     var limit = canCompress ? MAX_RAW_BYTES_WITH_COMPRESS : MAX_UPLOAD_BYTES;
     if (f && f.size > limit) {
       state.file = null;
+      resetWindow();
       $('btn-start').disabled = true;
       // なぜ弾かれたかで案内を変える。「圧縮をオンにすれば送れる」のに
       // 「撮り直せ」と言ってしまう事故が実際に起きた(2026-07-28、3.73GBのMOV)
@@ -1424,6 +1451,7 @@
       return;
     }
     state.file = f;
+    loadWindow(f);
     $('btn-start').disabled = !state.file;
     var note = (f && f.size > MAX_UPLOAD_BYTES)
       ? '（アップロード前にブラウザ内で720pに圧縮されます）' : '';
@@ -1431,6 +1459,62 @@
       ? state.file.name + '（' + fmtSize(state.file.size) + '）' + note
       : '';
   });
+  // ---- 対局の窓 ----
+  // 動画の頭・終わりのままなら何も送らない(= これまでと同じ変換)。
+  // 時刻は動画の先頭からの秒。ブラウザ内の圧縮はフレームの時刻を保つので、圧縮後もずれない。
+  // プレビューを再生できない形式(Windows の Chrome で HEVC など)は、窓の欄ごと出さない。
+  function fmtClock(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), ss = sec % 60;
+    var mm = h ? (m < 10 ? '0' + m : '' + m) : '' + m;
+    return (h ? h + ':' : '') + mm + ':' + (ss < 10 ? '0' + ss : ss);
+  }
+  function renderWindow() {
+    $('window-start-text').textContent = fmtClock(gameWindow.start == null ? 0 : gameWindow.start);
+    $('window-end-text').textContent = fmtClock(gameWindow.end == null ? gameWindow.duration : gameWindow.end);
+    $('btn-window-start-reset').hidden = gameWindow.start == null;
+    $('btn-window-end-reset').hidden = gameWindow.end == null;
+  }
+  function resetWindow() {
+    var v = $('window-video');
+    v.onloadedmetadata = null;
+    v.onerror = null;
+    if (v.src) { try { URL.revokeObjectURL(v.src); } catch (e) {} }
+    v.removeAttribute('src');
+    v.load();
+    gameWindow = { start: null, end: null, duration: 0 };
+    $('window-box').hidden = true;
+  }
+  function loadWindow(file) {
+    resetWindow();
+    if (!file) { return; }
+    var v = $('window-video');
+    v.onloadedmetadata = function () {
+      if (!isFinite(v.duration) || v.duration <= 0) { return; }
+      gameWindow.duration = v.duration;
+      renderWindow();
+      $('window-box').hidden = false;
+    };
+    var url = URL.createObjectURL(file);
+    v.onerror = function () { if (v.src === url) { $('window-box').hidden = true; } };
+    v.src = url;
+  }
+  function setWindowEdge(which) {
+    var t = Math.round($('window-video').currentTime * 1000) / 1000;
+    if (which === 'start') {
+      if (gameWindow.end != null && t >= gameWindow.end) { alert('はじまりは終局より前にしてください。'); return; }
+      gameWindow.start = t < 0.5 ? null : t;
+    } else {
+      if (gameWindow.start != null && t <= gameWindow.start) { alert('終局ははじまりより後にしてください。'); return; }
+      gameWindow.end = t > gameWindow.duration - 1 ? null : t;
+    }
+    renderWindow();
+  }
+  $('btn-window-start').addEventListener('click', function () { setWindowEdge('start'); });
+  $('btn-window-end').addEventListener('click', function () { setWindowEdge('end'); });
+  $('btn-window-start-reset').addEventListener('click', function () { gameWindow.start = null; renderWindow(); });
+  $('btn-window-end-reset').addEventListener('click', function () { gameWindow.end = null; renderWindow(); });
+
   $('btn-start').addEventListener('click', run);
   // サンプル動画(サイト同梱・約0.6MB)でその場で体験できるように
   $('btn-sample').addEventListener('click', function () {
@@ -1445,6 +1529,7 @@
       })
       .then(function (blob) {
         state.file = new File([blob], 'sample-game.mp4', { type: 'video/mp4' });
+        resetWindow();
         $('file-info').textContent = 'サンプル対局動画（21秒・冒頭5手）';
         restore();
         run();
@@ -1515,6 +1600,7 @@
   });
   $('btn-retry').addEventListener('click', function () {
     state.file = null; state.jobId = null;
+    resetWindow();
     clearJob();
     $('resume-box').hidden = true;
     $('file-input').value = '';
