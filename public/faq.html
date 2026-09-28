@@ -2,6 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8">
+    <title>よくある質問 | Shogiban to Kif</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap -->
@@ -36,79 +37,89 @@
     <h3>FAQ</h3>
 
     <div class="accbox">
-      <!--ラベル1-->
+        <!--ラベル1-->
         <input type="checkbox" id="label1" class="cssacc" />
         <label for="label1">使い方がわからない</label>
         <div class="accshow">
           <!--ここに隠す中身-->
           <p>
-          以下の通りにご使用ください。
+          次の順にお使いください。
             <ol>
-              <li>Camera ボタンをタップし、将棋盤を撮影</li>
-              <li>先手/後手を確認（ボタンタップで切り替え）</li>
-              <li>Submit ボタンをタップ</li>
-              <li>しばらく待つと、kifデータ（テキスト）が生成</li>
-              <li>間違っている箇所があればタップして修正</li>
-              <li>コピーで将棋アプリで使用可</li>
+              <li>「📷 撮影する」で将棋盤を撮ります（撮ってあった写真を使うときは「🖼 画像を選ぶ」）</li>
+              <li>「変換する」を押します</li>
+              <li>盤面が表示されたら、元の写真と見比べます。違っている駒や持ち駒はタップで直せます</li>
+              <li>「先手番」「後手番」で、どちらが指す番かを選びます</li>
+              <li>「ぴよ将棋」「KENTO」のボタンで検討へ。KIF・SFEN はコピーかファイル保存で、ほかの将棋アプリへ渡せます</li>
             </ol>
           </p>
+          <p>くわしくは<a href="/howto.html">使い方ガイド</a>をご覧ください。</p>
         </div>
         <!--//ラベル1-->
         <!--ラベル3-->
         <input type="checkbox" id="label3" class="cssacc" />
-        <label for="label3">kif データが生成されない</label>
+        <label for="label3">「認識できませんでした」と出る・間違いが多い</label>
         <div class="accshow">
           <!--ここに隠す中身-->
           <p>
-            画像やkif データの送信には時間がかかるため、焦らずゆっくりお待ちください。
-            高速な通信環境下ではより短い時間でサービスをご利用いただけます。
+          次の点を確かめてから撮り直してください。
+            <ul>
+              <li>盤の一部が写真から切れていないか</li>
+              <li>盤が横倒し・上下逆に写っていないか</li>
+              <li>盤が小さく写りすぎていないか（寄って撮る）</li>
+              <li>駒が手や物で隠れていないか</li>
+            </ul>
           </p>
+          <p>撮り方は<a href="/blog/photo-tips.html">撮り方のコツ</a>にもまとめています。</p>
         </div>
         <!--//ラベル3-->
+        <!--ラベル4-->
+        <input type="checkbox" id="label4" class="cssacc" />
+        <label for="label4">変換に時間がかかる</label>
+        <div class="accshow">
+          <!--ここに隠す中身-->
+          <p>
+          写真を送って読み取るまで、ふつうは数秒です。通信が遅いと長くかかることがあります。画面はそのままでお待ちください。
+          </p>
+        </div>
+        <!--//ラベル4-->
         <!--ラベル6-->
         <input type="checkbox" id="label6" class="cssacc" />
-        <label for="label6">対応ブラウザ</label>
+        <label for="label6">対応ブラウザ・機種</label>
         <div class="accshow">
           <!--ここに隠す中身-->
           <p>
-          HTML5 に対応した標準的なスマートフォン向けブラウザ（chrome，safari など）でご利用ください。
-          利用の際はスマートフォンを縦向きにしてください。
+          スマートフォン・タブレット・パソコンの標準的なブラウザ（Chrome、Safari など）でご利用いただけます。アプリのインストールや会員登録はいりません。
           </p>
+          <p>写真は縦長でも横長でもかまいません。</p>
         </div>
         <!--//ラベル6-->
-        <!--ラベル7-->
-        <input type="checkbox" id="label7" class="cssacc" />
-        <label for="label7">対応機種</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          ブラウザ依存のWebアプリケーションのため、機種に依存するとは考えにくいですが、現在対応機種を確認しております。確認済み機種は以下の通りです。
-          </p>
-          <p>iPhne SE，iPod touch（第6世代），HUAWEI Nova lite，HTC 10</p>
-        </div>
-        <!--//ラベル7-->
         <!--ラベル8-->
         <input type="checkbox" id="label8" class="cssacc" />
         <label for="label8">対応アプリ</label>
         <div class="accshow">
           <!--ここに隠す中身-->
           <p>
-          現在生成したkifデータをコピーし使用できるアプリを確認しております。確認済みアプリは以下の通りです。
-          </p>
-          <p>
-          Android : ShogiDroid，ぴよ将棋
-          </p>
-          <p>
-          iPhone : ぴよ将棋
+          ぴよ将棋とKENTOは、結果の画面のボタンからそのまま開けます。ほかの将棋アプリには、KIFかSFENをコピーまたはファイル保存して渡してください。
           </p>
         </div>
         <!--//ラベル8-->
+        <!--ラベル10-->
+        <input type="checkbox" id="label10" class="cssacc" />
+        <label for="label10">1局まるごと棋譜にしたい</label>
+        <div class="accshow">
+          <!--ここに隠す中身-->
+          <p>
+          写真1枚から作れるのは、その時点の局面です。指し手つきの棋譜が必要なときは、対局を動画で撮って変換する<a href="/video.html">動画まるごと棋譜化（β版）</a>をお使いください。
+          </p>
+          <p>iPhone・iPadなら、盤の横に置いて指すだけで棋譜になるアプリ「コマドリ」もあります（Android版は準備中です）。<a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Storeで見る</a></p>
+        </div>
+        <!--//ラベル10-->
         <!--ラベル9-->
         <input type="checkbox" id="label9" class="cssacc" />
         <label for="label9">バグが発生した</label>
         <div class="accshow">
           <!--ここに隠す中身-->
-          <p>発生したバグについて<a href="https://twitter.com/nkkuma_service"　target="_blank">NKKUMA 公式ツイッター</a>までお寄せください。お問い合わせの際はバグ発生の時間と詳細をお伝えください。
+          <p>発生したバグは、<a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">X（@nkkuma_service）</a>か、メール（nkkumaservice@gmail.com）でお知らせください。起きた時刻と、どの画面で何をしたかを添えていただけると助かります。</p>
         </div>
         <!--//ラベル9-->
     </div><!--//.accbox-->
@@ -117,7 +128,7 @@
     <div id="tmpfoot">
       <br><!--タグはここから--><table border="0" cellspacing="0" cellpadding="0" align="center"><tr><td align="center"><a href="http://www.rays-counter.com/"><img src="http://www.rays-counter.com/d412_f6_024/5b42d99ac1c89/" alt="アクセスカウンター" border="0"></a></td></tr><tr><td align="center"><img src="http://www.rays-counter.com/images/counter_01.gif" border="0"><img src="http://www.rays-counter.com/images/counter_02.gif" border="0"><img src="http://www.rays-counter.com/images/counter_03.gif" border="0"><img src="http://www.rays-counter.com/images/counter_04.gif" border="0" ><img src="http://www.rays-counter.com/images/counter_05.gif" border="0"></td></tr></table><!--ここまで-->
       <br><a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="写真1枚で簡単KIF作成！" data-url="https://shogi.nkkuma.tokyo" data-hashtags="えぬっくま" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      <br>開発：nkkuma　twitter始めました<br>
+      <br>開発：えぬっくま<br>
       <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
       <a class="twitter-timeline" height="400px" href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw">Tweets by nkkuma_service</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
       <a href="//af.moshimo.com/af/c/click?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733&guid=ON" target="_blank" rel="nofollow"><img src="//image.moshimo.com/af-img/0866/000000022733.jpg" width="234" height="60" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733" width="1" height="1" style="border:none;">
