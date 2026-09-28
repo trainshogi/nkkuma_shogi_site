@@ -123,7 +123,7 @@
       border-radius: 10px; padding: 10px 20px; font-size: 16px; font-weight: bold;
     }
     .store-btn:hover { background: #333; }
-    .android { font-size: 14px; margin: 12px 0 0; }
+    .stores { display: flex; flex-wrap: wrap; gap: 10px; }
     .app .more { font-size: 14px; margin: 14px 0 0; }
     .app .more a { color: #a4461b; }
     .app .more a, .works p a, .timeline a { white-space: nowrap; }
@@ -201,7 +201,7 @@
       <div>
         <p class="app-name">
           <img src="/img/about/komadori-icon.png" alt="" width="56" height="56">
-          <span><b>コマドリ</b><small>iPhone・iPad のアプリ</small></span>
+          <span><b>コマドリ</b><small>iPhone・iPad・Android のアプリ</small></span>
         </p>
         <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
         <ul class="steps">
@@ -209,8 +209,10 @@
           <li><b>指す</b><span>いつもどおり指すと、手を読み上げて棋譜に書きとめます。</span></li>
           <li><b>渡す</b><span>できた棋譜は、ぴよ将棋などふだんのアプリやサイトへ。</span></li>
         </ul>
-        <a class="store-btn" href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Store で見る</a>
-        <p class="android">Android 版<span class="tag dev">準備中</span></p>
+        <div class="stores">
+          <a class="store-btn" href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Store で見る</a>
+          <a class="store-btn" href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">Google Play で見る</a>
+        </div>
         <p class="note">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。</p>
         <p class="more"><a href="/komadori/placement.html">スマホと盤の置き方</a> ／ <a href="/komadori/gear.html">対応している盤と駒</a> ／ <a href="/komadori/support.html">サポート</a></p>
       </div>
@@ -270,6 +272,7 @@
       <a href="/taikai.html">大会・教室</a>
       <a href="/blog.html">ブログ</a>
       <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ（iPhone・iPad）</a>
+      <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
       <a href="/privacy.html">プライバシーポリシー・利用規約</a>
     </nav>
     &copy; 2019-2026 Shogiban to Kif（えぬっくま）
