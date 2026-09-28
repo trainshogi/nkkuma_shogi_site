@@ -62,134 +62,215 @@
   <meta property="og:description" content="将棋の対局を「消えない記録」にする。画像認識と動画棋譜化の個人開発。">
   <meta property="og:url" content="https://shogi.nkkuma.tokyo/about.html">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:site_name" content="Shogiban to Kif">
   <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@nkkuma_service">
 
   <style>
     * { box-sizing: border-box; }
+    :root {
+      --text: #222; --muted: #666; --faint: #999; --line: #e5e5e5;
+      --card: #fafaf8; --link: #0b67c2;
+      --cream: #fbf4e4; --orange: #e5672e; --brown: #4a3326;
+    }
     body {
       margin: 0; padding: 0;
-      color: #222; background: #fff;
+      color: var(--text); background: #fff;
       font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-      line-height: 1.9;
+      line-height: 1.85;
       -webkit-text-size-adjust: 100%;
     }
+    a { color: var(--link); }
+    img { max-width: 100%; height: auto; }
     .site-head {
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid var(--line);
       padding: 10px 16px;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
     }
-    .site-head a { display: inline-block; }
-    .site-head img { height: 34px; width: auto; vertical-align: middle; }
-    .site-head nav { display: inline-block; margin-left: 12px; }
-    .site-head nav a { font-size: 13px; color: #555; margin-right: 12px; text-decoration: none; }
-    .site-head nav a:hover { color: #0b67c2; }
-    main { max-width: 720px; margin: 0 auto; padding: 24px 18px 48px; }
-    h1 { font-size: 26px; line-height: 1.5; margin: 8px 0 4px; }
-    .lead { color: #555; margin: 0 0 30px; }
-    h2 { font-size: 21px; margin: 44px 0 12px; padding-bottom: 6px; border-bottom: 2px solid #eee; }
-    p { margin: 0 0 1.2em; }
-    a { color: #0b67c2; }
-    img { max-width: 100%; height: auto; border-radius: 6px; }
-    figure { margin: 18px 0; }
-    figcaption { color: #888; font-size: 13px; margin-top: 6px; }
+    .site-head .logo img { height: 34px; width: auto; display: block; }
+    .site-head nav { display: flex; flex-wrap: wrap; gap: 0 14px; }
+    .site-head nav a { font-size: 13px; color: #555; text-decoration: none; }
+    .site-head nav a:hover { color: var(--link); }
+    .site-head nav a[aria-current] { color: var(--text); font-weight: bold; }
+    main { max-width: 760px; margin: 0 auto; padding: 28px 18px 48px; }
+
+    .intro h1 { font-size: 28px; line-height: 1.4; margin: 0 0 6px; }
+    .intro .lead { font-size: 17px; margin: 0 0 6px; }
+    .intro .who { color: var(--muted); font-size: 14px; margin: 0; }
+
+    h2 { font-size: 21px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #eee; }
+    p { margin: 0 0 1.1em; }
+
+    /* コマドリ */
+    .app {
+      margin: 28px 0 0; padding: 22px 20px 20px;
+      background: var(--cream); border-radius: 16px; color: var(--brown);
+      display: grid; gap: 18px 28px; grid-template-columns: 1fr;
+    }
+    .app-name { display: flex; align-items: center; gap: 12px; margin: 0; }
+    .app-name img { width: 56px; height: 56px; border-radius: 13px; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+    .app-name b { font-size: 20px; line-height: 1.3; display: block; }
+    .app-name small { font-size: 13px; color: #7a6254; }
+    .app .catch { font-size: 24px; font-weight: bold; line-height: 1.45; margin: 16px 0 10px; }
+    .app .catch em { font-style: normal; color: var(--orange); }
+    .app .steps { list-style: none; padding: 0; margin: 0 0 14px; font-size: 15px; }
+    .app .steps li { display: grid; grid-template-columns: 3.2em 1fr; padding: 3px 0; }
+    .app .steps b { color: var(--orange); }
+    .app .note { font-size: 14px; margin: 14px 0 0; }
+    .store-btn {
+      display: inline-block; background: #111; color: #fff; text-decoration: none;
+      border-radius: 10px; padding: 10px 20px; font-size: 16px; font-weight: bold;
+    }
+    .store-btn:hover { background: #333; }
+    .android { font-size: 14px; margin: 12px 0 0; }
+    .app .more { font-size: 14px; margin: 14px 0 0; }
+    .app .more a { color: #a4461b; }
+    .app .more a, .works p a, .timeline a { white-space: nowrap; }
+    .app figure { margin: 0; }
+    .app figure img { border-radius: 10px; display: block; margin: 0 auto; max-height: 420px; width: auto; }
+    .app .end { grid-column: 1 / -1; margin: 0; font-weight: bold; font-size: 15px; border-top: 1px solid #ecdcc4; padding-top: 14px; }
+    @media (min-width: 700px) {
+      .app { grid-template-columns: 1fr 300px; padding: 28px; }
+      .app figure { align-self: center; }
+    }
+
     .works { display: grid; gap: 14px; padding: 0; margin: 0; list-style: none; }
-    .works li {
-      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
-      padding: 16px 18px;
-    }
+    .works li { border: 1px solid #e0e0e0; border-radius: 12px; background: var(--card); padding: 16px 18px; }
     .works b { font-size: 16px; }
-    .works .tag {
-      display: inline-block; font-size: 12px; font-weight: bold;
-      border-radius: 999px; padding: 1px 10px; margin-left: 8px; vertical-align: 1px;
+    .works p { margin: 6px 0 0; font-size: 14.5px; }
+    @media (min-width: 700px) { .works { grid-template-columns: 1fr 1fr; } }
+    .tag {
+      display: inline-block; font-size: 12px; font-weight: bold; line-height: 1.7;
+      border-radius: 999px; padding: 0 10px; margin-left: 6px; vertical-align: 2px; white-space: nowrap;
     }
     .tag.live { background: #e7f2ea; color: #2f7a4d; }
     .tag.beta { background: #fdf1e3; color: #b06a1e; }
     .tag.dev  { background: #eef1f6; color: #5a6b8c; }
-    .works p { margin: 6px 0 0; font-size: 14.5px; }
+
+    figure.photo { margin: 18px 0; }
+    figure.photo img { border-radius: 8px; display: block; width: 100%; max-height: 360px; object-fit: cover; }
+    figcaption { color: #888; font-size: 13px; margin-top: 6px; }
+
     .timeline { list-style: none; padding: 0; margin: 0; }
-    .timeline li { padding: 6px 0 6px 0; }
-    .timeline .y { display: inline-block; width: 74px; color: #999; font-size: 14px; }
+    .timeline li { display: grid; grid-template-columns: 4.6em 1fr; gap: 0 8px; padding: 7px 0; border-bottom: 1px dashed #eee; }
+    .timeline li:last-child { border-bottom: 0; }
+    .timeline .y { color: var(--faint); font-size: 14px; font-variant-numeric: tabular-nums; padding-top: 1px; }
+
+    .mail-btn {
+      display: inline-block; border: 1px solid var(--link); color: var(--link); text-decoration: none;
+      border-radius: 10px; padding: 8px 18px; font-weight: bold; font-size: 15px;
+    }
+    .mail-btn:hover { background: #eef5fc; }
     .contact {
-      margin: 40px 0 8px; padding: 18px 16px;
-      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
+      margin: 16px 0 0; padding: 16px 18px;
+      border: 1px solid #e0e0e0; border-radius: 12px; background: var(--card);
       font-size: 15px;
     }
+    .contact dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
+    .contact dt { color: var(--muted); }
+    .contact dd { margin: 0; overflow-wrap: anywhere; }
+    @media (max-width: 360px) { .contact { font-size: 14px; padding: 14px; } }
     .site-foot {
-      border-top: 1px solid #e5e5e5; margin-top: 24px;
-      padding: 18px 16px; text-align: center; color: #888; font-size: 13px;
+      border-top: 1px solid var(--line); margin-top: 24px;
+      padding: 18px 16px; text-align: center; color: #888; font-size: 13px; line-height: 2;
     }
-    .site-foot a { color: #0b67c2; }
+    .site-foot nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 16px; }
+    .site-foot a { color: var(--link); }
   </style>
 </head>
 <body>
   <header class="site-head">
-    <a href="/"><img src="/img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif"></a>
+    <a class="logo" href="/"><img src="/img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif"></a>
     <nav>
       <a href="/">写真をKIFに</a>
       <a href="/taikai.html">大会・教室</a>
       <a href="/blog.html">ブログ</a>
-      <a href="/about.html">About</a>
+      <a href="/about.html" aria-current="page">About</a>
     </nav>
   </header>
 
   <main>
-    <h1>えぬっくま</h1>
-    <p class="lead">将棋の対局を「消えない記録」にするために、画像認識と将棋のサービスを個人で開発しています。開発者は佐藤旭。</p>
+    <section class="intro">
+      <h1>えぬっくま</h1>
+      <p class="lead">将棋の一局を、あとに残る棋譜にする。そのためのアプリとサイトを、個人で作っています。</p>
+      <p class="who">開発・運営：佐藤旭（えぬっくま）</p>
+    </section>
 
-    <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場の一局にも、大会での子供の一局にも、記録は残りません。カメラと画像認識でそこをなんとかする、というのがこの活動の軸です。</p>
+    <section class="app" id="komadori">
+      <div>
+        <p class="app-name">
+          <img src="/img/about/komadori-icon.png" alt="" width="56" height="56">
+          <span><b>コマドリ</b><small>iPhone・iPad のアプリ</small></span>
+        </p>
+        <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
+        <ul class="steps">
+          <li><b>置く</b><span>盤の横にスマホを置きます。</span></li>
+          <li><b>指す</b><span>いつもどおり指すと、手を読み上げて棋譜に書きとめます。</span></li>
+          <li><b>渡す</b><span>できた棋譜は、ぴよ将棋などふだんのアプリやサイトへ。</span></li>
+        </ul>
+        <a class="store-btn" href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Store で見る</a>
+        <p class="android">Android 版<span class="tag dev">準備中</span></p>
+        <p class="note">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。</p>
+        <p class="more"><a href="/komadori/placement.html">スマホと盤の置き方</a> ／ <a href="/komadori/gear.html">対応している盤と駒</a> ／ <a href="/komadori/support.html">サポート</a></p>
+      </div>
+      <figure>
+        <img src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。盤の横に置いたスマホが、指した手を記録している" width="800" height="813" loading="lazy">
+      </figure>
+      <p class="end">記録係がいなくても、あの一局が残ります。</p>
+    </section>
 
-    <figure>
-      <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
-      <figcaption>2026年8月・行橋名人戦。対局者は普段どおり指すだけで、棋譜が残る。</figcaption>
-    </figure>
-
-    <h2>作っているもの</h2>
+    <h2 id="works">ほかに作っているもの</h2>
     <ul class="works">
       <li>
-        <b>コマドリ（iPhone・iPadアプリ）</b><span class="tag live">公開中</span>
-        <p>盤の横にスマホを置いて指すだけで、対局しながらその場で棋譜になるアプリ。撮り終えた動画からも起こせます。できた棋譜は、お使いの将棋アプリやサイトへそのまま渡せます。iOS 17以降・無料。<a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Storeで見る</a></p>
-        <p><a href="/komadori/placement.html">スマホと盤の置き方</a> ／ <a href="/komadori/gear.html">対応している盤と駒</a> ／ <a href="/komadori/support.html">サポート</a></p>
-      </li>
-      <li>
-        <b>コマドリ（Androidアプリ）</b><span class="tag dev">準備中</span>
-        <p>iPhone版と同じことが、Androidのスマホでもできるように準備しています。</p>
-      </li>
-      <li>
         <b>Shogiban to Kif</b><span class="tag live">公開中</span>
-        <p>将棋盤の写真を撮るだけでKIF・SFEN形式に変換できる無料ツール。登録不要。<a href="/">使ってみる</a></p>
+        <p>将棋盤の写真を撮るだけで、局面を KIF・SFEN にできるサイトです。登録は要りません。<a href="/">写真をKIFにする</a></p>
       </li>
       <li>
-        <b>対局動画の自動棋譜化</b><span class="tag beta">ベータ</span>
-        <p>対局を撮った動画から、一局まるごと棋譜を復元します。2026年8月の行橋名人戦では1日分・12局を棋譜集にしてお渡ししました。<a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></p>
+        <b>大会・教室の棋譜づくり</b><span class="tag beta">ベータ</span>
+        <p>対局を撮った動画から、一局まるごと棋譜にします。2026年8月の行橋名人戦では、1日分・12局を棋譜集にしてお渡ししました。<a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></p>
       </li>
     </ul>
+
+    <h2>なぜ作っているか</h2>
+    <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場の一局にも、大会での子どもの一局にも、記録は残りません。並べ直せば上達の近道になるのに、書きとめる手が足りない。そこをカメラでなんとかする、というのがこの活動の軸です。</p>
+    <figure class="photo">
+      <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
+      <figcaption>2026年8月・行橋名人戦。対局者はふだんどおり指すだけで、棋譜が残ります。</figcaption>
+    </figure>
 
     <h2>あゆみ</h2>
     <ul class="timeline">
-      <li><span class="y">2019</span>東京農工大学在学中に、スマホで撮影した将棋盤面をディープラーニングで認識するWebアプリを開発・発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf">大学プレスリリース</a>）</li>
-      <li><span class="y">以降</span>「えぬっくま」名義で将棋の画像認識サービスを開発・運営</li>
-      <li><span class="y">2026.08</span>行橋名人戦（福岡）で大会1日分・12局の棋譜化を実施。リアルタイム棋譜記録のデモも実演</li>
-      <li><span class="y">2026.08</span>iPhoneアプリ「コマドリ」を公開。撮った対局動画から棋譜を起こせるように</li>
-      <li><span class="y">2026.08</span>高島平将棋クラブで6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</li>
-      <li><span class="y">2026.09</span>コマドリで、対局しながらその場で棋譜にできるように</li>
-      <li><span class="y">2026.09</span>コマドリがiPadに対応</li>
+      <li><span class="y">2019</span><span>東京農工大学在学中に、スマホで撮った将棋盤の写真から局面を読み取る Web アプリを開発・発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf" target="_blank" rel="noopener">大学のプレスリリース</a>）</span></li>
+      <li><span class="y">以降</span><span>「えぬっくま」の名前で、将棋盤の写真を棋譜にするサイトを運営</span></li>
+      <li><span class="y">2026.08</span><span>行橋名人戦（福岡）で、大会1日分・12局を棋譜にする。その場で棋譜を記録するところも実演</span></li>
+      <li><span class="y">2026.08</span><span>iPhone アプリ「コマドリ」を公開。撮った対局の動画から棋譜を起こせるように</span></li>
+      <li><span class="y">2026.08</span><span>高島平将棋クラブで6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</span></li>
+      <li><span class="y">2026.09</span><span>コマドリで、対局しながらその場で棋譜にできるように</span></li>
+      <li><span class="y">2026.09</span><span>コマドリが iPad に対応</span></li>
     </ul>
 
     <h2>大会・教室のみなさまへ</h2>
-    <p>大会や教室での棋譜化のご相談を歓迎しています。機材の持ち込み・設置・運用まですべてこちらで行い、運営のお手間はかけません。ベータ期間中のため費用は無料です。まずはお気軽にご連絡ください。</p>
-    <p>教室や道場でご自分で記録したいときは、<a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ</a>をお使いください。盤の横にスマホを置くだけで始められます。</p>
+    <p>大会や教室での棋譜づくりのご相談を歓迎しています。機材の持ち込み・設置・運用まですべてこちらで行い、運営のお手間はかけません。ベータの間は費用をいただいていません。</p>
+    <p>教室や道場でご自分で記録したいときは、<a href="#komadori">コマドリ</a>をお使いください。盤の横にスマホを置くだけで始められます。</p>
+    <p><a class="mail-btn" href="mailto:nkkumaservice@gmail.com?subject=%E5%A4%A7%E4%BC%9A%E3%83%BB%E6%95%99%E5%AE%A4%E3%81%AE%E6%A3%8B%E8%AD%9C%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">メールで相談する</a></p>
 
-    <div class="contact">
-      <b>連絡先</b><br>
-      メール: nkkumaservice@gmail.com<br>
-      X: <a href="https://x.com/nkkuma_service">@nkkuma_service</a>
+    <div class="contact" id="contact">
+      <dl>
+        <dt>メール</dt><dd><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></dd>
+        <dt>X</dt><dd><a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a></dd>
+      </dl>
     </div>
   </main>
 
   <footer class="site-foot">
-    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ(iPhone・iPad) — App Storeで見る</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    <nav>
+      <a href="/">Shogiban to Kif</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ（App Store）</a>
+      <a href="/privacy.html">プライバシーポリシー・利用規約</a>
+    </nav>
     &copy; 2019-2026 Shogiban to Kif（えぬっくま）
   </footer>
 </body>
