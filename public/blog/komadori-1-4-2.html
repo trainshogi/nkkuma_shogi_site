@@ -14,13 +14,13 @@
   </script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>記事一覧 | Shogiban to Kif ブログ</title>
-  <meta name="description" content="将棋の棋譜・KIF形式・盤面認識に関する解説記事">
-  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog.html">
+  <title>コマドリ 1.4.2｜戦型の読み上げ、棚の検索、撮り損ないのお知らせ | Shogiban to Kif ブログ</title>
+  <meta name="description" content="将棋の対局を棋譜にするアプリ「コマドリ」1.4.2 の変更点。戦型と囲いの読み上げ、棋譜の棚の検索、撮り損ないのお知らせ、4:3 のカメラ、ぴよ将棋へ反則の手前まで渡す、など。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog/komadori-1-4-2.html">
 
-  <meta property="og:title" content="記事一覧">
-  <meta property="og:description" content="将棋の棋譜・KIF形式・盤面認識に関する解説記事">
-  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog.html">
+  <meta property="og:title" content="コマドリ 1.4.2｜戦型の読み上げ、棚の検索、撮り損ないのお知らせ">
+  <meta property="og:description" content="将棋の対局を棋譜にするアプリ「コマドリ」1.4.2 の変更点。戦型と囲いの読み上げ、棋譜の棚の検索、撮り損ないのお知らせ、4:3 のカメラ、ぴよ将棋へ反則の手前まで渡す、など。">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog/komadori-1-4-2.html">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="将棋盤認識サイト">
   <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
@@ -105,21 +105,41 @@
 
   <main>
     <article>
-      <h1>記事一覧</h1>
-      <div class="meta">　Shogiban to Kif 運営</div>
-      <style>.post-list{list-style:none;padding:0}.post-list li{margin:0 0 14px}.post-list .d{color:#999;font-size:12.5px;margin-left:10px}</style>
-    <ul class="post-list">
-      <li><a href="/blog/funabashi-2026-report.html">船橋支部の例会で、2局を撮らせてもらいました</a><span class="d">2026-09-29</span></li>
-      <li><a href="/blog/komadori-1-4-2.html">コマドリ 1.4.2｜戦型の読み上げ、棚の検索、撮り損ないのお知らせ</a><span class="d">2026-09-29</span></li>
-      <li><a href="/blog/toda-2026-report.html">戸田の「棋力向上委員会」で、盤を浅い角度から撮って分かったこと</a><span class="d">2026-09-29</span></li>
-      <li><a href="/blog/komadori-1-4.html">コマドリ 1.4 で変わったこと｜記録する・直す・渡す</a><span class="d">2026-09-28</span></li>
-      <li><a href="/blog/komadori-android-test.html">コマドリ Android版のテストに参加する方法</a><span class="d">2026-09-08</span></li>
-      <li><a href="/blog/komadori-shooting.html">コマドリの撮り方</a><span class="d">2026-09-08</span></li>
-      <li><a href="/blog/takashimadaira-2026-report.html">高島平将棋クラブで6局撮って、そのまま出せたのは1局でした</a><span class="d">2026-08-28</span></li>
-      <li><a href="/blog/yukuhashi-2026-report.html">将棋大会の12局をカメラだけで棋譜にしてきた｜行橋名人戦レポート</a><span class="d">2026-08-05</span></li>
-      <li><a href="/blog/kif-guide.html">KIFファイルとは？開き方・作り方・変換方法まとめ【将棋の棋譜形式】</a><span class="d">2026-07-13</span></li>
-      <li><a href="/blog/photo-tips.html">将棋盤の写真がうまく認識されないときのコツ【撮り方まとめ】</a><span class="d">2026-07-13</span></li>
-    </ul>
+      <h1>コマドリ 1.4.2｜戦型の読み上げ、棚の検索、撮り損ないのお知らせ</h1>
+      <div class="meta">2026-09-29　Shogiban to Kif 運営</div>
+      <p>コマドリ 1.4.2 を出しました。今回は、対局中と、対局が終わって棋譜がたまってきたあとの、細かいところの直しが中心です。</p>
+<h2>戦型と囲いの名前を読み上げます</h2>
+<p>対局中に「四間飛車」「美濃囲い」のような戦型と囲いの名前も読み上げられるようにしました。設定で入にすると使えます。はじめは切です。</p>
+<p>戦型の名前は、指し手を読み上げる声とは別の声（VOICEVOX:玄野武宏）で読みます。形が見えたところで一度だけ言って、言い直しはしません。途中で形が変わることもあるので、あくまで目安として聞いてください。</p>
+<h2>棋譜の棚を探せます</h2>
+<p>ホームの棋譜の棚で、対局者の名前やメモで探せるようにしました。絞り込みと並べ替えもできます。局が増えてくると、あの日のあの一局がどこにあるか分からなくなるんですよね。</p>
+<h2>撮り損ないを、その場でお知らせします</h2>
+<p>記録中に、次のようなことが起きたら、画面の1行でお知らせします。</p>
+<ul>
+<li>片付けがはじまった</li>
+<li>カメラが動いた</li>
+<li>盤の角が画面の端にかかっている</li>
+<li>盤が隠れている</li>
+<li>暗い</li>
+<li>反射している</li>
+</ul>
+<p>対局は止めません。気づいたときに直してもらえれば十分です。</p>
+<h2>カメラを 4:3 で使います</h2>
+<p>カメラを 4:3 の形で使うようにしました。スマホを縦に置いたとき、盤の横幅の向きが広く写るので、スタンドを盤に近づけても盤が入りやすくなります。</p>
+<p>置き方の目安も、これに合わせて変わりました。<a href="/komadori/placement.html">スマホと盤の置き方</a>を見てください。</p>
+<h2>向きの選び方</h2>
+<p>撮り方のコツと向きの選び方の案内を直しました。盤の横から撮っているときは、先手がまだ分からなくても、左か右のどちらかを選んでください。</p>
+<h2>ぴよ将棋へ、反則の手前まで渡せます</h2>
+<p>二歩などの反則の手が1手でも入っていると、ぴよ将棋のアプリはその一局を受け付けず、1手も開けませんでした。1.4.2 からは、反則の手前までを渡します。何手目までを渡したかは、画面に出します。</p>
+<p>子どもの将棋だと、二歩や王手放置で終わる局は珍しくありません。その一局こそ残しておきたいので、せめて手前までは開けるようにしました。</p>
+<h2>そのほか</h2>
+<ul>
+<li>端末だけで読む梅の、手の読み方を速くしました。</li>
+<li>設定の「このアプリ」に、形勢判断に使っているエンジンの名前を出します。</li>
+</ul>
+<hr />
+<p>Android 版は準備中です。</p>
+<p>コマドリは <a href="https://apps.apple.com/jp/app/id6800334202">App Store</a> にあります。1.4.0 と 1.4.1 で変わったところは<a href="/blog/komadori-1-4.html">コマドリ 1.4 で変わったこと</a>に書きました。感想や不具合は <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> か、X の <a href="https://x.com/nkkuma_service">@nkkuma_service</a> まで。</p>
     </article>
 
     <div class="tool-cta">
