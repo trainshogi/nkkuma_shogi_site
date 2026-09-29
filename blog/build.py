@@ -34,6 +34,12 @@ SITE = "https://shogi.nkkuma.tokyo"
 
 REQUIRED_KEYS = ("title", "description", "slug", "date")
 
+# ブログ以外で sitemap.xml に載せるページ。ビルドのたびに消えないようここに書く
+EXTRA_SITEMAP_PATHS = (
+    "/komadori/gear.html",
+    "/komadori/placement.html",
+)
+
 
 def parse_front_matter(text, path):
     """先頭の --- で囲まれた key: value を辞書で返す。本文も返す。"""
@@ -113,7 +119,11 @@ def main():
     print("  built: /blog.html  (一覧)")
 
     # sitemap.xml（トップ・ブログ一覧・各記事）
-    urls = [f"{SITE}/", f"{SITE}/blog.html"] + [f"{SITE}/blog/{a['slug']}.html" for a in articles]
+    urls = (
+        [f"{SITE}/", f"{SITE}/blog.html"]
+        + [f"{SITE}/blog/{a['slug']}.html" for a in articles]
+        + [f"{SITE}{p}" for p in EXTRA_SITEMAP_PATHS]
+    )
     body = "\n".join(f"  <url><loc>{u}</loc></url>" for u in urls)
     sitemap = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
