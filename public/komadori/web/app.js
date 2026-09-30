@@ -120,6 +120,10 @@ window.addEventListener('popstate', () => {
 });
 
 // ---------------------------------------------------------------- S1 準備
+// 駒落ちは、サーバが手合割を受けて読むようになってから選べるようにする(aws-nkkuma #214 の本番反映)。
+// それまでの本番は平手として読むので、駒落ちの対局は棋譜が崩れる
+const HANDICAP_READY = false;
+
 function renderPrep() {
   const hc = isHc();
   const unsent = R.loadRec();
@@ -139,7 +143,8 @@ function renderPrep() {
       <p class="prep-q">手合割をえらんでください</p>
       <div class="hc-cards">
         <button class="hc-card${hc ? '' : ' on'}" data-card="hirate">平手<small>▲先手から指します</small></button>
-        <button class="hc-card${hc ? ' on' : ''}" data-card="koma">駒落ち<small>${hc ? esc(st.meta.handicap) + '・△上手から' : '上手が駒を落とします'}</small></button>
+        ${HANDICAP_READY ? `<button class="hc-card${hc ? ' on' : ''}" data-card="koma">駒落ち<small>${hc ? esc(st.meta.handicap) + '・△上手から' : '上手が駒を落とします'}</small></button>`
+    : '<button class="hc-card" data-card="koma" disabled>駒落ち<small>まだ選べません</small></button>'}
       </div>
       ${hc ? `<div class="hc-chips">${chips}<button class="hc-more" id="p-more">${st.hcOther ? '‹ おもな駒落ち' : 'そのほかの駒落ち ›'}</button></div>` : ''}
       <div class="prep-preview" id="p-preview"></div>

@@ -441,3 +441,5 @@ a { color: var(--primary); }
 .tl.low.wide #kv.on { column-gap: 14px; grid-template-columns: calc(var(--S) + 20px) 190px minmax(0, 1fr); grid-template-areas: "hg list right" "board list right" "hs list right"; }
 .tl.low.wide .kv-list { display: block; width: auto; }
 .tl.low .kv-right { padding-top: 6px; }
+
+.hc-card:disabled { opacity: .55; }
