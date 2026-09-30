@@ -248,7 +248,8 @@
         rec = {
           id: id, startedAt: Date.now(), frames: 0, dropped: 0, gaps: 0,
           store: store, encoder: encoder, muxer: muxer, flush: flush,
-          failed: function () { return failed; }, timer: null, size: size, codec: cfg.codec
+          failed: function () { return failed; }, timer: null, size: size, codec: cfg.codec,
+          bytes: function () { return store.bytes + pendingBytes; }
         };
         saveRec({ id: id, startedAt: rec.startedAt, frames: 0, bytes: 0, opfs: !!store.dir, sent: false });
 
@@ -397,7 +398,7 @@
     hudTimer = setInterval(function () {
       if (!rec) { return; }
       $('rec-time').textContent = fmtElapsed(Date.now() - rec.startedAt);
-      $('rec-size').textContent = fmtSize(rec.store.bytes);
+      $('rec-size').textContent = fmtSize(rec.bytes());
       if (rec.failed()) {
         $('rec-warn').textContent = '録画が止まりました。「対局おわり」を押すと、ここまでの分を送れます。';
         show('rec-warn', true);
