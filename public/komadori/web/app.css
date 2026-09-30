@@ -401,8 +401,8 @@ a { color: var(--primary); }
 .tight2 .kv-panel { gap: 4px; padding: 4px 0; }
 .tight2 .act { height: 44px; }
 .tight2 .kv-panel .btn { min-height: 44px; }
-.short #kv[data-mode="check"] .kv-strip, .short #kv[data-mode="fix"] .kv-strip, .short #kv[data-mode="video"] .kv-strip { display: none; }
-.short .ask-why { display: none; }
+.compact #kv[data-mode="check"] .kv-strip, .compact #kv[data-mode="fix"] .kv-strip, .compact #kv[data-mode="video"] .kv-strip { display: none; }
+.compact .ask-why { display: none; }
 .edge-bottom.guess::after { top: auto; bottom: 100%; margin: 0 0 2px; }
 .share-row .btn { padding: 0 8px; white-space: nowrap; font-size: 13px; gap: 6px; }
 /* スマホを横にしたとき: 一覧と情報を畳み、盤と右の列だけ */
@@ -417,3 +417,27 @@ a { color: var(--primary); }
 #cam.side .band-check .band-note { display: none; }
 #cam.side .band-row { flex-direction: row; }
 #cam.side .band-row .btn { min-height: 44px; font-size: 14px; padding: 0 8px; }
+
+/* 撮っている間の仮棋譜 */
+.live { display: flex; gap: 10px; align-items: center; min-height: 0; }
+.live .kb { --S: 108px; }
+.live .kb-files span, .live .kb-ranks span { font-size: 7px; }
+.live-txt { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.live-h { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+.live-h .tag { background: #3A2E29; color: #F3ECE8; }
+.live-moves { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#app.short .live .live-bd { display: none; }
+#cam.side .live { flex-direction: column; align-items: stretch; }
+#cam.side .live .live-bd { align-self: center; }
+#cam.side .live .kb { --S: 180px; }
+
+/* 幅 340 未満(表示サイズを大きくした端末)では、下の操作の字を詰めて 1 行に収める */
+@media (max-width: 340px) {
+  .act { font-size: 11px; letter-spacing: -.02em; white-space: nowrap; }
+  .band-row .btn { font-size: 14px; white-space: nowrap; padding: 0 8px; }
+}
+
+/* 小さいタブレットを横にしたとき(高さ 520 未満・幅 860 以上)は、手の一覧も出す */
+.tl.low.wide #kv.on { column-gap: 14px; grid-template-columns: calc(var(--S) + 20px) 190px minmax(0, 1fr); grid-template-areas: "hg list right" "board list right" "hs list right"; }
+.tl.low.wide .kv-list { display: block; width: auto; }
+.tl.low .kv-right { padding-top: 6px; }

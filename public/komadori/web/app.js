@@ -13,6 +13,7 @@ import {
 import { Board, renderHand, pieceSrc } from './board.js';
 import * as M from './moves.js';
 import * as H from './handoff.js';
+import { LiveDraft, obsFrom } from './live.js';
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -63,11 +64,14 @@ function measure() {
   const land = w > h;
   let lay = 'phone';
   if (land && (w >= 900 || h < 480)) lay = 'tl';
-  else if (w >= 600) lay = land ? 'tl' : 'tp';
+  // 縦の小さいタブレット(幅 600 台)は、2 列にすると盤が小さくなるのでスマホの並びにする
+  else if (land ? w >= 600 : w >= 700) lay = land ? 'tl' : 'tp';
   st.lay = lay; st.short = lay === 'phone' && h < 560;
-  st.low = lay === 'tl' && h < 480; // スマホを横にしたとき
+  // 見える高さが 660 未満のスマホ(表示サイズを大きくした端末・小さい端末)は、確かめるときに手の帯を外して盤を保つ
+  const compact = lay === 'phone' && h < 660;
+  st.low = lay === 'tl' && h < 520; // スマホを横にしたときと、小さいタブレットを横にしたとき
   const app = $('app');
-  app.className = lay + (st.short ? ' short' : '') + (st.low ? ' low' : '');
+  app.className = lay + (st.short ? ' short' : '') + (compact ? ' compact' : '') + (st.low ? ' low' : '') + (st.low && w >= 860 ? ' wide' : '');
   document.documentElement.style.setProperty('--vh', h + 'px');
 }
 
@@ -80,7 +84,7 @@ function fitKv() {
   let maxS; let minS; let prefer;
   if (st.lay === 'phone') { maxS = w - 2 * g - 14; minS = Math.min(272, maxS); prefer = 300; }
   else if (st.lay === 'tp') { maxS = w - 2 * g - 14 - 224 - 16; minS = 300; prefer = 440; }
-  else if (st.low) { maxS = w - 2 * g - 20 - 14 - 300; minS = 200; prefer = 240; }
+  else if (st.low) { maxS = w - 2 * g - 20 - 14 - 300 - (w >= 860 ? 240 : 0); minS = 200; prefer = 240; }
   else { maxS = w - 2 * g - 260 - 40 - 14 - 340; minS = 240; prefer = 400; }
   maxS = Math.floor(Math.min(maxS, h));
   let S = maxS;
@@ -202,6 +206,7 @@ async function openCameraFlow() {
 }
 
 function leaveCamera() {
+  if (st.place && st.place.live) st.place.live.on = false;
   R.closeCamera();
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   st.place = null;
@@ -327,10 +332,11 @@ function renderCam() {
     layer.innerHTML = `<div class="count"><button class="btn text" id="c-stop">やめる</button><b id="c-num">${P.n}</b></div>`;
     $('c-stop').onclick = () => { clearTimeout(P.timer); P.step = 'dir'; P.chosen = null; renderCam(); drawCamSvg(); };
   } else if (P.step === 'rec') {
-    band.innerHTML = `<button class="btn big wide" id="c-end">対局おわり</button>`;
+    band.innerHTML = `${P.live ? '<div class="live" id="c-live"></div>' : ''}<button class="btn big wide" id="c-end">対局おわり</button>`;
     layer.innerHTML = `<div class="rec-top"><span class="rec-dot"></span><span>記録しています</span><span class="t" id="c-time">0:00</span><span class="mb" id="c-mb">0MB</span></div><div class="rec-msgs" id="c-msgs"></div>`;
     $('c-end').onclick = openEndSheet;
     renderRecMsgs();
+    renderLive();
   }
   // 帯の高さが変わると映像の四角も動くので、枠を載せ直す
   if (video().videoWidth) layoutStage(); else drawCamSvg();
@@ -461,7 +467,8 @@ async function beginRecording() {
     alertBox('録画をはじめられませんでした。Chrome を新しくしてから、もう一度お試しください。');
     return;
   }
-  P.step = 'rec'; P.msgs = [{ id: 'hint', text: '対局中は棋譜が出ません。終わってから読みます', ttl: Date.now() + 5000 }];
+  P.live = startLive();
+  P.step = 'rec'; P.msgs = [{ id: 'hint', text: P.live ? '仮棋譜は数秒おくれて出ます。終わってから録画を読み直して、清書します' : '対局中は棋譜が出ません。終わってから読みます', ttl: Date.now() + 6000 }];
   if (!('wakeLock' in navigator)) P.msgs.push({ id: 'wake', text: '画面が自動で消えないよう、端末の設定をご確認ください', close: true });
   renderCam();
   track('komadori_web_record_start', { handicap: st.meta.handicap, orientation: st.meta.orientation || 'unknown' });
@@ -497,6 +504,54 @@ function renderRecMsgs() {
   for (const b of el.querySelectorAll('[data-close]')) b.onclick = () => { P.msgs = P.msgs.filter((m) => m.id !== b.dataset.close); renderRecMsgs(); };
 }
 
+// ---- 撮っている間の仮棋譜 ----
+// LIVE_SEC ごとに今の 1 枚を写真の認識に送り、前の局面から指せる手でつなぐ(live.js)。
+// 盤の枠が見つからなかったときと、先手の向きが分からないときは出さない。
+const LIVE_SEC = 5;
+function startLive() {
+  const P = st.place;
+  if (!P || !P.recog) return null;
+  let rot = P.chosen && P.chosen !== 'unknown' ? P.rotation : (!P.recog.ambiguous ? P.recog.rot : null);
+  if (rot == null) return null;
+  const L = { on: true, rot, draft: new LiveDraft(parseSfen(HANDICAP_SFENS[st.meta.handicap])), fails: 0, reads: 0 };
+  (async () => {
+    await sleep(1500);
+    while (L.on && R.recording()) {
+      const t0 = Date.now();
+      try {
+        const still = await R.grabStill(video(), 1024);
+        let blob = still.blob; let r = rot;
+        // 横向きの盤は、写真を 90° 回して送る(横向きのままでは先後を読み分けられない)
+        if (rot === 90 || rot === 270) { blob = await rotateBlob(blob, 90); r = rot - 90; }
+        const res = await A.recognizeStill(blob, 1);
+        if (!L.on) break;
+        L.reads++; L.fails = 0;
+        if (L.draft.feed(obsFrom(res, r))) renderLive();
+      } catch (err) {
+        L.fails++;
+        if (L.fails === 3) renderLive();
+      }
+      await sleep(Math.max(1000, LIVE_SEC * 1000 - (Date.now() - t0)));
+    }
+  })();
+  return L;
+}
+function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+function renderLive() {
+  const el = $('c-live'); const P = st.place;
+  if (!el || !P || !P.live) return;
+  const d = P.live.draft; const N = d.plies.length;
+  const last = N ? d.plies[N - 1].move : null;
+  const recent = [];
+  for (let i = Math.max(0, N - 3); i < N; i++) recent.push(moveLabel(d.plies[i].move, d.plies[i].side, i ? d.plies[i - 1].move : null, { from: false }));
+  el.innerHTML = `<div class="live-bd" id="c-live-bd"></div><div class="live-txt">
+    <p class="live-h"><span class="tag">仮棋譜</span>${N ? `<b>${N}手</b>` : ''}</p>
+    <p class="live-moves">${N ? recent.map((t) => esc(t)).join(' ') : 'まだ手はありません'}</p>
+    <p class="band-note">${P.live.fails >= 3 ? '通信が不安定で、仮棋譜が止まっています。録画は続いています' : '終わってから、録画を読み直して清書します'}</p></div>`;
+  new Board($('c-live-bd')).render(d.pos, { last });
+}
+
 function openEndSheet() {
   const opts = [['投了', ''], ['中断', ''], ['持将棋', ''], ['千日手', ''], ['', '棋譜だけ残す<small>終局を書きません</small>']];
   openSheet(`<h2>この対局を終わりにしますか</h2>
@@ -509,6 +564,9 @@ function openEndSheet() {
 async function finishRecording(terminal) {
   const P = st.place;
   clearInterval(P && P.clock);
+  if (P && P.live) P.live.on = false;
+  // 撮っている間の仮棋譜は、サーバが読みはじめるまでの棋譜の画面に出す
+  st.draft = P && P.live && P.live.draft.plies.length ? P.live.draft : null;
   st.meta.terminal = terminal;
   const out = await R.stopRecording();
   R.closeCamera();
@@ -540,7 +598,7 @@ async function sendTape(blob, recId, startedAt, meta) {
     await R.removeSaved(recId); R.clearRec();
     A.saveShelfItem({ jobId, meta: st.meta, createdAt: startedAt || Date.now() });
     track('komadori_web_sent', { mb: Math.round(total / 1e6) });
-    openJob(jobId, st.meta);
+    openJob(jobId, st.meta, true);
   } catch (err) {
     clearInterval(stallTimer);
     box.innerHTML = `<img class="bird" src="img/bird.png" alt=""><p class="h1">送れませんでした</p><p class="note">${esc(err.message)}。録画はこの端末に残っています。</p>
@@ -561,7 +619,8 @@ async function resumeUnsent() {
 let board = null;
 let pollTimer = null;
 
-function openJob(jobId, meta) {
+function openJob(jobId, meta, keepDraft) {
+  if (!keepDraft) st.draft = null;
   st.meta = { ...st.meta, ...(meta || {}) };
   st.job = { id: jobId, status: 'STARTING', final: false, plies: [], start: startOfMeta(), evals: null, kif: '', review: [] };
   st.job.positions = [st.job.start];
@@ -676,7 +735,7 @@ function renderKv() {
   else if (!N && !job.final) title.textContent = '棋譜を読んでいます';
   else if (!job.final) title.textContent = `ここまで ${N} 手を読みました`;
   else title.textContent = `${N}手の棋譜ができました`;
-  tag.innerHTML = !job.final && N ? `<span class="tag">${icon('clock').replace('class="ico"', 'class="ico" style="width:14px;height:14px"')}途中</span>` : '';
+  tag.innerHTML = !job.final && N ? `<span class="tag">${icon('clock').replace('class="ico"', 'class="ico" style="width:14px;height:14px"')}仮棋譜</span>` : '';
   $('kv-more').hidden = !job.final;
   $('kv-info').innerHTML = `<p class="h1">${esc(title.textContent)}</p>${tag.innerHTML ? '<p>' + tag.innerHTML + '</p>' : ''}
     <p>▲${esc(st.meta.sente || sideName('sente', hc))} 対 △${esc(st.meta.gote || sideName('gote', hc))}${hc ? '(' + esc(st.meta.handicap) + ')' : ''}<br>${fmtDate(st.meta.startedAt)}</p>`;
@@ -684,15 +743,16 @@ function renderKv() {
   // 盤
   const fixing = st.mode === 'fix' && st.fix;
   const showPly = fixing ? st.fix.ply - 1 : st.cur;
-  const pos = job.positions[showPly] || job.start;
-  const last = !fixing && showPly > 0 ? job.plies[showPly - 1].move : null;
+  const draft = st.mode === 'wait' && st.draft;
+  const pos = draft ? st.draft.pos : (job.positions[showPly] || job.start);
+  const last = draft ? st.draft.plies[st.draft.plies.length - 1].move : (!fixing && showPly > 0 ? job.plies[showPly - 1].move : null);
   const marks = {};
   if (fixing) {
     if (st.fix.sel) marks[sq(st.fix.sel)] = 'sel';
     for (const t of st.fix.dests || []) marks[sq(t)] = 'dot';
   }
   board.render(pos, { last, marks });
-  board.el.classList.toggle('dim', st.mode === 'wait');
+  board.el.classList.toggle('dim', st.mode === 'wait' && !draft);
   // 持ち駒
   const who = (side) => (side === 'sente' ? '▲' : '△') + (st.meta[side] || sideName(side, hc));
   const handTap = fixing ? (side) => (k) => onHandTap(side, k) : () => null;
@@ -798,7 +858,7 @@ function renderEval() {
 function renderPanel() {
   const el = $('kv-panel'); const job = st.job; const N = job.plies.length;
   // スマホを横にしたとき(高さ 480 未満)は、右の列もスマホの操作の列で詰める
-  const phone = st.lay === 'phone' || window.innerHeight < 480;
+  const phone = st.lay === 'phone' || st.low;
   const roomy = st.lay !== 'phone' ? window.innerHeight >= 480 : window.innerHeight >= 740;
   let html = '';
   const nav = st.lay === 'tl' ? `<div class="nav4"><button data-go="first" aria-label="最初">|◀</button><button data-go="-1" aria-label="1手戻る">◀</button><button data-go="1" aria-label="1手進む">▶</button><button data-go="last" aria-label="最後">▶|</button><span>${st.cur} / ${N}</span></div>` : '';
@@ -809,9 +869,9 @@ function renderPanel() {
       <button class="btn" data-act="new">新しい対局を撮る</button></div>`;
   } else if (st.mode === 'wait') {
     html = `<div style="display:flex;gap:12px;align-items:center;justify-content:center;padding-top:8px"><img class="bird" src="img/bird.png" alt="" style="width:48px">
-      <div><p class="h1 dots">棋譜を読んでいます</p><p class="note">対局の長さによって数分かかります。このページを開いたままお待ちください</p></div></div>`;
+      <div><p class="h1 dots">棋譜を読んでいます</p><p class="note">${st.draft ? `盤は、撮っている間の仮棋譜(${st.draft.plies.length}手)です。録画を読み終えると、清書に変わります` : '対局の長さによって数分かかります。このページを開いたままお待ちください'}</p></div></div>`;
   } else if (st.mode === 'interim') {
-    html = `${curMove}${nav}<p class="note">最後まで読むと、手が変わることがあります</p><p class="note dots" style="text-align:center;font-size:15px">読み終わるまでお待ちください</p>`;
+    html = `${curMove}${nav}<p class="note">いま出ているのは仮棋譜です。最後まで読むと、手が変わることがあります</p><p class="note dots" style="text-align:center;font-size:15px">読み終わるまでお待ちください</p>`;
   } else if (st.mode === 'result') {
     const n = job.review.length;
     const primary = n ? `<button class="btn wide" data-act="check">確認する(${n}件)</button>` : `<button class="btn wide" data-act="handoff">渡す</button>`;
