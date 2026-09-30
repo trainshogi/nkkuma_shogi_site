@@ -227,6 +227,7 @@
       <button class="btn" id="btn-sample">サンプル動画で試す</button>
     </div>
     <div id="file-info"></div>
+    <p class="note" style="margin:6px 0 0">Androidのスマホなら、<a href="/komadori/web.html">ブラウザで撮るページ</a>で対局を撮って、そのまま送れます。</p>
     <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#666;margin-top:8px;cursor:pointer">
       <input type="checkbox" id="compress-toggle" checked style="width:16px;height:16px;flex:none">
       アップロード前にブラウザで圧縮する（推奨。PCの動作が重くなる場合はオフ）
@@ -1593,6 +1594,11 @@
     clearJob();
     $('resume-box').hidden = true;
   });
+  // ブラウザで撮るページ(komadori/web.html)から送った直後は、そのまま結果へ進む
+  if (saved && saved.jobId && /[?&]resume=1\b/.test(location.search)) {
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    $('btn-resume').click();
+  }
 })();
 </script>
 
