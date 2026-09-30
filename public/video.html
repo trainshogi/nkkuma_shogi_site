@@ -1594,11 +1594,6 @@
     clearJob();
     $('resume-box').hidden = true;
   });
-  // ブラウザで撮るページ(komadori/web.html)から送った直後は、そのまま結果へ進む
-  if (saved && saved.jobId && /[?&]resume=1\b/.test(location.search)) {
-    try { history.replaceState(null, '', location.pathname); } catch (e) {}
-    $('btn-resume').click();
-  }
 })();
 </script>
 
