@@ -3,7 +3,7 @@
 // 駒と盤の絵は iOS アプリと同じ Shogi Images(久保良介さん・CC0)。後手の駒は先手の絵を 180° 回す。
 // 盤の絵は罫線の外側で切ってあるので、外枠の線は CSS で足す。
 // 第 n 手を選んだ盤は、n 手目のあとの局面に、指した元から先への矢印を載せる(remake の約束)。
-import { HAND_ORDER } from './shogi.js';
+import { HAND_ORDER, KANJI } from './shogi.js';
 
 const IMG = {
   fu: 'fu', ky: 'kyo', ke: 'kei', gi: 'gin', ki: 'kin', ka: 'kaku', hi: 'hi', ou: 'ou', gyoku: 'gyoku',
@@ -18,6 +18,23 @@ export function pieceSrc(kind, side) {
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 const KAN = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+
+// 駒の絵。絵を読めなかった(通信が切れた等)ときは、字の駒に置きかえる
+function pieceImg(kind, side) {
+  const img = document.createElement('img');
+  img.alt = '';
+  img.draggable = false;
+  if (side === 'gote') img.className = 'gote';
+  img.onerror = () => {
+    const t = document.createElement('span');
+    const name = KANJI[kind] || '';
+    t.className = 'kp' + (side === 'gote' ? ' gote' : '') + (name.length > 1 ? ' two' : '') + (/^(to|ny|nk|ng|um|ry)$/.test(kind) ? ' promo' : '');
+    t.textContent = name;
+    img.replaceWith(t);
+  };
+  img.src = pieceSrc(kind, side);
+  return img;
+}
 
 export class Board {
   constructor(el, opts = {}) {
@@ -68,12 +85,7 @@ export class Board {
       c.className = 'kb-cell';
       c.innerHTML = '';
       if (p) {
-        const img = document.createElement('img');
-        img.src = pieceSrc(p.kind, p.side);
-        img.alt = '';
-        img.draggable = false;
-        if (p.side === 'gote') img.className = 'gote';
-        c.appendChild(img);
+        c.appendChild(pieceImg(p.kind, p.side));
       }
     }
     const last = opts.last;
@@ -137,11 +149,7 @@ export function renderHand(el, hand, side, label, onTap) {
     b.type = 'button';
     b.className = 'kh-piece';
     b.dataset.kind = k;
-    const img = document.createElement('img');
-    img.src = pieceSrc(k, side);
-    img.alt = '';
-    if (side === 'gote') img.className = 'gote';
-    b.appendChild(img);
+    b.appendChild(pieceImg(k, side));
     if (n > 1) { const c = document.createElement('span'); c.className = 'kh-n'; c.textContent = n; b.appendChild(c); }
     if (onTap) b.addEventListener('click', () => onTap(k));
     list.appendChild(b);
