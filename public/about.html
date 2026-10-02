@@ -42,7 +42,7 @@
       "owns": {
         "@type": "SoftwareApplication",
         "name": "コマドリ",
-        "operatingSystem": "iOS",
+        "operatingSystem": "iOS, Android",
         "applicationCategory": "UtilitiesApplication",
         "url": "https://apps.apple.com/jp/app/id6800334202"
       },
@@ -69,114 +69,168 @@
 
   <style>
     * { box-sizing: border-box; }
-    :root {
-      --text: #222; --muted: #666; --faint: #999; --line: #e5e5e5;
-      --card: #fafaf8; --link: #0b67c2;
-      --cream: #fbf4e4; --orange: #e5672e; --brown: #4a3326;
-    }
-    body {
-      margin: 0; padding: 0;
-      color: var(--text); background: #fff;
-      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
-      line-height: 1.85;
-      -webkit-text-size-adjust: 100%;
-    }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; line-height: 1.85; font-family: var(--sans); color: var(--text); background: var(--bg); }
+    img { max-width: 100%; height: auto; display: block; }
     a { color: var(--link); }
-    img { max-width: 100%; height: auto; }
-    .site-head {
-      border-bottom: 1px solid var(--line);
-      padding: 10px 16px;
-      display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px;
-    }
-    .site-head .logo img { height: 34px; width: auto; display: block; }
-    .site-head nav { display: flex; flex-wrap: wrap; gap: 0 14px; }
-    .site-head nav a { font-size: 13px; color: #555; text-decoration: none; }
-    .site-head nav a:hover { color: var(--link); }
-    .site-head nav a[aria-current] { color: var(--text); font-weight: bold; }
-    main { max-width: 760px; margin: 0 auto; padding: 28px 18px 48px; }
-
-    .intro h1 { font-size: 28px; line-height: 1.4; margin: 0 0 6px; }
-    .intro .lead { font-size: 17px; margin: 0 0 6px; }
-    .intro .who { color: var(--muted); font-size: 14px; margin: 0; }
-
-    h2 { font-size: 21px; margin: 48px 0 14px; padding-bottom: 6px; border-bottom: 2px solid #eee; }
     p { margin: 0 0 1.1em; }
-
-    /* コマドリ */
-    .app {
-      margin: 28px 0 0; padding: 22px 20px 20px;
-      background: var(--cream); border-radius: 16px; color: var(--brown);
-      display: grid; gap: 18px 28px; grid-template-columns: 1fr;
-    }
-    .app-name { display: flex; align-items: center; gap: 12px; margin: 0; }
-    .app-name img { width: 56px; height: 56px; border-radius: 13px; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-    .app-name b { font-size: 20px; line-height: 1.3; display: block; }
-    .app-name small { font-size: 13px; color: #7a6254; }
-    .app .catch { font-size: 24px; font-weight: bold; line-height: 1.45; margin: 16px 0 10px; }
-    .app .catch em { font-style: normal; color: var(--orange); }
-    .app .steps { list-style: none; padding: 0; margin: 0 0 14px; font-size: 15px; }
-    .app .steps li { display: grid; grid-template-columns: 3.2em 1fr; padding: 3px 0; }
-    .app .steps b { color: var(--orange); }
-    .app .note { font-size: 14px; margin: 14px 0 0; }
-    .store-btn {
-      display: inline-block; background: #111; color: #fff; text-decoration: none;
-      border-radius: 10px; padding: 10px 20px; font-size: 16px; font-weight: bold;
-    }
-    .store-btn:hover { background: #333; }
+    .site-head { padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+    .site-head .logo img { height: 34px; width: auto; }
+    .site-head nav { display: flex; flex-wrap: wrap; gap: 0 14px; }
+    .site-head nav a { font-size: 13px; text-decoration: none; }
+    .site-head nav a[aria-current] { font-weight: 700; }
+    .hero-in, .more-in, main, .cta-in { max-width: 1040px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
+    main { max-width: 760px; }
+    .cta-in { max-width: 760px; }
+    .kicker { margin: 0; font-size: 15px; letter-spacing: .12em; font-weight: 700; line-height: 1.6; }
+    .kicker span { display: block; letter-spacing: .02em; font-weight: 400; font-size: 14px; }
+    .app-name { display: flex; align-items: center; gap: 12px; margin: 22px 0 0; }
+    .app-name img { width: 52px; height: 52px; border-radius: 12px; }
+    .app-name b { display: block; font-size: 19px; line-height: 1.3; }
+    .app-name small { font-size: 13px; }
+    .catch { margin: 14px 0 22px; font-weight: 900; line-height: 1.3; letter-spacing: .01em; }
+    .catch em { font-style: normal; }
+    .steps { list-style: none; margin: 0 0 26px; padding: 0; }
     .stores { display: flex; flex-wrap: wrap; gap: 10px; }
-    .app .more { font-size: 14px; margin: 14px 0 0; }
-    .app .more a { color: #a4461b; }
-    .app .more a, .works p a, .timeline a { white-space: nowrap; }
-    .app figure { margin: 0; }
-    .app figure img { border-radius: 10px; display: block; margin: 0 auto; max-height: 420px; width: auto; }
-    .app .end { grid-column: 1 / -1; margin: 0; font-weight: bold; font-size: 15px; border-top: 1px solid #ecdcc4; padding-top: 14px; }
-    @media (min-width: 700px) {
-      .app { grid-template-columns: 1fr 300px; padding: 28px; }
-      .app figure { align-self: center; }
-    }
-
-    .works { display: grid; gap: 14px; padding: 0; margin: 0; list-style: none; }
-    .works li { border: 1px solid #e0e0e0; border-radius: 12px; background: var(--card); padding: 16px 18px; }
-    .works b { font-size: 16px; }
+    .badge { display: inline-flex; flex-direction: column; justify-content: center; min-width: 168px; padding: 7px 20px 8px; border-radius: 12px; text-decoration: none; line-height: 1.25; }
+    .badge small { font-size: 11px; letter-spacing: .04em; opacity: .8; }
+    .badge b { font-size: 19px; letter-spacing: .01em; }
+    .web { margin: 16px 0 0; font-size: 14px; }
+    .phone { margin: 0; }
+    /* 画像は背景つきなので、スマホの部分だけ切り出す */
+    .phone-crop { width: var(--pw); aspect-ratio: 273 / 581; overflow: hidden; border-radius: calc(var(--pw) * .14); position: relative; margin: 0 auto; }
+    .phone-crop img { position: absolute; max-width: none; width: calc(var(--pw) * 800 / 273); left: calc(var(--pw) * -16.5 / 273); top: calc(var(--pw) * -18.5 / 273); }
+    .more p { margin: 0; }
+    .more .links { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+    .more .links a, .go a, .timeline a { white-space: nowrap; }
+    h2 { line-height: 1.4; }
+    .works { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
     .works p { margin: 6px 0 0; font-size: 14.5px; }
+    .works .go { display: flex; flex-wrap: wrap; gap: 0 16px; }
     @media (min-width: 700px) { .works { grid-template-columns: 1fr 1fr; } }
-    .tag {
-      display: inline-block; font-size: 12px; font-weight: bold; line-height: 1.7;
-      border-radius: 999px; padding: 0 10px; margin-left: 6px; vertical-align: 2px; white-space: nowrap;
-    }
+    .tag { display: inline-block; font-size: 12px; font-weight: 700; line-height: 1.7; border-radius: 999px; padding: 0 10px; margin-left: 8px; vertical-align: 2px; }
     .tag.live { background: #e7f2ea; color: #2f7a4d; }
     .tag.beta { background: #fdf1e3; color: #b06a1e; }
-    .tag.dev  { background: #eef1f6; color: #5a6b8c; }
-
-    figure.photo { margin: 18px 0; }
-    figure.photo img { border-radius: 8px; display: block; width: 100%; max-height: 360px; object-fit: cover; }
-    figcaption { color: #888; font-size: 13px; margin-top: 6px; }
-
-    .timeline { list-style: none; padding: 0; margin: 0; }
-    .timeline li { display: grid; grid-template-columns: 4.6em 1fr; gap: 0 8px; padding: 7px 0; border-bottom: 1px dashed #eee; }
-    .timeline li:last-child { border-bottom: 0; }
-    .timeline .y { color: var(--faint); font-size: 14px; font-variant-numeric: tabular-nums; padding-top: 1px; }
-
-    .mail-btn {
-      display: inline-block; border: 1px solid var(--link); color: var(--link); text-decoration: none;
-      border-radius: 10px; padding: 8px 18px; font-weight: bold; font-size: 15px;
-    }
-    .mail-btn:hover { background: #eef5fc; }
-    .contact {
-      margin: 16px 0 0; padding: 16px 18px;
-      border: 1px solid #e0e0e0; border-radius: 12px; background: var(--card);
-      font-size: 15px;
-    }
-    .contact dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
-    .contact dt { color: var(--muted); }
+    figure.photo { margin: 18px 0 0; }
+    figure.photo img { width: 100%; max-height: 380px; object-fit: cover; }
+    figcaption { font-size: 13px; margin-top: 8px; opacity: .7; }
+    .timeline { list-style: none; margin: 0; padding: 0; }
+    .timeline li { display: grid; grid-template-columns: 4.8em 1fr; gap: 0 10px; padding: 8px 0; }
+    .timeline .y { font-size: 14px; font-variant-numeric: tabular-nums; padding-top: 1px; }
+    .mail-btn { display: inline-block; text-decoration: none; border-radius: 12px; padding: 10px 22px; font-weight: 700; font-size: 15px; }
+    .contact { margin: 22px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 15px; }
     .contact dd { margin: 0; overflow-wrap: anywhere; }
-    @media (max-width: 360px) { .contact { font-size: 14px; padding: 14px; } }
-    .site-foot {
-      border-top: 1px solid var(--line); margin-top: 24px;
-      padding: 18px 16px; text-align: center; color: #888; font-size: 13px; line-height: 2;
+    .site-foot { padding: 22px 16px 34px; text-align: center; font-size: 12px; }
+    .koma-row { display: none; }
+    .site-foot nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; margin-bottom: 8px; }
+    .stores { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .stores a { display: block; line-height: 0; }
+    .stores img { height: 48px; width: auto; }
+    .site-foot .tm { font-size: 11px; opacity: .7; margin: 0 0 6px; }
+    :root { --bg: #fff; --text: #111; --muted: #6e6e73; --link: #d4561c; --orange: #e5672e;
+      --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; --pw: 240px; }
+    .site-head { border-bottom: 1px solid #eee; }
+    .site-head nav a { color: #555; }
+    .site-head nav a[aria-current] { color: #111; }
+    .hero { text-align: center; padding: 48px 0 30px; }
+    .hero .kicker { font-size: 13px; color: var(--muted); letter-spacing: .3em; }
+    .hero .kicker span { letter-spacing: .04em; }
+    .big-icon { width: 96px; height: 96px; border-radius: 22px; margin: 26px auto 10px; box-shadow: 0 10px 30px rgba(229,103,46,.25); }
+    .app-label { font-size: 14px; color: var(--muted); margin: 0; }
+    .app-label b { color: #111; font-size: 17px; }
+    .hero .catch { font-size: clamp(44px, 8vw, 84px); letter-spacing: -.01em; margin: 18px 0 28px; line-height: 1.18; }
+    .hero .catch em { color: var(--orange); }
+    @media (min-width: 760px) { .catch br.sp { display: none; } }
+    .hero .stores { justify-content: center; }
+    .hero .web { font-size: 14px; }
+    .story { background: #f5f5f7; }
+    .story-in { max-width: 1040px; margin: 0 auto; padding: 30px 20px 30px; display: grid; gap: 0; }
+    .story-steps { margin-top: -240px; }
+    .story-phone { position: sticky; top: 10px; z-index: 1; }
+    .story-phone .phone-crop { --pw: 120px; margin: 0 0 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,.18); }
+    .story-steps li { padding-right: 38%; }
+    .story-steps { list-style: none; margin: 0; padding: 0; position: relative; z-index: 2; }
+    .story-steps li { min-height: 40vh; display: flex; flex-direction: column; justify-content: center; padding: 20px 38% 20px 0; }
+    .story-steps b { font-size: 56px; font-weight: 900; line-height: 1.2; }
+    .story-steps span { font-size: 18px; color: #333; background: rgba(245,245,247,.85); }
+    .more { border-bottom: 1px solid #eee; font-size: 14px; color: var(--muted); }
+    .more-in { padding-top: 18px; padding-bottom: 18px; display: grid; gap: 4px; }
+    .statement { padding: 80px 20px; }
+    .statement p { max-width: 900px; margin: 0 auto; font-size: clamp(34px, 7vw, 72px); font-weight: 900; line-height: 1.25; }
+    .statement span { color: #111; }
+    main { padding-bottom: 40px; }
+    h2 { font-size: 26px; font-weight: 900; margin: 56px 0 16px; }
+    .works li { background: #f5f5f7; border-radius: 22px; padding: 22px; }
+    figure.photo img { border-radius: 22px; }
+    .timeline li { border-bottom: 1px solid #eee; }
+    .timeline .y { color: #999; }
+    .timeline li.now .y { color: var(--orange); font-weight: 700; }
+    .cta { background: #f5f5f7; }
+    .cta-in { padding-top: 6px; padding-bottom: 44px; }
+    .cta h2 { margin-top: 40px; }
+    .mail-btn { background: #111; color: #fff; border-radius: 999px; }
+    .contact dt { color: var(--muted); }
+    .site-foot { color: #888; }
+    .site-foot a { color: #555; text-decoration: none; }
+    @media (min-width: 760px) {
+      .hero { padding: 80px 0 60px; }
+      .story-in { grid-template-columns: 1fr 1fr; gap: 60px; padding-top: 20px; padding-bottom: 20px; }
+      .story-phone { top: 12vh; align-self: start; padding: 6vh 0; }
+      .story-phone .phone-crop { --pw: 280px; margin: 0 auto; }
+      .story-steps li { padding-right: 0; }
+      .story-steps li { min-height: 76vh; }
+      .story-steps { margin-top: 0; }
+      .story-steps b { font-size: 88px; }
+      .story-steps span { font-size: 21px; background: none; }
+      .more-in { grid-template-columns: 1fr auto; align-items: center; }
+      .statement { padding: 140px 20px; }
     }
-    .site-foot nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 16px; }
-    .site-foot a { color: var(--link); }
+    @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
+    .hero .catch, .big-icon { animation: heroOut linear both; animation-timeline: scroll(root); animation-range: 0 520px; }
+    @keyframes heroOut { to { transform: scale(.9) translateY(-30px); opacity: .25; } }
+    .story-steps li { animation: stepIn linear both; animation-timeline: view(); animation-range: entry 10% cover 50%; }
+    @keyframes stepIn { from { opacity: .08; transform: translateY(60px) scale(.94); } to { opacity: 1; transform: none; } }
+    .story-phone .phone-crop { animation: tilt linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+    @keyframes tilt { from { transform: perspective(900px) rotateY(18deg) rotateX(6deg); } 50% { transform: perspective(900px) rotateY(-8deg) rotateX(-2deg); } to { transform: perspective(900px) rotateY(10deg) rotateX(4deg); } }
+    .statement span { background: linear-gradient(90deg, #111 0 50%, #d9d9de 50% 100%) 100% 0 / 200% 100% no-repeat; -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: fill linear both; animation-timeline: view(); animation-range: cover 15% cover 55%; }
+    @keyframes fill { to { background-position: 0 0; } }
+    }}
+    @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
+    main > h2, main > p, figure.photo, .works li, .timeline li, .cta-in > *, .more-in {
+      animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    @keyframes rise { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: none; } }
+    }}
+    .who { margin: 0; font-size: 15px; font-weight: 900; letter-spacing: .3em; color: #111; }
+    .who span { display: block; margin-top: 2px; font-size: 13.5px; font-weight: 400; letter-spacing: .02em; color: var(--muted); }
+    .hero .catch { margin-bottom: 10px; }
+    .sub { margin: 0 0 26px; font-size: 16px; color: #333; }
+    .jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #eee; scrollbar-width: none; }
+    .jump a { flex: none; padding: 6px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13.5px; font-weight: 700; }
+    .jump a:focus-visible, .btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+    @media (min-width: 760px) { .jump { justify-content: center; } }
+    :target { scroll-margin-top: 64px; }
+    .story-steps small { font-size: 13px; font-weight: 700; color: var(--orange); letter-spacing: .1em; }
+    .story-steps li { min-height: 28vh; }
+    .story-more { max-width: 1040px; margin: 0 auto; padding: 0 20px 34px; font-size: 14px; color: var(--muted); }
+    .story-more a { display: inline-block; margin: 6px 16px 0 0; color: var(--link); }
+    .btn { display: inline-block; padding: 10px 20px; border-radius: 999px; background: #111; color: #fff !important; text-decoration: none; font-weight: 700; font-size: 15px; }
+    .btn.ghost { background: transparent; color: #111 !important; box-shadow: inset 0 0 0 1.5px #111; }
+    .works { grid-template-columns: 1fr !important; }
+    .works .go { gap: 10px; margin-top: 14px; }
+    .works b { font-size: 18px; }
+    .taikai { display: grid; gap: 18px; }
+    .taikai figure.photo { margin: 0; }
+    .taikai figcaption a { white-space: nowrap; }
+    .me p { margin-bottom: .8em; }
+    .me b { font-size: 18px; }
+    .timeline { margin-top: 10px; }
+    .statement p { word-break: keep-all; overflow-wrap: anywhere; }
+    @media (min-width: 760px) {
+      .story-steps li { min-height: 50vh; }
+      .taikai { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
   </style>
 </head>
 <body>
@@ -190,82 +244,91 @@
     </nav>
   </header>
 
+
+  <section class="hero" id="komadori">
+    <div class="hero-in">
+      <h1 class="who">えぬっくま<span>将棋の対局を、あとに残る棋譜にするアプリとサイトを作っています。</span></h1>
+      <img class="big-icon" src="/img/about/komadori-icon.png" alt="" width="96" height="96">
+      <p class="app-label"><b>コマドリ</b>　iPhone・iPad・Android のアプリ</p>
+      <p class="catch">盤で指した<br class="sp">将棋も<br><em>振り返れる</em></p>
+      <p class="sub">スマホを盤の横に置いておけば、指した手がそのまま棋譜になります。</p>
+      <div class="stores">
+    <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener"><img class="b-apple" src="/img/about/badge-appstore-ja.svg" alt="App Store からダウンロード" width="131" height="48"></a>
+    <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener"><img class="b-play" src="/img/about/badge-googleplay-ja.svg" alt="Google Play で手に入れよう" width="163" height="48"></a>
+  </div>
+    </div>
+  </section>
+
+  <nav class="jump" aria-label="このページの中身">
+    <a href="#steps">コマドリの使い方</a>
+    <a href="#works">写真・動画から棋譜に</a>
+    <a href="#taikai">大会・教室の方へ</a>
+    <a href="#me">作っている人</a>
+  </nav>
+
+  <section class="story" id="steps">
+    <div class="story-in">
+      <div class="story-phone"><figure class="phone">
+    <div class="phone-crop"><img src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。指した手を記録している" width="800" height="813"></div>
+  </figure></div>
+      <ol class="story-steps">
+        <li><small>1</small><b>置く</b><span>盤の横にスマホを置いて、盤が画面に入るように向けます。</span></li>
+        <li><small>2</small><b>指す</b><span>いつもどおり指すだけです。指した手を読み上げて、棋譜に書きとめていきます。</span></li>
+        <li><small>3</small><b>渡す</b><span>終わったら、ぴよ将棋など、ふだん使っているアプリやサイトに棋譜を送れます。</span></li>
+      </ol>
+    </div>
+    <p class="story-more">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。<br>
+      <a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">困ったときは</a></p>
+  </section>
+
+  <section class="statement"><p><span>記録係がいなくても<br>あの一局が残ります</span></p></section>
+
   <main>
-    <section class="intro">
-      <h1>えぬっくま</h1>
-      <p class="lead">将棋の一局を、あとに残る棋譜にする。そのためのアプリとサイトを、個人で作っています。</p>
-      <p class="who">開発・運営：佐藤旭（えぬっくま）</p>
-    </section>
-
-    <section class="app" id="komadori">
-      <div>
-        <p class="app-name">
-          <img src="/img/about/komadori-icon.png" alt="" width="56" height="56">
-          <span><b>コマドリ</b><small>iPhone・iPad・Android のアプリ</small></span>
-        </p>
-        <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
-        <ul class="steps">
-          <li><b>置く</b><span>盤の横にスマホを置きます。</span></li>
-          <li><b>指す</b><span>いつもどおり指すと、手を読み上げて棋譜に書きとめます。</span></li>
-          <li><b>渡す</b><span>できた棋譜は、ぴよ将棋などふだんのアプリやサイトへ。</span></li>
-        </ul>
-        <div class="stores">
-          <a class="store-btn" href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Store で見る</a>
-          <a class="store-btn" href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">Google Play で見る</a>
-        </div>
-        <p class="note">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。</p>
-        <p class="more"><a href="/komadori/placement.html">スマホと盤の置き方</a> ／ <a href="/komadori/gear.html">対応している盤と駒</a> ／ <a href="/komadori/support.html">サポート</a></p>
-      </div>
-      <figure>
-        <img src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。盤の横に置いたスマホが、指した手を記録している" width="800" height="813" loading="lazy">
-      </figure>
-      <p class="end">記録係がいなくても、あの一局が残ります。</p>
-    </section>
-
-    <h2 id="works">ほかに作っているもの</h2>
+    <h2 id="works">写真や動画から棋譜にする</h2>
     <ul class="works">
       <li>
-        <b>Shogiban to Kif</b><span class="tag live">公開中</span>
-        <p>将棋盤の写真を撮るだけで、局面を KIF・SFEN にできるサイトです。対局を撮った動画から、一局まるごと棋譜にすることもできます。登録は要りません。</p>
-        <p><a href="/">写真をKIFにする</a> ／ <a href="/video.html">動画から棋譜にする（β）</a></p>
-      </li>
-      <li>
-        <b>大会・教室の棋譜づくり</b><span class="tag beta">ベータ</span>
-        <p>対局を撮った動画から、一局まるごと棋譜にします。2026年8月の行橋名人戦では、1日分・12局を棋譜集にしてお渡ししました。<a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></p>
+        <b>Shogiban to Kif</b>
+        <p>盤を撮った写真から、その局面を KIF や SFEN にします。対局を撮った動画なら、一局まるごと棋譜にできます。登録はいりません。</p>
+        <p class="go"><a class="btn" href="/">写真から棋譜にする</a><a class="btn ghost" href="/video.html">動画から棋譜にする（β）</a></p>
       </li>
     </ul>
 
-    <h2>なぜ作っているか</h2>
-    <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場の一局にも、大会での子どもの一局にも、記録は残りません。並べ直せば上達の近道になるのに、書きとめる手が足りない。そこをカメラでなんとかする、というのがこの活動の軸です。</p>
-    <figure class="photo">
-      <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
-      <figcaption>2026年8月・行橋名人戦。対局者はふだんどおり指すだけで、棋譜が残ります。</figcaption>
-    </figure>
+    <h2 id="taikai">大会・教室の方へ</h2>
+    <div class="taikai">
+      <figure class="photo">
+        <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
+        <figcaption>2026年8月・行橋名人戦。1日分・12局を棋譜集にしてお渡ししました。<a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></figcaption>
+      </figure>
+      <div>
+        <p>大会や教室の対局を撮って、棋譜にしてお渡しします。機材の持ち込みから設置、当日の運用まで、こちらで行います。運営のみなさんは、いつもどおり進めるだけです。いまは費用をいただいていません。</p>
+        <p>教室や道場でご自分で記録したいときは、<a href="#komadori">コマドリ</a>が使えます。</p>
+        <p><a class="btn" href="mailto:nkkumaservice@gmail.com?subject=%E5%A4%A7%E4%BC%9A%E3%83%BB%E6%95%99%E5%AE%A4%E3%81%AE%E6%A3%8B%E8%AD%9C%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">メールで相談する</a></p>
+      </div>
+    </div>
 
-    <h2>あゆみ</h2>
+    <h2 id="me">作っている人</h2>
+    <div class="me">
+      <p><b>佐藤旭（えぬっくま）</b></p>
+      <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場や大会の一局には、記録が残りません。並べ直せば上達の近道になるのに、書きとめる手が足りない。そこをカメラでなんとかしたくて、ひとりで作っています。</p>
+    </div>
     <ul class="timeline">
-      <li><span class="y">2019</span><span>東京農工大学在学中に、スマホで撮った将棋盤の写真から局面を読み取る Web アプリを開発・発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf" target="_blank" rel="noopener">大学のプレスリリース</a>）</span></li>
-      <li><span class="y">以降</span><span>「えぬっくま」の名前で、将棋盤の写真を棋譜にするサイトを運営</span></li>
-      <li><span class="y">2026.08</span><span>行橋名人戦（福岡）で、大会1日分・12局を棋譜にする。その場で棋譜を記録するところも実演</span></li>
-      <li><span class="y">2026.08</span><span>iPhone アプリ「コマドリ」を公開。撮った対局の動画から棋譜を起こせるように</span></li>
-      <li><span class="y">2026.08</span><span>高島平将棋クラブで6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</span></li>
-      <li><span class="y">2026.09</span><span>コマドリで、対局しながらその場で棋譜にできるように</span></li>
-      <li><span class="y">2026.09</span><span>コマドリが iPad に対応</span></li>
+      <li><span class="y">2019</span><span>東京農工大学在学中に、将棋盤の写真から局面を読み取る Web アプリを発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf" target="_blank" rel="noopener">大学のプレスリリース</a>）。その後、Shogiban to Kif として運営</span></li>
+      <li><span class="y">2026.08</span><span>行橋名人戦（福岡）で、大会1日分・12局を棋譜に。高島平将棋クラブでも6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</span></li>
+      <li><span class="y">2026.08</span><span>コマドリ（iPhone）を公開</span></li>
+      <li><span class="y">2026.09</span><span>対局しながらその場で棋譜にできるように。iPad にも対応</span></li>
+      <li class="now"><span class="y">2026.10</span><span>コマドリの Android 版を公開</span></li>
     </ul>
+  </main>
 
-    <h2>大会・教室のみなさまへ</h2>
-    <p>大会や教室での棋譜づくりのご相談を歓迎しています。機材の持ち込み・設置・運用まですべてこちらで行い、運営のお手間はかけません。ベータの間は費用をいただいていません。</p>
-    <p>教室や道場でご自分で記録したいときは、<a href="#komadori">コマドリ</a>をお使いください。盤の横にスマホを置くだけで始められます。</p>
-    <p><a class="mail-btn" href="mailto:nkkumaservice@gmail.com?subject=%E5%A4%A7%E4%BC%9A%E3%83%BB%E6%95%99%E5%AE%A4%E3%81%AE%E6%A3%8B%E8%AD%9C%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">メールで相談する</a></p>
-
-    <div class="contact" id="contact">
-      <dl>
+  <section class="cta" id="contact">
+    <div class="cta-in">
+      <h2>お問い合わせ</h2>
+      <dl class="contact">
         <dt>メール</dt><dd><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></dd>
         <dt>X</dt><dd><a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a></dd>
       </dl>
     </div>
-  </main>
-
+  </section>
   <footer class="site-foot">
     <nav>
       <a href="/">Shogiban to Kif</a>
@@ -275,6 +338,7 @@
       <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
       <a href="/privacy.html">プライバシーポリシー・利用規約</a>
     </nav>
+    <p class="tm">Apple、Apple のロゴ、App Store は Apple Inc. の商標です。Google Play および Google Play のロゴは Google LLC の商標です。</p>
     &copy; 2019-2026 Shogiban to Kif（えぬっくま）
   </footer>
 </body>
