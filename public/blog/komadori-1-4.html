@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!-- このファイルは blog/build.py が生成しました。直接編集せず articles/*.md を編集してください -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>コマドリ 1.4 で変わったこと｜記録する・直す・渡す | Shogiban to Kif ブログ</title>
+  <meta name="description" content="将棋の対局を棋譜にするアプリ「コマドリ」の1.4.0と1.4.1で変わったところをまとめました。読み上げの声、棋譜の直し方、ほかのアプリへの渡し方、iPad、紙への印刷まで。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog/komadori-1-4.html">
+
+  <meta property="og:title" content="コマドリ 1.4 で変わったこと｜記録する・直す・渡す">
+  <meta property="og:description" content="将棋の対局を棋譜にするアプリ「コマドリ」の1.4.0と1.4.1で変わったところをまとめました。読み上げの声、棋譜の直し方、ほかのアプリへの渡し方、iPad、紙への印刷まで。">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog/komadori-1-4.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@nkkuma_service">
+
+  <!-- AdSense: 審査通過後、ここに広告コードを貼る -->
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      color: #222; background: #fff;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.9;
+      -webkit-text-size-adjust: 100%;
+    }
+    .site-head {
+      border-bottom: 1px solid #e5e5e5;
+      padding: 10px 16px;
+    }
+    .site-head a { display: inline-block; }
+    .site-head img { height: 34px; width: auto; vertical-align: middle; }
+    .site-head nav { display: inline-block; margin-left: 12px; }
+    .site-head nav a { font-size: 13px; color: #555; margin-right: 12px; text-decoration: none; }
+    .site-head nav a:hover { color: #0b67c2; }
+    main {
+      max-width: 720px; margin: 0 auto; padding: 24px 18px 48px;
+    }
+    h1 { font-size: 26px; line-height: 1.5; margin: 8px 0 4px; }
+    .meta { color: #999; font-size: 13px; margin-bottom: 28px; }
+    h2 {
+      font-size: 21px; margin: 44px 0 12px;
+      padding-bottom: 6px; border-bottom: 2px solid #eee;
+    }
+    h3 { font-size: 17px; margin: 32px 0 8px; }
+    p { margin: 0 0 1.2em; }
+    a { color: #0b67c2; }
+    pre {
+      background: #f6f6f4; border: 1px solid #e8e8e4; border-radius: 6px;
+      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    }
+    /* 和文等幅フォントを指定して、KIFの盤面図（全角の漢字と半角のv・記号）の桝を揃える */
+    pre, pre code {
+      font-family: "ＭＳ ゴシック", "MS Gothic", "Osaka-等幅", Osaka-mono,
+                   "Hiragino Kaku Gothic ProN", Menlo, Consolas, monospace;
+    }
+    code { font-family: Menlo, Consolas, monospace; font-size: 0.92em; }
+    p code, li code { background: #f2f2ef; padding: 1px 5px; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14.5px; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #f7f7f5; }
+    blockquote { margin: 1em 0; padding: 2px 16px; border-left: 4px solid #ddd; color: #555; }
+    img { max-width: 100%; height: auto; }
+    .tool-cta {
+      margin: 40px 0 8px; padding: 18px 16px;
+      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
+      font-size: 15px;
+    }
+    .tool-cta a.btn {
+      display: inline-block; margin-top: 10px;
+      background: #dc3545; color: #fff; text-decoration: none;
+      padding: 10px 18px; border-radius: 6px; font-weight: bold;
+    }
+    .site-foot {
+      border-top: 1px solid #e5e5e5; margin-top: 24px;
+      padding: 18px 16px; text-align: center; color: #888; font-size: 13px;
+    }
+    .site-foot a { color: #0b67c2; }
+  </style>
+</head>
+<body>
+  <header class="site-head">
+    <a href="/"><img src="/img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif"></a>
+    <nav>
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <article>
+      <h1>コマドリ 1.4 で変わったこと｜記録する・直す・渡す</h1>
+      <div class="meta">2026-09-28　Shogiban to Kif 運営</div>
+      <p>9月25日に iPhone 版のコマドリ 1.4.0 を、翌26日に 1.4.1 を出しました。2日続けて出したので、ストアの「アップデート内容」だけだと何が変わったのか追いにくいと思います。ここに、2つの版でまとめて変わったところを書いておきます。</p>
+<p>いちばん大きいのは、対局が終わったあとの流れです。これまでは「棋譜になった、で、どうする？」のところが弱かったので、確かめる・直す・ほかへ渡す、の3つを作り直しました。</p>
+<h2>記録のしかたは「梅」と「竹」の2つに</h2>
+<p>ホームの入口は「対局を記録する」の1つにしました。記録のしかたは設定で選びます。</p>
+<ul>
+<li><strong>梅</strong>: スマホの中だけで読みます。通信を使いません。</li>
+<li><strong>竹</strong>: 梅と同じように対局中に読みながら、止めたあとに録画をサーバーで読み直して、棋譜を仕上げます。</li>
+</ul>
+<p>1.4.1 からは、まだどちらも選んでいない方は竹で始まります。竹は録画を送るので、始める前に毎回画面でお知らせします。梅を選んである方は、梅のままです。</p>
+<p>記録中の画面は、梅でも竹でも同じ見た目にしました。「録画映像」と「認識した盤面」は切り替えて見られて、盤面のほうには持ち駒も出ます。</p>
+<h2>読み上げの声を選べます</h2>
+<p>対局中、指した手を読み上げます。声は3つから選べます。</p>
+<ul>
+<li>北尾まどかさん（女流棋士）の録音</li>
+<li>VOICEVOX:冥鳴ひまり</li>
+<li>VOICEVOX:ずんだもん</li>
+</ul>
+<p>はじめは北尾さんの声です。「同」は「おなじく」、「飛」は「ひしゃ」、「打」は「うつ」と読みます。読み上げは、設定と記録中の画面で入り切りできます。</p>
+<h2>確かめる</h2>
+<p>対局が終わると、結果の画面を作り直しました。見出しが1つ、押すボタンが1つです。</p>
+<p>気になる手は「たしかめ再生」で、録画の映像と盤を並べて見られます。止まったところには、前の手と次の手も並べて出します。要確認の一覧から開くと、その手で止まった状態で開きます。</p>
+<p>盤を見ていない時間があったときは「その間に指された手はありません」と答えられるようにしました。何も起きていなかったのか、手が抜けたのかを、機械の側からは見分けられないことがあるためです。</p>
+<h2>直す</h2>
+<p>棋譜の直しは、盤で行います。符号を打ち込む必要はありません。</p>
+<ul>
+<li>手の一覧を長押しすると、続いた手の範囲を選べます。まとめて消すことも、空けて盤で並べ直すこともできます。</li>
+<li>手と手のあいだに、抜けた手を足せます。</li>
+<li>1手直したあと、続きの手と合わなくなったら、「次の手を直す」か「ここから書き直す」を選べます。</li>
+</ul>
+<h2>渡す</h2>
+<p>結果の画面に「ほかのアプリ・サイトへ渡す」を置きました。渡し先ごとに、押したら何が起きるか分かるボタンにしています。</p>
+<ul>
+<li><strong>将棋アプリ</strong>: ぴよ将棋はリンクで開きます。きふみAI と iShogi は共有シートから。</li>
+<li><strong>ブラウザ</strong>: ぴよ将棋w、KENTO、SHOGI-EXTEND は URL で開きます。Lishogi とみと将棋は、コピーして貼り付けます。</li>
+<li><strong>パソコン</strong>: メール、AirDrop、ファイルで KIF を送って、将棋所や ShogiGUI、ShogiHome で開いてください。</li>
+</ul>
+<p>KI2 と CSA でのコピーもできます。「棋譜テキスト」では、KIF・KI2・CSA・USI・SFEN を切り替えて見られます。</p>
+<p>KIF という形式そのものについては、<a href="/blog/kif-guide.html">KIFファイルとは？開き方・作り方・変換方法まとめ</a>に書きました。</p>
+<h2>紙に印刷する（お試し）</h2>
+<p>「ほかのアプリ・サイトへ渡す」の中に「紙に印刷」を足しました。棋譜を B5 の紙に収めた PDF を作って、そのまま印刷できます。紙の下には、投了図と、選んだ1手の図が入ります。「ひとこと」の欄もあるので、指導対局のあとに講評を手で書いて、その場で渡す、という使い方を考えています。まだお試しなので、使ってみて気になったところを教えてください。</p>
+<h2>棋譜を再生する</h2>
+<p>「盤で再生」で、対局者の名前と勝敗、手の一覧を出します。手の一覧には消費時間も並びます。選んだ手は、動きを矢印で示します。</p>
+<p>形勢のグラフと、次の推奨手も出します。このとき送るのは局面の文字だけで、映像は送りません。</p>
+<p>対局の前に、手合割と同じ画面で対局者の名前を入れられるようにしました。空のままでも始められます。</p>
+<h2>iPad</h2>
+<p>iPad は、盤を大きく取る形に組み直しました。横向きでは盤を左に、指し手や形勢を右に並べます。ホームは左に棋譜の棚、右に開いた局。設定は左で項目を選ぶと、右に中身が出ます。</p>
+<h2>置き方</h2>
+<p>スタンドの置き方は、<a href="/komadori/placement.html">スマホと盤の置き方</a>のページにまとめました。スタンドを盤からどれだけ離して、何度倒すか、を機種ごとに書いています。まだの方は、先にこちらを見てください。</p>
+<hr />
+<p>Android 版は準備中です。公開したら、ここでもお知らせします。</p>
+<p>コマドリは <a href="https://apps.apple.com/jp/app/id6800334202">App Store</a> にあります。うまくいかなかったときは<a href="/komadori/support.html">サポートページ</a>を見てください。感想や不具合は <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> か、X の <a href="https://x.com/nkkuma_service">@nkkuma_service</a> まで、ひと言で結構です。</p>
+    </article>
+
+    <div class="tool-cta">
+      <b>将棋盤の写真から棋譜を作れます</b><br>
+      盤面をスマホで撮るだけで、KIF・SFEN形式に変換できる無料ツールを運営しています。登録不要です。
+      <br><a class="btn" href="/">盤面写真をKIFに変換する</a>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+</body>
+</html>

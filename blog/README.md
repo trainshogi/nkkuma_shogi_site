@@ -35,10 +35,16 @@ gh pr create --fill
 
 5. PRをマージすると GitHub Actions が自動で本番（S3+CloudFront）に反映する
 
+## 下書き
+
+- `articles/drafts/` に置いた記事はビルドされない（`build.py` は `articles/` の直下だけを読む）。一覧にも sitemap にも出ない
+- 公開するときは `git mv articles/drafts/<名前>.md articles/` して、`date` を公開日に直してからビルドする
+- 下書きの先頭の `<!-- 【公開前メモ】 -->` に、公開してよい条件（リリース待ち・先方の了解待ちなど）を書いておく。公開前にメモと【要記入】を消す
+
 ## 仕組み
 
 - `blog/template.html` … 全記事共通の見た目（GA・OGP・ツールへの導線込み）
-- `blog/build.py` … articles/*.md → `public/blog/<slug>.html`（記事）と `public/blog.html`（一覧）と sitemap.xml を生成
+- `blog/build.py` … articles/*.md → `public/blog/<slug>.html`（記事）と `public/blog.html`（一覧）と sitemap.xml を生成。ブログ以外で sitemap に載せるページは `EXTRA_SITEMAP_PATHS` に足す
 - **URLはフラットな .html**（例 `/blog/kif-guide.html`）。このサイトのCloudFrontはサブディレクトリの index.html を自動配信しないため、`/blog/slug/` 形式は403になる。ディレクトリ形式にしたい場合はCloudFront Functionでの書き換えが別途必要
 - 生成物をコミットする方式なので、CI にビルド環境は不要（今の deploy がそのまま動く）
 

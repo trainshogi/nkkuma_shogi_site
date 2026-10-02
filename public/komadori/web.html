@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1', { page_location: location.origin + location.pathname });
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#FFF8F6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1A120E" media="(prefers-color-scheme: dark)">
+  <title>ブラウザで撮って棋譜にする | コマドリ</title>
+  <meta name="description" content="Android のスマホなら、アプリを入れなくてもブラウザで対局を撮れます。盤の横にスマホを置いて撮り、対局が終わったら送ると、棋譜ができます。">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/komadori/web.html">
+  <link rel="stylesheet" href="web/app.css">
+  <link rel="modulepreload" href="web/shogi.js">
+  <link rel="modulepreload" href="web/board.js">
+  <link rel="modulepreload" href="web/recorder.js">
+</head>
+<body>
+<!--
+  コマドリ Web(Android Chrome)。設計: project-files web-android/設計-2026-09-30.md
+  駒(二文字)と盤の絵: Shogi Images(久保良介さん)— CC0 1.0 https://github.com/sunfish-shogi/shogi-images
+  QR: qrcode-generator(Kazuhiko Arase)— MIT
+-->
+<div id="app">
+  <section id="prep" class="screen" aria-label="対局の準備"></section>
+
+  <section id="cam" class="screen" aria-label="カメラ">
+    <div class="cam-view">
+      <video id="cam-video" playsinline muted autoplay></video>
+      <div class="cam-stage" id="cam-stage"><svg id="cam-svg" preserveAspectRatio="none"></svg></div>
+      <div id="cam-layer"></div>
+    </div>
+    <div class="cam-band" id="cam-band"></div>
+  </section>
+
+  <section id="send" class="screen" aria-label="送る"><div class="center-box" id="send-box"></div></section>
+
+  <section id="kv" class="screen" aria-label="棋譜"></section>
+
+  <section id="handoff" class="screen" aria-label="ほかのアプリ・サイトへ"></section>
+</div>
+<div id="sheet" class="sheet-back" hidden></div>
+
+<noscript><p style="padding:16px">このページは JavaScript を使います。Android の Chrome で開いてください。</p></noscript>
+<script src="/js/vendor/mp4-muxer.min.js"></script>
+<script src="/js/vendor/qrcode.min.js"></script>
+<script type="module" src="web/app.js"></script>
+</body>
+</html>
