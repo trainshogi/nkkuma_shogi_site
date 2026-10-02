@@ -138,8 +138,9 @@
     .big-icon { width: 96px; height: 96px; border-radius: 22px; margin: 26px auto 10px; box-shadow: 0 10px 30px rgba(229,103,46,.25); }
     .app-label { font-size: 14px; color: var(--muted); margin: 0; }
     .app-label b { color: #111; font-size: 17px; }
-    .hero .catch { font-size: clamp(44px, 9vw, 96px); letter-spacing: -.01em; margin: 18px 0 28px; line-height: 1.18; }
+    .hero .catch { font-size: clamp(44px, 8vw, 84px); letter-spacing: -.01em; margin: 18px 0 28px; line-height: 1.18; }
     .hero .catch em { color: var(--orange); }
+    @media (min-width: 760px) { .catch br.sp { display: none; } }
     .hero .stores { justify-content: center; }
     .hero .web { font-size: 14px; }
     .story { background: #f5f5f7; }
@@ -249,8 +250,8 @@
       <h1 class="who">えぬっくま<span>将棋の対局を、あとに残る棋譜にするアプリとサイトを作っています。</span></h1>
       <img class="big-icon" src="/img/about/komadori-icon.png" alt="" width="96" height="96">
       <p class="app-label"><b>コマドリ</b>　iPhone・iPad・Android のアプリ</p>
-      <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
-      <p class="sub">対局を、スマホが見て書きとめます。</p>
+      <p class="catch">あの一局を、<br class="sp">家に帰って<br><em>もう一度。</em></p>
+      <p class="sub">盤の横にスマホを置いておけば、指した手が棋譜で残ります。</p>
       <div class="stores">
     <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener"><img class="b-apple" src="/img/about/badge-appstore-ja.svg" alt="App Store からダウンロード" width="131" height="48"></a>
     <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener"><img class="b-play" src="/img/about/badge-googleplay-ja.svg" alt="Google Play で手に入れよう" width="163" height="48"></a>
@@ -280,7 +281,7 @@
       <a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">困ったときは</a></p>
   </section>
 
-  <section class="statement"><p><span>記録係がいなくても、<wbr>あの一局が残ります。</span></p></section>
+  <section class="statement"><p><span>記録係がいなくても、<wbr>棋譜は残ります。</span></p></section>
 
   <main>
     <h2 id="works">写真や動画から棋譜にする</h2>
