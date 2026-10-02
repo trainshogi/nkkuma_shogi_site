@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!-- このファイルは blog/build.py が生成しました。直接編集せず articles/*.md を編集してください -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>スマホはどこに置く？ 盤から15cm、60°倒す｜コマドリの置き方 | Shogiban to Kif ブログ</title>
+  <meta name="description" content="将棋の対局を棋譜にするアプリ「コマドリ」のスマホの置き方。スタンドを盤から15cm離し、スマホを60°倒す。機種と盤の大きさごとに、画角から計算しました。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/blog/komadori-placement-4x3.html">
+
+  <meta property="og:title" content="スマホはどこに置く？ 盤から15cm、60°倒す｜コマドリの置き方">
+  <meta property="og:description" content="将棋の対局を棋譜にするアプリ「コマドリ」のスマホの置き方。スタンドを盤から15cm離し、スマホを60°倒す。機種と盤の大きさごとに、画角から計算しました。">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/blog/komadori-placement-4x3.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@nkkuma_service">
+
+  <!-- AdSense: 審査通過後、ここに広告コードを貼る -->
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      color: #222; background: #fff;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.9;
+      -webkit-text-size-adjust: 100%;
+    }
+    main {
+      max-width: 720px; margin: 0 auto; padding: 24px 18px 48px;
+    }
+    h1 { font-size: 26px; line-height: 1.5; margin: 8px 0 4px; }
+    .meta { color: #999; font-size: 13px; margin-bottom: 28px; }
+    h2 {
+      font-size: 21px; margin: 44px 0 12px;
+      padding-bottom: 6px; border-bottom: 2px solid #eee;
+    }
+    h3 { font-size: 17px; margin: 32px 0 8px; }
+    p { margin: 0 0 1.2em; }
+    a { color: #0b67c2; }
+    pre {
+      background: #f6f6f4; border: 1px solid #e8e8e4; border-radius: 6px;
+      padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.6;
+    }
+    /* 和文等幅フォントを指定して、KIFの盤面図（全角の漢字と半角のv・記号）の桝を揃える */
+    pre, pre code {
+      font-family: "ＭＳ ゴシック", "MS Gothic", "Osaka-等幅", Osaka-mono,
+                   "Hiragino Kaku Gothic ProN", Menlo, Consolas, monospace;
+    }
+    code { font-family: Menlo, Consolas, monospace; font-size: 0.92em; }
+    p code, li code { background: #f2f2ef; padding: 1px 5px; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 14.5px; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #f7f7f5; }
+    blockquote { margin: 1em 0; padding: 2px 16px; border-left: 4px solid #ddd; color: #555; }
+    img { max-width: 100%; height: auto; }
+    .tool-cta {
+      margin: 40px 0 8px; padding: 18px 16px;
+      border: 1px solid #e0e0e0; border-radius: 10px; background: #fafaf8;
+      font-size: 15px;
+    }
+    .tool-cta a.btn {
+      display: inline-block; margin-top: 10px;
+      background: #dc3545; color: #fff; text-decoration: none;
+      padding: 10px 18px; border-radius: 6px; font-weight: bold;
+    }
+    .site-foot {
+      border-top: 1px solid #e5e5e5; margin-top: 24px;
+      padding: 18px 16px; text-align: center; color: #888; font-size: 13px;
+    }
+    .site-foot a { color: #0b67c2; }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html" aria-current="page">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <article>
+      <h1>スマホはどこに置く？ 盤から15cm、60°倒す｜コマドリの置き方</h1>
+      <div class="meta">2026-10-03　Shogiban to Kif 運営</div>
+      <p>コマドリを使ってくださる方から、いちばん多く聞かれるのが「スマホってどこに置けばいいの？」なんですよね。これまでアプリの案内は「盤全体と四隅が映るように」としか書いていなくて、数字は出していませんでした。</p>
+<p>そこで今回、国内でよく使われているスマホのカメラの仕様と、よく売れている将棋盤の大きさ、それに私がふだん使っているスタンドの寸法から、置き場所を計算してみました。机の上で盤を広げて、定規を持ちながら読んでもらえるとうれしいです。</p>
+<h2>まず結論</h2>
+<p>コマドリの iPhone 版 1.4.2・Android 版 0.1.24 以降で、エレコムのタブレットスタンド（TB-DSCHARMPTBK）を使う場合です。</p>
+<ul>
+<li><strong>スタンドのアームを全部伸ばします。</strong></li>
+<li><strong>スタンドの土台を、盤の縁から 15cm くらい離して置きます。</strong>（15〜18cm）</li>
+<li><strong>スマホは縦置きのまま、60° くらい倒して盤に向けます。</strong> 45〜70° の間なら大丈夫です。</li>
+</ul>
+<p>これで、ここ数年の iPhone と主な Android、ふつうの大きさの盤から小さめの盤まで、全部の組み合わせで盤が画面に収まる計算になりました。</p>
+<p>スタンドは盤の横、対局者と対局者の間に置きます。</p>
+<p>アプリで「先手は、どちらがわですか?」と聞かれたら、画面の左か右を選んでください。盤の横から撮ると、画面の中の盤は横向きに写ります。録画を送って読む方式（竹）なら、先手がまだ決まっていなくても、左か右のどちらかを選んでもらえれば大丈夫です。左右が逆でも、どちらが先手かはあとで機械が決めます。</p>
+<h2>なぜ「1.4.2 以降」なのか</h2>
+<p>じつは、前のバージョンまでは、iPhone と Android でちょうどいい置き方が違っていました。原因はスマホではなく、コマドリがカメラから受け取る絵の形でした。</p>
+<p>スマホのカメラのセンサーは、iPhone も Android も、ほとんどが <strong>4:3</strong> の形をしています。ところが、動画でよく使う 1920×1080 は <strong>16:9</strong> で、4:3 のセンサーの上下を切り落として作られています（Apple と Android の公式資料で確かめました）。</p>
+<p>縦置きのスマホで盤を撮ると、盤の横幅は画面の「狭いほうの向き」に入ります。16:9 だと、この向きが大きく削られてしまうんですね。</p>
+<table>
+<thead>
+<tr>
+<th>35mm 換算</th>
+<th>当てはまる主な機種</th>
+<th>狭い向きの画角（16:9）</th>
+<th>狭い向きの画角（4:3）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>19mm</td>
+<td>AQUOS R6〜R8 pro</td>
+<td>約 54°</td>
+<td>約 70°</td>
+</tr>
+<tr>
+<td>23mm</td>
+<td>Galaxy S23〜S25、AQUOS sense8・sense9・R9</td>
+<td>約 46°</td>
+<td>約 60°</td>
+</tr>
+<tr>
+<td>24〜25mm</td>
+<td>iPhone 14 Pro〜17 Pro・Pro Max、Pixel 7〜9・9a</td>
+<td>約 44°</td>
+<td>約 58°</td>
+</tr>
+<tr>
+<td>26mm</td>
+<td>iPhone XS〜17（無印）、Pixel 7a・8a、Xperia 10 V・VI</td>
+<td>約 41°</td>
+<td>約 53°</td>
+</tr>
+<tr>
+<td>28mm</td>
+<td>iPhone SE（第2・第3世代）</td>
+<td>約 38°</td>
+<td>約 50°</td>
+</tr>
+</tbody>
+</table>
+<p>前のバージョンの iPhone は 16:9 で受け取っていたので、盤を収めるには離れる必要がありました。Android は 4:3 でしたが、640×480 と粗かったので、今度は離れると奥のマスが小さくなりすぎました。そのため「iPhone は離して、Android は近づけて」と、逆の案内になっていたんです。</p>
+<p>iPhone 版 1.4.2・Android 版 0.1.24 からは、iPhone も Android も 4:3 で受け取るようにしました（iPhone は 1920×1440、Android は 1280×960）。画素を減らさずに、写る範囲だけが広がっています。これで、どちらも同じ置き方で案内できるようになりました。</p>
+<h2>盤の大きさ</h2>
+<p>よく売れている盤を、大きさで3つに分けました。外寸はお店の表記です。</p>
+<table>
+<thead>
+<tr>
+<th>大きさ</th>
+<th>外寸（縦×横）</th>
+<th>主な商品</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ふつう（本寸）</td>
+<td>約 36×33cm</td>
+<td>新桂 7号 折将棋盤（35.5×32×1.9cm）、日本将棋連盟 ソフト盤（36×33cm）、ビニール将棋盤（36×33cm）、くもん NEWスタディ将棋（35.7×33.6cm）、ビバリー マスター将棋 BOG-002（34.4×33cm）、幻冬舎 木製将棋セット（34.6×31.4cm）、囲碁ラボジャパン 3307il（35×32cm）、脚付き盤（36.4×33.3cm）</td>
+</tr>
+<tr>
+<td>ひとまわり小さい（中寸）</td>
+<td>約 33×29.5cm</td>
+<td>新桂 5号・6号 折将棋盤（33×29.5cm）</td>
+</tr>
+<tr>
+<td>小さめ</td>
+<td>約 30×26cm</td>
+<td>囲碁ラボジャパン 木製将棋盤セット（30×26cm）、4号の卓上盤</td>
+</tr>
+</tbody>
+</table>
+<p>どの大きさでも、結論の置き方で収まります。いちばん厳しいのは「ふつう」の盤で、表の数字もここで出しています。</p>
+<p>厚さ 6cm くらいの卓上の盤でも、倒し角 60°、すき間 10〜18cm で収まる計算でした。脚付き盤は盤の面が床から 17〜38cm も上にあるので、机に置くこのスタンドでは届きません。</p>
+<p>マグネット将棋やポータブル将棋のような、20cm 前後の小さい盤は、駒が小さすぎて今は読めません。</p>
+<h2>機種ごとの倒し角</h2>
+<p>土台を盤から 15cm 離したとき、盤が収まる倒し角です。ふつうの盤で計算しました。倒し角は、スマホを垂直に立てた状態から、盤のほうへ倒す角度です。</p>
+<table>
+<thead>
+<tr>
+<th>機種</th>
+<th>カメラ（35mm 換算）</th>
+<th>入る倒し角</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iPhone 16・17</td>
+<td>26mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>iPhone 16 Pro・17 Pro、Pro Max</td>
+<td>24mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>iPhone SE（第2・第3世代）</td>
+<td>28mm</td>
+<td>40〜70°</td>
+</tr>
+<tr>
+<td>Pixel 9・9a</td>
+<td>24〜25mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>Pixel 8a</td>
+<td>26mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>Galaxy S24</td>
+<td>23〜24mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>AQUOS sense9</td>
+<td>23mm</td>
+<td>35〜75°</td>
+</tr>
+<tr>
+<td>Xperia 10 VI</td>
+<td>26mm</td>
+<td>40〜75°</td>
+</tr>
+<tr>
+<td>AQUOS R8 pro</td>
+<td>19mm</td>
+<td>30〜80°</td>
+</tr>
+</tbody>
+</table>
+<p>同じレンズの古い機種（iPhone XS〜15、Pixel 7・7a、Galaxy S23 など）も、表の同じ換算の行と同じと考えてください。</p>
+<p>60° 倒したとき、レンズは盤の面から約 46cm、盤の縁から約 17cm の位置に来ます。盤の真ん中を、だいたい 54° の角度で見下ろす形です。</p>
+<h2>この置き方が難しいときは</h2>
+<p>カメラの写る範囲が広い機種をお持ちなら、ほかの置き方もできます。</p>
+<ul>
+<li><strong>盤の横に 15cm の場所がないとき</strong>: iPhone 14 Pro 以降の Pro・Pro Max、Pixel 7〜9・9a、Galaxy S23〜S25、AQUOS sense8・sense9・R9 なら、土台を盤にくっつけて置けます。スマホは 60〜80° 倒してください。ただ、カメラが盤の真上に近づくぶん、身を乗り出した人の頭で盤の奥が隠れやすくなります。場所があるなら 15cm 離すほうがおすすめです。</li>
+<li><strong>スタンドを全部伸ばすとぐらつくとき</strong>: 上と同じ機種なら、アームを 5cm 縮めても大丈夫です。土台は盤から 15cm、倒し角は 45〜70° にします。</li>
+<li><strong>スタンドをもっと低くしたいとき</strong>: AQUOS R6〜R8 pro は写る範囲がとても広いので、アームをいちばん短くしても入ります。土台は盤から 0〜10cm、倒し角は 60〜75° です。</li>
+</ul>
+<p>iPhone（無印・SE）、Pixel a シリーズ、Xperia 10 は、写る範囲に余裕がないので、最初の置き方がいちばん確実です。</p>
+<p>ここで書いた置き方は、共通の置き方より余裕が小さめです。置いたら、画面で盤の四隅が見えるかを確かめてください。</p>
+<h2>真上ではなく、斜めから撮る理由</h2>
+<p>真上から撮る形も試しましたが、対局している人の頭や手がカメラの下に入りやすいんですよね。天井の照明が盤に映り込むこともあります。</p>
+<p>そこで、横から斜めに撮る形をおすすめしています。</p>
+<p>3D で置き方をいろいろ試したところ、手や腕で隠れる升の数は、どこに置いてもほとんど変わりませんでした。変わったのは、考え込んで身を乗り出したときの頭です。帽子をかぶった子どもが 22cm 乗り出すと、この記事の置き方では盤の奥の 7 升ほどが隠れますが、真上からだと 23 升ほどが隠れました。カメラは高くしすぎず、盤の横から斜めに、がいちばん隠れにくい置き方です。斜めから撮っても、升の読み取りは真上から撮ったときと変わりませんでした。</p>
+<h2>仕様だけで「全部入る」と言える理由</h2>
+<p>今回の数字は、各機種を実際に並べて撮ったものではなく、メーカーが公表しているカメラの仕様から計算したものです。そこで、実物のほうが画角が狭かった場合も計算しました。</p>
+<p>実物の画角が狭くなる理由は3つあります。</p>
+<ul>
+<li>手ぶれ補正: 画面の周りを数〜十数 % 削ります。コマドリでは使っていないので、ここは 0 です。</li>
+<li>ゆがみ補正: 機種によっては、周りを少し（数 %）削ります。</li>
+<li>計算そのものの誤差: Apple が公表している iPhone 8 の値と比べると、私の計算は 2〜4% 広めに出ていました。</li>
+</ul>
+<p>全部を足しても、10% には届かない見込みです。<strong>画角が仕様より 9% 狭くても、「土台を盤から 15〜20cm、倒し角 55〜65°」なら、表の全機種がどの盤でも収まります。</strong> 13% 狭くても、iPhone SE を除けば同じ置き方で入ります。</p>
+<p>ひとつだけ正直に書いておくと、Android はメーカーごとにカメラの中の処理が違うので、機種によっては仕様より少し多めに削られることがあります。うまく入らないときは、土台を盤から少し離すか、倒し角を 60° に近づけてみてください。</p>
+<h2>スタンドについて</h2>
+<p>私が使っているのは、エレコムのタブレットスタンド（TB-DSCHARMPTBK）です。高さは、土台からスマホを載せる板のいちばん上まで 33.8〜50.8cm、土台は直径 18cm くらいです。スマホを載せる板は回したり倒したりできます。</p>
+<ul>
+<li>アームは全部伸ばして使ってください。</li>
+<li>スマホは縦置きで、下の辺を受けに乗せます。</li>
+<li>倒すと、スマホの上の端（レンズのあるほう）が盤のほうへ出ます。土台を 15cm 離すのは、この分を見込んでいるからです。</li>
+</ul>
+<p>ほかのスタンドを使う場合は、「レンズが盤の面から 45cm くらい、盤の縁から 15〜20cm 外、盤の真ん中を斜め 55° くらいで見下ろす」が目安になります。</p>
+<hr />
+<p>計算の元データ: 盤の大きさはお店の表記、カメラの画角はメーカーの公表値と大手媒体の記事、センサーの形は Apple と Android（AOSP）の公式資料、利用者の多い機種は MMD研究所の 2026年8月の調査を見て選びました。升目の寸法はお店に書いていないので、昔からの寸法（ふつうの盤で 1マス 1寸1分×1寸2分）で計算しています。</p>
+<p>この置き方は、各社が公表している仕様から計算したもので、すべての機種を実際に並べて試したわけではありません。うまく入らなかったときは、機種名と盤の商品名を<a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> か、X の <a href="https://x.com/nkkuma_service">@nkkuma_service</a>から教えてもらえるとうれしいです。数字を直して、この記事も書き換えます。</p>
+    </article>
+
+    <div class="tool-cta">
+      <b>将棋盤の写真から棋譜を作れます</b><br>
+      盤面をスマホで撮るだけで、KIF・SFEN形式に変換できる無料ツールを運営しています。登録不要です。
+      <br><a class="btn" href="/">盤面写真をKIFに変換する</a>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+</body>
+</html>
