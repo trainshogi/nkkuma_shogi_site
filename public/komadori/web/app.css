@@ -78,7 +78,12 @@ a { color: var(--primary); }
 .kb-grid {
   grid-column: 1; grid-row: 2; position: relative; display: grid;
   grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
-  background: var(--ban) 0 0 / 100% 100%; box-shadow: 0 0 0 1px rgba(60, 40, 20, .55);
+  /* 盤の絵を読めなかったときも、木の色と罫線は出す */
+  background: var(--ban) 0 0 / 100% 100%,
+    linear-gradient(to right, rgba(60, 40, 20, .55) 1px, transparent 1px) 0 0 / calc(100% / 9) 100%,
+    linear-gradient(to bottom, rgba(60, 40, 20, .55) 1px, transparent 1px) 0 0 / 100% calc(100% / 9),
+    #E3C27E;
+  box-shadow: 0 0 0 1px rgba(60, 40, 20, .55);
 }
 .kb-cell { position: relative; display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; }
 .kb-cell img { width: 90.4%; height: 95.2%; pointer-events: none; user-select: none; }
@@ -443,3 +448,10 @@ a { color: var(--primary); }
 .tl.low .kv-right { padding-top: 6px; }
 
 .hc-card:disabled { opacity: .55; }
+
+/* 駒の絵を読めなかったときの字の駒 */
+.kp { display: flex; align-items: center; justify-content: center; width: 86%; height: 92%; background: #F6E3B0; border: 1px solid rgba(60, 40, 20, .5); border-radius: 3px; color: #1D1410; font-weight: 700; font-size: calc(var(--S) / 9 * .56); line-height: 1; pointer-events: none; user-select: none; }
+.kp.two { font-size: calc(var(--S) / 9 * .32); writing-mode: vertical-rl; }
+.kp.promo { color: #B3261E; }
+.kp.gote { transform: rotate(180deg); }
+.kh-piece .kp { height: 100%; width: calc(var(--S) / 9 * .66); font-size: calc(var(--S) / 9 * .48); }
