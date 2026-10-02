@@ -5,6 +5,8 @@ slug: komadori-android-test
 date: 2026-09-08
 ---
 
+**テストは終わりました。Android 版は Google Play から入れられます。くわしくは[コマドリ Android 版を公開しました](/blog/komadori-android.html)をご覧ください。**
+
 Android版のコマドリを、公開の前に試してくださる方をさがしています。やることは3つです。
 
 1. [Googleグループ](https://groups.google.com/g/komadori-testers)に参加します。Googleアカウントが要ります。参加のしかたは[Googleのヘルプ「グループを検索して参加する」](https://support.google.com/groups/answer/1067205?hl=ja)にあります。

@@ -53,6 +53,6 @@ date: 2026-09-29
 
 ---
 
-Android 版は準備中です。
+Android 版は [Google Play](https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori) にあります（[公開のお知らせ](/blog/komadori-android.html)）。
 
 コマドリは [App Store](https://apps.apple.com/jp/app/id6800334202) にあります。1.4.0 と 1.4.1 で変わったところは[コマドリ 1.4 で変わったこと](/blog/komadori-1-4.html)に書きました。感想や不具合は [nkkumaservice@gmail.com](mailto:nkkumaservice@gmail.com) か、X の [@nkkuma_service](https://x.com/nkkuma_service) まで。

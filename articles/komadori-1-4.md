@@ -80,6 +80,6 @@ iPad は、盤を大きく取る形に組み直しました。横向きでは盤
 
 ---
 
-Android 版は準備中です。公開したら、ここでもお知らせします。
+Android 版は [Google Play](https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori) にあります（[公開のお知らせ](/blog/komadori-android.html)）。
 
 コマドリは [App Store](https://apps.apple.com/jp/app/id6800334202) にあります。うまくいかなかったときは[サポートページ](/komadori/support.html)を見てください。感想や不具合は [nkkumaservice@gmail.com](mailto:nkkumaservice@gmail.com) か、X の [@nkkuma_service](https://x.com/nkkuma_service) まで、ひと言で結構です。
