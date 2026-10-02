@@ -231,7 +231,7 @@
       .story-steps li { min-height: 50vh; }
       .taikai { grid-template-columns: 1fr 1fr; align-items: start; }
     }
-    /* ヘッダー: 文字のロゴ。スマホはメニューをボタンにまとめる（CSS だけ） */
+    /* ヘッダー: 文字のロゴ（えぬっくま）。スマホはメニューをボタンにまとめる（CSS だけ） */
     .menu-t { position: absolute; opacity: 0; pointer-events: none; }
     .menu-b { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; font-size: 13.5px; font-weight: 700; cursor: pointer; user-select: none; }
     .menu-b span, .menu-b span::before, .menu-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
@@ -247,9 +247,7 @@
       .site-head .mnav a { padding: 0; font-size: 14px; border-radius: 0; }
     }
 
-    .logo.txt { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 900; font-size: 18px; letter-spacing: -.01em; line-height: 1; }
-    .logo.txt span { font-weight: 400; opacity: .55; }
-    .logo.txt i { width: 18px; height: 20px; background: var(--orange); clip-path: polygon(50% 0, 92% 22%, 100% 100%, 0 100%, 8% 22%); }
+    .logo.txt { text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; line-height: 1; }
 
     .site-head.hB { position: relative; display: flex; flex-wrap: nowrap; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee; background: #fff; }
     .hB .logo.txt { color: #111; }
@@ -266,7 +264,7 @@
 </head>
 <body>
   <header class="site-head hB">
-    <a class="logo txt" href="/"><i aria-hidden="true"></i>Shogiban <span>to</span> Kif</a>
+    <a class="logo txt" href="/">えぬっくま</a>
     <input type="checkbox" id="menu-t" class="menu-t"><label for="menu-t" class="menu-b" aria-label="メニュー"><span></span>メニュー</label>
     <nav class="mnav">
       <a href="/">写真をKIFに</a>
