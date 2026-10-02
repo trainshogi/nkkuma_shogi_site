@@ -123,123 +123,113 @@
     .site-foot { padding: 22px 16px 34px; text-align: center; font-size: 12px; }
     .koma-row { display: none; }
     .site-foot nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; margin-bottom: 8px; }
-    :root { --bg: #fff; --text: #241c17; --muted: #6d625a; --link: #b4501f; --orange: #ef6a2c; --ink: #15110e;
-      --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; --pw: 236px; }
-    .site-head { background: var(--ink); }
-    .site-head nav a { color: #b9aea4; }
-    .site-head nav a[aria-current] { color: #fff; }
-    .hero { position: relative; color: #f4ece3; overflow: hidden;
-      background:
-        radial-gradient(520px 420px at 78% 48%, rgba(239,106,44,.30), transparent 70%),
-        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 44px 44px,
-        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0 / 44px 44px,
-        var(--ink); }
-    .hero-in { padding-top: 34px; padding-bottom: 46px; display: grid; gap: 34px; }
-    .kicker { color: #fff; }
-    .kicker span { color: #a99c90; }
-    .app-name img { box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
-    .app-name small { color: #a99c90; }
-    .catch { font-size: 38px; color: #fff; }
-    .catch em { color: var(--orange); }
-    .steps { counter-reset: s; display: grid; gap: 12px; }
-    .steps li { counter-increment: s; display: grid; grid-template-columns: 2.4em 3em 1fr; align-items: baseline; font-size: 15px; color: #d8cdc2; }
-    .steps li::before { content: "0" counter(s); font-size: 12px; color: var(--orange); letter-spacing: .08em; font-weight: 700; }
-    .steps b { color: #fff; font-size: 16px; }
-    .badge { background: #fff; color: var(--ink); }
-    .badge:hover { background: #f1e8de; }
-    .web a { color: #ffb48c; }
-    .phone-crop { box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.08); }
-    .more { background: #f6efe6; color: #5b4637; font-size: 14px; }
-    .more-in { padding-top: 16px; padding-bottom: 16px; display: grid; gap: 4px; }
-    .more a { color: #a4461b; }
-    .statement { position: relative; background: var(--ink); }
-    .statement img { width: 100%; height: 300px; object-fit: cover; object-position: 60% 40%; opacity: .55; }
-    .statement p { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; margin: 0; padding: 0 20px;
-      color: #fff; font-size: 26px; font-weight: 900; line-height: 1.5; text-shadow: 0 2px 20px rgba(0,0,0,.6); }
-    main { padding-top: 12px; padding-bottom: 40px; }
-    h2 { font-size: 22px; margin: 52px 0 16px; display: flex; align-items: center; gap: 10px; }
-    h2::before { content: ""; width: 6px; height: 22px; border-radius: 3px; background: var(--orange); }
-    .works li { border-radius: 16px; background: #fff; padding: 18px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(36,28,23,.07); border: 1px solid #f0e9e2; }
-    .works b { font-size: 16.5px; }
-    figure.photo img { border-radius: 14px; }
-    .timeline { position: relative; padding-left: 4px; }
-    .timeline li { position: relative; padding-left: 22px; grid-template-columns: 4.8em 1fr; }
-    .timeline li::before { content: ""; position: absolute; left: 0; top: 17px; width: 9px; height: 9px; border-radius: 50%; background: #fff; border: 2px solid #d9cbbd; }
-    .timeline li::after { content: ""; position: absolute; left: 5px; top: 30px; bottom: -14px; width: 1px; background: #e8ddd2; }
-    .timeline li:last-child::after { display: none; }
-    .timeline li.now::before { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 4px rgba(239,106,44,.18); }
-    .timeline .y { color: #9a8d82; }
+    .stores { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .stores a { display: block; line-height: 0; }
+    .stores img { height: 48px; width: auto; }
+    .site-foot .tm { font-size: 11px; opacity: .7; margin: 0 0 6px; }
+    :root { --bg: #fff; --text: #111; --muted: #6e6e73; --link: #d4561c; --orange: #e5672e;
+      --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; --pw: 240px; }
+    .site-head { border-bottom: 1px solid #eee; }
+    .site-head nav a { color: #555; }
+    .site-head nav a[aria-current] { color: #111; }
+    .hero { text-align: center; padding: 48px 0 30px; }
+    .hero .kicker { font-size: 13px; color: var(--muted); letter-spacing: .3em; }
+    .hero .kicker span { letter-spacing: .04em; }
+    .big-icon { width: 96px; height: 96px; border-radius: 22px; margin: 26px auto 10px; box-shadow: 0 10px 30px rgba(229,103,46,.25); }
+    .app-label { font-size: 14px; color: var(--muted); margin: 0; }
+    .app-label b { color: #111; font-size: 17px; }
+    .hero .catch { font-size: clamp(44px, 9vw, 96px); letter-spacing: -.01em; margin: 18px 0 28px; line-height: 1.18; }
+    .hero .catch em { color: var(--orange); }
+    .hero .stores { justify-content: center; }
+    .hero .web { font-size: 14px; }
+    .story { background: #f5f5f7; }
+    .story-in { max-width: 1040px; margin: 0 auto; padding: 30px 20px 30px; display: grid; gap: 0; }
+    .story-steps { margin-top: -240px; }
+    .story-phone { position: sticky; top: 10px; z-index: 1; }
+    .story-phone .phone-crop { --pw: 120px; margin: 0 0 0 auto; box-shadow: 0 20px 50px rgba(0,0,0,.18); }
+    .story-steps li { padding-right: 38%; }
+    .story-steps { list-style: none; margin: 0; padding: 0; position: relative; z-index: 2; }
+    .story-steps li { min-height: 40vh; display: flex; flex-direction: column; justify-content: center; padding: 20px 38% 20px 0; }
+    .story-steps b { font-size: 56px; font-weight: 900; line-height: 1.2; }
+    .story-steps span { font-size: 18px; color: #333; background: rgba(245,245,247,.85); }
+    .more { border-bottom: 1px solid #eee; font-size: 14px; color: var(--muted); }
+    .more-in { padding-top: 18px; padding-bottom: 18px; display: grid; gap: 4px; }
+    .statement { padding: 80px 20px; }
+    .statement p { max-width: 900px; margin: 0 auto; font-size: clamp(34px, 7vw, 72px); font-weight: 900; line-height: 1.25; }
+    .statement span { color: #111; }
+    main { padding-bottom: 40px; }
+    h2 { font-size: 26px; font-weight: 900; margin: 56px 0 16px; }
+    .works li { background: #f5f5f7; border-radius: 22px; padding: 22px; }
+    figure.photo img { border-radius: 22px; }
+    .timeline li { border-bottom: 1px solid #eee; }
+    .timeline .y { color: #999; }
     .timeline li.now .y { color: var(--orange); font-weight: 700; }
-    .cta { background: var(--ink); color: #e6dcd2; }
-    .cta-in { padding-top: 10px; padding-bottom: 44px; }
-    .cta h2 { color: #fff; margin-top: 40px; }
-    .cta a { color: #ffb48c; }
-    .mail-btn { background: var(--orange); color: #fff !important; }
-    .mail-btn:hover { background: #ff7d42; }
-    .contact dt { color: #9e9186; }
-    .site-foot { background: var(--ink); color: #8d8178; border-top: 1px solid rgba(255,255,255,.08); }
-    .site-foot a { color: #c9bdb2; text-decoration: none; }
+    .cta { background: #f5f5f7; }
+    .cta-in { padding-top: 6px; padding-bottom: 44px; }
+    .cta h2 { margin-top: 40px; }
+    .mail-btn { background: #111; color: #fff; border-radius: 999px; }
+    .contact dt { color: var(--muted); }
+    .site-foot { color: #888; }
+    .site-foot a { color: #555; text-decoration: none; }
     @media (min-width: 760px) {
-      :root { --pw: 270px; }
-      .hero-in { grid-template-columns: 1fr 340px; align-items: center; padding-top: 56px; padding-bottom: 64px; }
-      .catch { font-size: 54px; }
+      .hero { padding: 80px 0 60px; }
+      .story-in { grid-template-columns: 1fr 1fr; gap: 60px; padding-top: 20px; padding-bottom: 20px; }
+      .story-phone { top: 12vh; align-self: start; padding: 6vh 0; }
+      .story-phone .phone-crop { --pw: 280px; margin: 0 auto; }
+      .story-steps li { padding-right: 0; }
+      .story-steps li { min-height: 76vh; }
+      .story-steps { margin-top: 0; }
+      .story-steps b { font-size: 88px; }
+      .story-steps span { font-size: 21px; background: none; }
       .more-in { grid-template-columns: 1fr auto; align-items: center; }
-      .statement img { height: 380px; }
-      .statement p { font-size: 34px; }
+      .statement { padding: 140px 20px; }
     }
-    /* スクロールに合わせた動き。CSS だけで、対応していないブラウザと「視差効果を減らす」では止まったまま */
     @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
-    main > h2, main > p, figure.photo, .works li, .timeline li, .cta-in > *, .statement p, .more-in {
+    .hero .catch, .big-icon { animation: heroOut linear both; animation-timeline: scroll(root); animation-range: 0 520px; }
+    @keyframes heroOut { to { transform: scale(.9) translateY(-30px); opacity: .25; } }
+    .story-steps li { animation: stepIn linear both; animation-timeline: view(); animation-range: entry 10% cover 50%; }
+    @keyframes stepIn { from { opacity: .08; transform: translateY(60px) scale(.94); } to { opacity: 1; transform: none; } }
+    .story-phone .phone-crop { animation: tilt linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+    @keyframes tilt { from { transform: perspective(900px) rotateY(18deg) rotateX(6deg); } 50% { transform: perspective(900px) rotateY(-8deg) rotateX(-2deg); } to { transform: perspective(900px) rotateY(10deg) rotateX(4deg); } }
+    .statement span { background: linear-gradient(90deg, #111 0 50%, #d9d9de 50% 100%) 100% 0 / 200% 100% no-repeat; -webkit-background-clip: text; background-clip: text; color: transparent;
+      animation: fill linear both; animation-timeline: view(); animation-range: cover 15% cover 55%; }
+    @keyframes fill { to { background-position: 0 0; } }
+    }}
+    @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
+    main > h2, main > p, figure.photo, .works li, .timeline li, .cta-in > *, .more-in {
       animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
     @keyframes rise { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: none; } }
     }}
-    @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
-    .hero-text { animation: heroText linear both; animation-timeline: scroll(root); animation-range: 0 640px; }
-    @keyframes heroText { to { transform: translateY(90px); opacity: .15; } }
-    .phone-crop { animation: phoneLift linear both; animation-timeline: scroll(root); animation-range: 0 700px; }
-    @keyframes phoneLift { to { transform: translateY(var(--lift, -40px)) rotate(-5deg) scale(1.04); } }
-    @media (min-width: 760px) { .phone-crop { --lift: -110px; } }
-    .statement { overflow: hidden; }
-    .statement img { animation: zoomOut linear both; animation-timeline: view(); }
-    @keyframes zoomOut { from { transform: scale(1.35) translateY(-30px); } to { transform: scale(1) translateY(30px); } }
-    figure.photo { overflow: hidden; border-radius: 14px; }
-    figure.photo img { animation: zoomOut linear both; animation-timeline: view(); }
-    }}
-    @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
-    .koma-row { display: flex; justify-content: center; gap: 6px; position: absolute; left: 0; right: 0; bottom: 34px; pointer-events: none; }
-    .koma-row span { width: 30px; height: 34px; display: grid; place-items: center; padding-top: 5px;
-      font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 900; font-size: 15px; color: #1d1611;
-      background: linear-gradient(160deg, #f4dcaa, #e3bb78); clip-path: polygon(50% 0, 86% 14%, 100% 100%, 0 100%, 14% 14%); }
-    .statement p { bottom: 60px; }
-    .steps li { animation: fromSide linear both; animation-timeline: view(); animation-range: entry 0% entry 90%; }
-    .steps li:nth-child(even), .works li:nth-child(even) { --dir: 1; }
-    .works li { animation-name: fromSide; }
-    @keyframes fromSide { from { opacity: 0; transform: translateX(calc(var(--dir, -1) * 60px)) rotate(calc(var(--dir, -1) * -4deg)); } to { opacity: 1; transform: none; } }
-    .timeline { position: relative; }
-    .timeline::before { content: ""; position: absolute; left: 9px; top: 18px; bottom: 18px; width: 2px; background: var(--orange, #c8442b);
-      transform-origin: top; animation: grow linear both; animation-timeline: view(); animation-range: entry 40% cover 60%; }
-    @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-    .timeline li::before { animation: pop linear both; animation-timeline: view(); animation-range: entry 60% entry 100%; z-index: 1; }
-    @keyframes pop { from { transform: scale(0); } 70% { transform: scale(1.5); } to { transform: scale(1); } }
-    @keyframes w0 { 0% { transform: translateY(0.0px) rotate(8.0deg); } 10% { transform: translateY(21.0px) rotate(4.7deg); } 20% { transform: translateY(24.7px) rotate(-2.5deg); } 30% { transform: translateY(8.0px) rotate(-7.6deg); } 40% { transform: translateY(-15.3px) rotate(-6.5deg); } 50% { transform: translateY(-26.0px) rotate(-0.0deg); } 60% { transform: translateY(-15.3px) rotate(6.5deg); } 70% { transform: translateY(8.0px) rotate(7.6deg); } 80% { transform: translateY(24.7px) rotate(2.5deg); } 90% { transform: translateY(21.0px) rotate(-4.7deg); } 100% { transform: translateY(0.0px) rotate(-8.0deg); } }
-    .koma-row span:nth-child(1) { animation: w0 linear both; animation-timeline: view(); }
-    @keyframes w1 { 0% { transform: translateY(17.7px) rotate(5.9deg); } 10% { transform: translateY(25.8px) rotate(-1.0deg); } 20% { transform: translateY(12.6px) rotate(-7.0deg); } 30% { transform: translateY(-11.0px) rotate(-7.3deg); } 40% { transform: translateY(-25.5px) rotate(-1.5deg); } 50% { transform: translateY(-19.0px) rotate(5.5deg); } 60% { transform: translateY(3.2px) rotate(7.9deg); } 70% { transform: translateY(22.7px) rotate(3.9deg); } 80% { transform: translateY(23.6px) rotate(-3.4deg); } 90% { transform: translateY(5.0px) rotate(-7.9deg); } 100% { transform: translateY(-17.7px) rotate(-5.9deg); } }
-    .koma-row span:nth-child(2) { animation: w1 linear both; animation-timeline: view(); }
-    @keyframes w2 { 0% { transform: translateY(25.9px) rotate(0.6deg); } 10% { transform: translateY(16.7px) rotate(-6.1deg); } 20% { transform: translateY(-6.3px) rotate(-7.8deg); } 30% { transform: translateY(-24.1px) rotate(-3.0deg); } 40% { transform: translateY(-22.1px) rotate(4.2deg); } 50% { transform: translateY(-1.8px) rotate(8.0deg); } 60% { transform: translateY(19.9px) rotate(5.1deg); } 70% { transform: translateY(25.2px) rotate(-1.9deg); } 80% { transform: translateY(9.8px) rotate(-7.4deg); } 90% { transform: translateY(-13.8px) rotate(-6.8deg); } 100% { transform: translateY(-25.9px) rotate(-0.6deg); } }
-    .koma-row span:nth-child(3) { animation: w2 linear both; animation-timeline: view(); }
-    @keyframes w3 { 0% { transform: translateY(20.2px) rotate(-5.0deg); } 10% { transform: translateY(-1.3px) rotate(-8.0deg); } 20% { transform: translateY(-21.8px) rotate(-4.4deg); } 30% { transform: translateY(-24.3px) rotate(2.9deg); } 40% { transform: translateY(-6.8px) rotate(7.7deg); } 50% { transform: translateY(16.3px) rotate(6.2deg); } 60% { transform: translateY(26.0px) rotate(-0.4deg); } 70% { transform: translateY(14.2px) rotate(-6.7deg); } 80% { transform: translateY(-9.3px) rotate(-7.5deg); } 90% { transform: translateY(-25.1px) rotate(-2.1deg); } 100% { transform: translateY(-20.2px) rotate(5.0deg); } }
-    .koma-row span:nth-child(4) { animation: w3 linear both; animation-timeline: view(); }
-    @keyframes w4 { 0% { transform: translateY(3.7px) rotate(-7.9deg); } 10% { transform: translateY(-18.7px) rotate(-5.6deg); } 20% { transform: translateY(-25.6px) rotate(1.4deg); } 30% { transform: translateY(-11.4px) rotate(7.2deg); } 40% { transform: translateY(12.2px) rotate(7.1deg); } 50% { transform: translateY(25.7px) rotate(1.1deg); } 60% { transform: translateY(18.1px) rotate(-5.7deg); } 70% { transform: translateY(-4.5px) rotate(-7.9deg); } 80% { transform: translateY(-23.3px) rotate(-3.5deg); } 90% { transform: translateY(-23.0px) rotate(3.7deg); } 100% { transform: translateY(-3.7px) rotate(7.9deg); } }
-    .koma-row span:nth-child(5) { animation: w4 linear both; animation-timeline: view(); }
-    @keyframes w5 { 0% { transform: translateY(-14.9px) rotate(-6.6deg); } 10% { transform: translateY(-26.0px) rotate(-0.2deg); } 20% { transform: translateY(-15.7px) rotate(6.4deg); } 30% { transform: translateY(7.5px) rotate(7.7deg); } 40% { transform: translateY(24.6px) rotate(2.6deg); } 50% { transform: translateY(21.3px) rotate(-4.6deg); } 60% { transform: translateY(0.5px) rotate(-8.0deg); } 70% { transform: translateY(-20.7px) rotate(-4.8deg); } 80% { transform: translateY(-24.9px) rotate(2.3deg); } 90% { transform: translateY(-8.5px) rotate(7.6deg); } 100% { transform: translateY(14.9px) rotate(6.6deg); } }
-    .koma-row span:nth-child(6) { animation: w5 linear both; animation-timeline: view(); }
-    @keyframes w6 { 0% { transform: translateY(-25.4px) rotate(-1.7deg); } 10% { transform: translateY(-19.4px) rotate(5.3deg); } 20% { transform: translateY(2.6px) rotate(8.0deg); } 30% { transform: translateY(22.5px) rotate(4.0deg); } 40% { transform: translateY(23.8px) rotate(-3.2deg); } 50% { transform: translateY(5.5px) rotate(-7.8deg); } 60% { transform: translateY(-17.3px) rotate(-6.0deg); } 70% { transform: translateY(-25.9px) rotate(0.8deg); } 80% { transform: translateY(-13.1px) rotate(6.9deg); } 90% { transform: translateY(10.5px) rotate(7.3deg); } 100% { transform: translateY(25.4px) rotate(1.7deg); } }
-    .koma-row span:nth-child(7) { animation: w6 linear both; animation-timeline: view(); }
-    @keyframes w7 { 0% { transform: translateY(-22.3px) rotate(4.1deg); } 10% { transform: translateY(-2.4px) rotate(8.0deg); } 20% { transform: translateY(19.6px) rotate(5.3deg); } 30% { transform: translateY(25.4px) rotate(-1.8deg); } 40% { transform: translateY(10.2px) rotate(-7.4deg); } 50% { transform: translateY(-13.3px) rotate(-6.9deg); } 60% { transform: translateY(-25.9px) rotate(-0.7deg); } 70% { transform: translateY(-17.1px) rotate(6.0deg); } 80% { transform: translateY(5.8px) rotate(7.8deg); } 90% { transform: translateY(23.9px) rotate(3.2deg); } 100% { transform: translateY(22.3px) rotate(-4.1deg); } }
-    .koma-row span:nth-child(8) { animation: w7 linear both; animation-timeline: view(); }
-    @keyframes w8 { 0% { transform: translateY(-7.3px) rotate(7.7deg); } 10% { transform: translateY(15.9px) rotate(6.3deg); } 20% { transform: translateY(26.0px) rotate(-0.2deg); } 30% { transform: translateY(14.6px) rotate(-6.6deg); } 40% { transform: translateY(-8.8px) rotate(-7.5deg); } 50% { transform: translateY(-25.0px) rotate(-2.2deg); } 60% { transform: translateY(-20.6px) rotate(4.9deg); } 70% { transform: translateY(0.8px) rotate(8.0deg); } 80% { transform: translateY(21.5px) rotate(4.5deg); } 90% { transform: translateY(24.5px) rotate(-2.7deg); } 100% { transform: translateY(7.3px) rotate(-7.7deg); } }
-    .koma-row span:nth-child(9) { animation: w8 linear both; animation-timeline: view(); }
-    }}
+    .who { margin: 0; font-size: 15px; font-weight: 900; letter-spacing: .3em; color: #111; }
+    .who span { display: block; margin-top: 2px; font-size: 13.5px; font-weight: 400; letter-spacing: .02em; color: var(--muted); }
+    .hero .catch { margin-bottom: 10px; }
+    .sub { margin: 0 0 26px; font-size: 16px; color: #333; }
+    .jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 1px solid #eee; scrollbar-width: none; }
+    .jump a { flex: none; padding: 6px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13.5px; font-weight: 700; }
+    .jump a:focus-visible, .btn:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+    @media (min-width: 760px) { .jump { justify-content: center; } }
+    :target { scroll-margin-top: 64px; }
+    .story-steps small { font-size: 13px; font-weight: 700; color: var(--orange); letter-spacing: .1em; }
+    .story-steps li { min-height: 28vh; }
+    .story-more { max-width: 1040px; margin: 0 auto; padding: 0 20px 34px; font-size: 14px; color: var(--muted); }
+    .story-more a { display: inline-block; margin: 6px 16px 0 0; color: var(--link); }
+    .btn { display: inline-block; padding: 10px 20px; border-radius: 999px; background: #111; color: #fff !important; text-decoration: none; font-weight: 700; font-size: 15px; }
+    .btn.ghost { background: transparent; color: #111 !important; box-shadow: inset 0 0 0 1.5px #111; }
+    .works { grid-template-columns: 1fr !important; }
+    .works .go { gap: 10px; margin-top: 14px; }
+    .works b { font-size: 18px; }
+    .taikai { display: grid; gap: 18px; }
+    .taikai figure.photo { margin: 0; }
+    .taikai figcaption a { white-space: nowrap; }
+    .me p { margin-bottom: .8em; }
+    .me b { font-size: 18px; }
+    .timeline { margin-top: 10px; }
+    .statement p { word-break: keep-all; overflow-wrap: anywhere; }
+    @media (min-width: 760px) {
+      .story-steps li { min-height: 50vh; }
+      .taikai { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
   </style>
 </head>
 <body>
@@ -253,93 +243,91 @@
     </nav>
   </header>
 
+
   <section class="hero" id="komadori">
     <div class="hero-in">
-      <div class="hero-text">
-        <h1 class="kicker">えぬっくま<span>将棋の一局を、あとに残る棋譜にする。</span></h1>
-        <p class="app-name">
-          <img src="/img/about/komadori-icon.png" alt="" width="56" height="56">
-          <span><b>コマドリ</b><small>iPhone・iPad・Android のアプリ</small></span>
-        </p>
-        <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
-        <ol class="steps">
-          <li><b>置く</b><span>盤の横にスマホを置きます。</span></li>
-          <li><b>指す</b><span>いつもどおり指すと、手を読み上げて棋譜に書きとめます。</span></li>
-          <li><b>渡す</b><span>できた棋譜は、ぴよ将棋などふだんのアプリやサイトへ。</span></li>
-        </ol>
-        <div class="stores">
-          <a class="badge" href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener"><small>iPhone・iPad</small><b>App Store</b></a>
-          <a class="badge" href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener"><small>Android</small><b>Google Play</b></a>
-        </div>
-        <p class="web"><a href="/komadori/web.html">Android のスマホなら、アプリを入れずにブラウザでも撮れます<span aria-hidden="true"> →</span></a></p>
-      </div>
-      <figure class="phone">
-        <div class="phone-crop"><img src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。指した手を記録している" width="800" height="813"></div>
-      </figure>
+      <h1 class="who">えぬっくま<span>将棋の対局を、あとに残る棋譜にするアプリとサイトを作っています。</span></h1>
+      <img class="big-icon" src="/img/about/komadori-icon.png" alt="" width="96" height="96">
+      <p class="app-label"><b>コマドリ</b>　iPhone・iPad・Android のアプリ</p>
+      <p class="catch">盤の横に置いて、<br><em>指すだけ。</em></p>
+      <p class="sub">対局を、スマホが見て書きとめます。</p>
+      <div class="stores">
+    <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener"><img class="b-apple" src="/img/about/badge-appstore-ja.svg" alt="App Store からダウンロード" width="131" height="48"></a>
+    <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener"><img class="b-play" src="/img/about/badge-googleplay-ja.svg" alt="Google Play で手に入れよう" width="163" height="48"></a>
+  </div>
     </div>
   </section>
 
-  <section class="more">
-    <div class="more-in">
-      <p>撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。</p>
-      <p class="links"><a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">サポート</a></p>
+  <nav class="jump" aria-label="このページの中身">
+    <a href="#steps">コマドリの使い方</a>
+    <a href="#works">写真・動画から棋譜に</a>
+    <a href="#taikai">大会・教室の方へ</a>
+    <a href="#me">作っている人</a>
+  </nav>
+
+  <section class="story" id="steps">
+    <div class="story-in">
+      <div class="story-phone"><figure class="phone">
+    <div class="phone-crop"><img src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。指した手を記録している" width="800" height="813"></div>
+  </figure></div>
+      <ol class="story-steps">
+        <li><small>1</small><b>置く</b><span>盤の横にスマホを置いて、盤が画面に入るように向けます。</span></li>
+        <li><small>2</small><b>指す</b><span>いつもどおり指すだけです。指した手を読み上げて、棋譜に書きとめていきます。</span></li>
+        <li><small>3</small><b>渡す</b><span>終わったら、ぴよ将棋など、ふだん使っているアプリやサイトに棋譜を送れます。</span></li>
+      </ol>
     </div>
+    <p class="story-more">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。<br>
+      <a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">困ったときは</a></p>
   </section>
 
-  <section class="statement">
-    <img src="/blog/img/yukuhashi-rig.jpg" alt="" loading="lazy">
-    <p>記録係がいなくても、<br>あの一局が残ります。</p>
-    <div class="koma-row" aria-hidden="true"><span>歩</span><span>歩</span><span>歩</span><span>歩</span><span>歩</span><span>歩</span><span>歩</span><span>歩</span><span>歩</span></div>
-  </section>
+  <section class="statement"><p><span>記録係がいなくても、<wbr>あの一局が残ります。</span></p></section>
 
   <main>
-    <h2 id="works">ほかに作っているもの</h2>
+    <h2 id="works">写真や動画から棋譜にする</h2>
     <ul class="works">
       <li>
-        <b>Shogiban to Kif</b><span class="tag live">公開中</span>
-        <p>将棋盤の写真を撮るだけで、局面を KIF・SFEN にできるサイトです。対局を撮った動画から、一局まるごと棋譜にすることもできます。登録は要りません。</p>
-        <p class="go"><a href="/">写真をKIFにする</a><a href="/video.html">動画から棋譜にする（β）</a></p>
-      </li>
-      <li>
-        <b>大会・教室の棋譜づくり</b><span class="tag beta">ベータ</span>
-        <p>対局を撮った動画から、一局まるごと棋譜にします。2026年8月の行橋名人戦では、1日分・12局を棋譜集にしてお渡ししました。</p>
-        <p class="go"><a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></p>
+        <b>Shogiban to Kif</b>
+        <p>盤を撮った写真から、その局面を KIF や SFEN にします。対局を撮った動画なら、一局まるごと棋譜にできます。登録はいりません。</p>
+        <p class="go"><a class="btn" href="/">写真から棋譜にする</a><a class="btn ghost" href="/video.html">動画から棋譜にする（β）</a></p>
       </li>
     </ul>
 
-    <h2>なぜ作っているか</h2>
-    <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場の一局にも、大会での子どもの一局にも、記録は残りません。並べ直せば上達の近道になるのに、書きとめる手が足りない。そこをカメラでなんとかする、というのがこの活動の軸です。</p>
-    <figure class="photo">
-      <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
-      <figcaption>2026年8月・行橋名人戦。対局者はふだんどおり指すだけで、棋譜が残ります。</figcaption>
-    </figure>
+    <h2 id="taikai">大会・教室の方へ</h2>
+    <div class="taikai">
+      <figure class="photo">
+        <img src="/blog/img/yukuhashi-play.jpg" alt="大会での対局。盤の脇に立てたカメラが対局を記録している" loading="lazy">
+        <figcaption>2026年8月・行橋名人戦。1日分・12局を棋譜集にしてお渡ししました。<a href="/blog/yukuhashi-2026-report.html">当日のレポート</a></figcaption>
+      </figure>
+      <div>
+        <p>大会や教室の対局を撮って、棋譜にしてお渡しします。機材の持ち込みから設置、当日の運用まで、こちらで行います。運営のみなさんは、いつもどおり進めるだけです。ベータの間は費用をいただいていません。</p>
+        <p>教室や道場でご自分で記録したいときは、<a href="#komadori">コマドリ</a>が使えます。</p>
+        <p><a class="btn" href="mailto:nkkumaservice@gmail.com?subject=%E5%A4%A7%E4%BC%9A%E3%83%BB%E6%95%99%E5%AE%A4%E3%81%AE%E6%A3%8B%E8%AD%9C%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">メールで相談する</a></p>
+      </div>
+    </div>
 
-    <h2>あゆみ</h2>
+    <h2 id="me">作っている人</h2>
+    <div class="me">
+      <p><b>佐藤旭（えぬっくま）</b></p>
+      <p>アマチュアの一局は、感想戦が終わると消えていきます。プロには記録係がつきますが、道場や大会の一局には、記録が残りません。並べ直せば上達の近道になるのに、書きとめる手が足りない。そこをカメラでなんとかしたくて、ひとりで作っています。</p>
+    </div>
     <ul class="timeline">
-      <li><span class="y">2019</span><span>東京農工大学在学中に、スマホで撮った将棋盤の写真から局面を読み取る Web アプリを開発・発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf" target="_blank" rel="noopener">大学のプレスリリース</a>）</span></li>
-      <li><span class="y">以降</span><span>「えぬっくま」の名前で、将棋盤の写真を棋譜にするサイトを運営</span></li>
-      <li><span class="y">2026.08</span><span>行橋名人戦（福岡）で、大会1日分・12局を棋譜にする。その場で棋譜を記録するところも実演</span></li>
-      <li><span class="y">2026.08</span><span>iPhone アプリ「コマドリ」を公開。撮った対局の動画から棋譜を起こせるように</span></li>
-      <li><span class="y">2026.08</span><span>高島平将棋クラブで6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</span></li>
-      <li><span class="y">2026.09</span><span>コマドリで、対局しながらその場で棋譜にできるように。iPad にも対応</span></li>
-      <li><span class="y">2026.09</span><span>Android のスマホなら、ブラウザでも撮れるように</span></li>
+      <li><span class="y">2019</span><span>東京農工大学在学中に、将棋盤の写真から局面を読み取る Web アプリを発表（<a href="https://www.tuat.ac.jp/documents/tuat/outline/disclosure/pressrelease/2019/20190913_01.pdf" target="_blank" rel="noopener">大学のプレスリリース</a>）。その後、Shogiban to Kif として運営</span></li>
+      <li><span class="y">2026.08</span><span>行橋名人戦（福岡）で、大会1日分・12局を棋譜に。高島平将棋クラブでも6局を撮影（<a href="/blog/takashimadaira-2026-report.html">レポート</a>）</span></li>
+      <li><span class="y">2026.08</span><span>コマドリ（iPhone）を公開</span></li>
+      <li><span class="y">2026.09</span><span>対局しながらその場で棋譜にできるように。iPad にも対応</span></li>
       <li class="now"><span class="y">2026.10</span><span>コマドリの Android 版を公開</span></li>
     </ul>
   </main>
 
-  <section class="cta">
+  <section class="cta" id="contact">
     <div class="cta-in">
-      <h2>大会・教室のみなさまへ</h2>
-      <p>大会や教室での棋譜づくりのご相談を歓迎しています。機材の持ち込み・設置・運用まですべてこちらで行い、運営のお手間はかけません。ベータの間は費用をいただいていません。</p>
-      <p>教室や道場でご自分で記録したいときは、<a href="#komadori">コマドリ</a>をお使いください。盤の横にスマホを置くだけで始められます。</p>
-      <p><a class="mail-btn" href="mailto:nkkumaservice@gmail.com?subject=%E5%A4%A7%E4%BC%9A%E3%83%BB%E6%95%99%E5%AE%A4%E3%81%AE%E6%A3%8B%E8%AD%9C%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">メールで相談する</a></p>
+      <h2>お問い合わせ</h2>
       <dl class="contact">
         <dt>メール</dt><dd><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></dd>
         <dt>X</dt><dd><a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">@nkkuma_service</a></dd>
       </dl>
     </div>
   </section>
-
   <footer class="site-foot">
     <nav>
       <a href="/">Shogiban to Kif</a>
@@ -349,6 +337,7 @@
       <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
       <a href="/privacy.html">プライバシーポリシー・利用規約</a>
     </nav>
+    <p class="tm">Apple、Apple のロゴ、App Store は Apple Inc. の商標です。Google Play および Google Play のロゴは Google LLC の商標です。</p>
     &copy; 2019-2026 Shogiban to Kif（えぬっくま）
   </footer>
 </body>
