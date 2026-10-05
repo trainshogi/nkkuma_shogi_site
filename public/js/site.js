@@ -167,6 +167,14 @@
 
   function setState(s) { document.body.setAttribute('data-state', s); }
 
+  // エラー表示の文。混み合い(429)のときだけ差し替える
+  var BUSY_MESSAGE = '混み合っています。少し待ってからもう一度お試しください';
+  var errMsgEl = document.querySelector('.result-error .err-msg');
+  var defaultErrMessage = errMsgEl ? errMsgEl.textContent : '';
+  function setErrorMessage(busy) {
+    if (errMsgEl) { errMsgEl.textContent = busy ? BUSY_MESSAGE : defaultErrMessage; }
+  }
+
   // ===== トースト =====
   var toastTimer = null;
   function toast(msg) {
@@ -618,6 +626,8 @@
       signal: controller ? controller.signal : undefined
     }).then(function (res) {
       if (timer) { clearTimeout(timer); }
+      // 429 は混み合い(使用量の上限)。やり直さずにそのまま伝える
+      if (res.status === 429) { var busy = new Error('HTTP 429'); busy.busy = true; throw busy; }
       if (res.status === 503 && attempt === 0) {
         return postRecognize(1);
       }
@@ -625,7 +635,7 @@
       return res.json();
     }).catch(function (err) {
       if (timer) { clearTimeout(timer); }
-      if (attempt === 0) { return postRecognize(1); }
+      if (attempt === 0 && !err.busy) { return postRecognize(1); }
       throw err;
     });
   }
@@ -639,6 +649,7 @@
       })
       .catch(function (err) {
         console.error(err);
+        setErrorMessage(err && err.busy);
         setState('error');
       });
   }

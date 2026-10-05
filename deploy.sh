@@ -36,7 +36,9 @@ EXCLUDES=(
 
 # ---- ステージング: プレースホルダを実キーに置換した一時 public/ を作る ----
 # __API_KEY__       <- ~/.shogi_api_key       （本番 recognize API）
-# __ALPHA_API_KEY__ <- ~/.shogi_alpha_api_key （α版 shogiapi-green）
+# __ALPHA_API_KEY__ <- ~/.shogi_alpha_api_key （α版 shogiapi-green の写真ページ用の鍵 shogiapi-alpha-web-photo）
+# __WEB_KOMADORI_API_KEY__ <- ~/.shogi_web_komadori_api_key （同じ α版の、コマドリ Web 版用の鍵 shogiapi-alpha-web-komadori）
+# どちらも上限つきの Web 用の鍵。本番サーバの鍵(Secret nkkuma/dev/recognize-api-key)はページに入れない
 inject_key() { # $1=placeholder $2=keyfile $3=required(1/0)
   local ph="$1" kf="$2" required="$3" key hits
   hits=$(grep -rl "$ph" "$STAGE" || true)
@@ -65,6 +67,7 @@ prepare_stage() {
   (cd "$SRC" && tar cf - .) | (cd "$STAGE" && tar xf -)
   inject_key "__API_KEY__"       "$KEY_FILE"                    1
   inject_key "__ALPHA_API_KEY__" "$HOME/.shogi_alpha_api_key"   0
+  inject_key "__WEB_KOMADORI_API_KEY__" "$HOME/.shogi_web_komadori_api_key" 0
 }
 
 cleanup_stage() { [ -n "${STAGE:-}" ] && rm -rf "$STAGE"; }
