@@ -288,7 +288,7 @@ function renderCam() {
     band.innerHTML = `${stepsHtml(2)}<p class="band-q"><span class="dots">盤の枠をさがしています</span></p><p class="band-note">カメラを動かさずにお待ちください</p>`;
   } else if (P.step === 'notfound') {
     band.innerHTML = `${stepsHtml(2)}
-      <div style="display:flex;gap:10px;align-items:center"><img class="bird" src="img/bird.png" alt="" style="width:44px"><div><p class="band-q">盤が見つかりませんでした</p><p class="band-note">盤の四隅が映っているか、明るさが足りているかをご確認ください</p></div></div>
+      <div style="display:flex;gap:10px;align-items:center"><img class="bird" src="img/bird.png" alt="" style="width:44px"><div>${P.busy ? '<p class="band-q">混み合っています</p><p class="band-note">少し待ってから、もう一度さがしてください</p>' : '<p class="band-q">盤が見つかりませんでした</p><p class="band-note">盤の四隅が映っているか、明るさが足りているかをご確認ください</p>'}</div></div>
       <div class="band-row"><button class="btn" id="c-again">もう一度さがす</button><button class="btn line center" id="c-skip">枠なしで進む</button></div>`;
     $('c-again').onclick = searchBoard;
     $('c-skip').onclick = () => { P.step = 'dir'; P.chosen = null; renderCam(); };
@@ -350,7 +350,7 @@ function renderCam() {
 // 写真 1 枚を写真の認識に送り、盤の四隅と並びを見る
 async function searchBoard() {
   const P = st.place;
-  P.step = 'search'; P.recog = null; renderCam();
+  P.step = 'search'; P.recog = null; P.busy = false; renderCam();
   try {
     const still = await R.grabStill(video(), 1280);
     const res = await A.recognizeStill(still.blob);
@@ -367,6 +367,7 @@ async function searchBoard() {
     track('komadori_web_board_found', { diffs: P.recog.diffs.length });
   } catch (err) {
     console.warn('recognize', err);
+    P.busy = !!err.busy;
     P.step = 'notfound';
   }
   renderCam();
@@ -533,7 +534,7 @@ function startLive() {
         L.reads++; L.fails = 0;
         if (L.draft.feed(obsFrom(res, r))) renderLive();
       } catch (err) {
-        L.fails++;
+        L.fails++; L.busy = !!err.busy;
         if (L.fails === 3) renderLive();
       }
       await sleep(Math.max(1000, LIVE_SEC * 1000 - (Date.now() - t0)));
@@ -553,7 +554,7 @@ function renderLive() {
   el.innerHTML = `<div class="live-bd" id="c-live-bd"></div><div class="live-txt">
     <p class="live-h"><span class="tag">仮棋譜</span>${N ? `<b>${N}手</b>` : ''}</p>
     <p class="live-moves">${N ? recent.map((t) => esc(t)).join(' ') : 'まだ手はありません'}</p>
-    <p class="band-note">${P.live.fails >= 3 ? '通信が不安定で、仮棋譜が止まっています。録画は続いています' : '終わってから、録画を読み直して清書します'}</p></div>`;
+    <p class="band-note">${P.live.fails >= 3 ? (P.live.busy ? '混み合っていて、仮棋譜が止まっています。録画は続いています' : '通信が不安定で、仮棋譜が止まっています。録画は続いています') : '終わってから、録画を読み直して清書します'}</p></div>`;
   new Board($('c-live-bd')).render(d.pos, { last });
 }
 

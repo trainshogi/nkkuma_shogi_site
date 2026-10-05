@@ -52,6 +52,7 @@ jobs:
         env:
           SHOGI_API_KEY: ${{ secrets.SHOGI_API_KEY }}
           SHOGI_ALPHA_API_KEY: ${{ secrets.SHOGI_ALPHA_API_KEY }}
+          SHOGI_WEB_KOMADORI_API_KEY: ${{ secrets.SHOGI_WEB_KOMADORI_API_KEY }}
         run: |
           if [ -z "$SHOGI_API_KEY" ]; then
             echo "::error::secrets.SHOGI_API_KEY が未設定です。Settings → Secrets and variables → Actions → Secrets に追加してください。"
@@ -77,6 +78,18 @@ jobs:
             echo "Injecting alpha key into $(echo "$alpha_hits" | wc -l | tr -d ' ') file(s)"
             echo "$alpha_hits" | while read -r f; do
               perl -i -pe 's/__ALPHA_API_KEY__/$ENV{SHOGI_ALPHA_API_KEY}/g' "$f"
+            done
+          fi
+          # コマドリ Web 版は写真ページと別の鍵(別の上限)。__WEB_KOMADORI_API_KEY__ は上の 2 つの部分文字列ではない
+          web_hits=$(grep -rl "__WEB_KOMADORI_API_KEY__" public/ || true)
+          if [ -n "$web_hits" ]; then
+            if [ -z "$SHOGI_WEB_KOMADORI_API_KEY" ]; then
+              echo "::error::Web 版が __WEB_KOMADORI_API_KEY__ を要求していますが secrets.SHOGI_WEB_KOMADORI_API_KEY が未設定です。"
+              exit 1
+            fi
+            echo "Injecting web komadori key into $(echo "$web_hits" | wc -l | tr -d ' ') file(s)"
+            echo "$web_hits" | while read -r f; do
+              perl -i -pe 's/__WEB_KOMADORI_API_KEY__/$ENV{SHOGI_WEB_KOMADORI_API_KEY}/g' "$f"
             done
           fi
 

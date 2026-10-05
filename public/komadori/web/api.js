@@ -31,7 +31,8 @@ export async function correct(jobId, pin) {
 }
 
 const RECOGNIZE_URL = 'https://scv8fb0ca0.execute-api.ap-northeast-1.amazonaws.com/alpha/recognize';
-const RECOGNIZE_KEY = '__ALPHA_API_KEY__'; // デプロイ時に注入(deploy-s3.yml)
+// Web 版だけの鍵(写真ページとは別の上限)。デプロイ時に注入(deploy-s3.yml)
+const RECOGNIZE_KEY = '__WEB_KOMADORI_API_KEY__';
 
 // 1枚の写真から盤の四隅と局面を読む。返り値 { points, ban_result, sente_mochi, gote_mochi }
 export async function recognizeStill(blob, attempt = 0) {
@@ -52,12 +53,14 @@ export async function recognizeStill(blob, attempt = 0) {
   try {
     const res = await fetch(RECOGNIZE_URL, { method: 'POST', headers: { 'x-api-key': RECOGNIZE_KEY }, body: fd, cache: 'no-store', signal: ctl.signal });
     clearTimeout(timer);
+    // 429 は混み合い(使用量の上限)。やり直さずにそのまま伝える
+    if (res.status === 429) { const e = new Error('busy'); e.busy = true; throw e; }
     if (res.status === 503 && attempt === 0) return recognizeStill(blob, 1);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   } catch (err) {
     clearTimeout(timer);
-    if (attempt === 0) return recognizeStill(blob, 1);
+    if (attempt === 0 && !err.busy) return recognizeStill(blob, 1);
     throw err;
   }
 }
