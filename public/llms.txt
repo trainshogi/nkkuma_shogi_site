@@ -26,6 +26,7 @@
 - [ブログ](https://shogi.nkkuma.tokyo/blog.html): KIF形式の解説・撮り方のコツ・大会レポート
 - [えぬっくまについて](https://shogi.nkkuma.tokyo/about.html): 開発者情報と活動のあゆみ
 - [コマドリ（iPhone・iPad版・App Store）](https://apps.apple.com/jp/app/id6800334202): 対局を撮って棋譜を作るアプリ。サポート: https://shogi.nkkuma.tokyo/komadori/support.html
+- [コマドリの使い方](https://shogi.nkkuma.tokyo/komadori/howto.html): 置く・記録を始める・対局する・対局を終える・直す・渡す、の6つを2分の動画と図で説明
 - [コマドリ（Android版・Google Play）](https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori): 同じアプリのAndroid版（Android 10以降）
 
 ## 開発者

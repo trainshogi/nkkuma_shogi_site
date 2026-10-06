@@ -15,8 +15,10 @@ date: 2026-09-08
 
 真上から撮ってもかまいません。その場合は[サンコーのスプリングアームスタンド](https://www.thanko.jp/view/item/000000003727)のような、ホルダーを真下に向けられるものが要ります。似た商品はいろいろあるので、お好みで。
 
-あとは、この動画を見てください。置き方から、記録して、直して、渡すまでを1分にまとめました（画面は iPhone 版 1.4.2 です。Android 版も同じ流れです）。
+あとは、この動画を見てください。置き方から、記録して、直して、渡すまでを2分ほどにまとめました（画面は iPhone 版です。Android 版も同じ流れです）。
 
 <video src="/komadori/howto.mp4" poster="/komadori/howto-poster.jpg" controls playsinline preload="none" style="display:block;width:100%;max-width:360px;aspect-ratio:9/16;background:#F7EFDF;border-radius:12px;margin:0 0 16px" title="コマドリの使い方"></video>
+
+<p>章ごとに見るには、<a href="/komadori/howto.html">コマドリの使い方</a>のページへ。</p>
 
 うまくいかないときは[サポートページ](/komadori/support.html)を見てください。
