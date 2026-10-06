@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コマドリの使い方 | コマドリ（iPhone版・Android版）</title>
+  <meta name="description" content="アプリ「コマドリ」の使い方。盤の横にスマホを置いて、指すだけ。置く・記録を始める・対局する・対局を終える・直す・渡す、の6つを2分の動画と図で説明します。" />
+  <meta property="og:title" content="コマドリの使い方" />
+  <meta property="og:description" content="盤の横にスマホを置いて、指すだけ。置くところから棋譜を渡すところまでを2分の動画で。" />
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/komadori/howto-poster.jpg" />
+  <meta property="og:type" content="article" />
+  <style>
+    :root{ --bg:#ffffff; --card:#f9f9f9; --text:#111111; --muted:#555555; --accent:#0077cc; --border:#dddddd; }
+    *{ box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", Meiryo, "Noto Sans JP", sans-serif; line-height:1.8; }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    header{ padding:48px 20px 12px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px }
+    .title{ font-size:clamp(22px, 2.6vw, 32px); font-weight:800; letter-spacing:0.2px }
+    .sub{ color:var(--muted); margin-top:6px; font-size:14px }
+    main{ padding:28px 0 80px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin:16px 0 }
+    h2{ font-size:20px; margin:32px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border) }
+    h3{ font-size:16px; margin:22px 0 4px }
+    ul{ padding-left:1.2em; margin:6px 0 }
+    li{ margin:8px 0 }
+    p{ margin:10px 0 }
+    .muted{ color:var(--muted) }
+    .small{ font-size:13px }
+    footer{ border-top:1px solid var(--border); padding:20px; color:var(--muted); font-size:12px }
+    dl.contact dt{ font-weight:700; margin-top:10px }
+    dl.contact dd{ margin:2px 0 0 0 }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+  <style>
+    .video-box{ display:flex; flex-wrap:wrap; gap:18px 24px; align-items:flex-start; margin:4px 0 8px }
+    .video-box video{ display:block; width:100%; max-width:300px; aspect-ratio:9/16; background:#F7EFDF; border-radius:14px; border:1px solid var(--border) }
+    .chapters{ flex:1 1 240px; display:grid; gap:8px }
+    .chapters button{ display:flex; align-items:center; gap:10px; width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:12px; background:var(--card); color:var(--text); font:inherit; font-size:15px; font-weight:700; text-align:left; cursor:pointer }
+    .chapters button:hover{ border-color:#e5672e }
+    .chapters button b{ display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:#e5672e; color:#fff; font-size:14px }
+    .chapters button span{ margin-left:auto; color:var(--muted); font-weight:400; font-size:13px }
+    .step h2{ display:flex; align-items:center; gap:10px }
+    .step .no{ display:inline-grid; place-items:center; width:28px; height:28px; border-radius:50%; background:#e5672e; color:#fff; font-size:15px }
+    .step .jump{ margin-left:auto; padding:4px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; color:#e5672e; font:inherit; font-size:12px; font-weight:700; cursor:pointer }
+    .step .row{ display:flex; gap:18px; align-items:flex-start }
+    .step img{ width:150px; height:auto; flex:0 0 auto; border-radius:10px; border:1px solid var(--border); background:#F7EFDF }
+    @media (max-width:520px){ .step img{ width:112px } }
+    .stores a{ display:inline-block; margin:4px 12px 4px 0; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-weight:700 }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <header>
+    <div class="wrap">
+      <h1 class="title">コマドリの使い方</h1>
+      <div class="sub">盤の横にスマホを置いて、指すだけ。置くところから棋譜を渡すところまでを、2分の動画にまとめました（画面は iPhone 版です。Android 版も同じ流れです）。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <div class="video-box">
+      <video id="howto" src="/komadori/howto.mp4" poster="/komadori/howto-poster.jpg" controls playsinline preload="metadata" title="コマドリの使い方"></video>
+      <div class="chapters" aria-label="動画の章"><button type="button" data-t="3"><b>1</b> スマホを置く<span>0:03</span></button><button type="button" data-t="14"><b>2</b> 記録を始める<span>0:14</span></button><button type="button" data-t="37"><b>3</b> 対局する<span>0:37</span></button><button type="button" data-t="60"><b>4</b> 対局を終える<span>1:00</span></button><button type="button" data-t="75"><b>5</b> 棋譜を直す<span>1:15</span></button><button type="button" data-t="91"><b>6</b> 棋譜を渡す<span>1:31</span></button></div>
+    </div>
+    <p class="small muted">章を押すと、動画がその場面から流れます。音が出ます。</p>
+
+    <section class="step" id="step1">
+      <h2><span class="no">1</span>スマホを置く <button type="button" class="jump" data-t="3">動画 0:03</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-1.jpg" alt="スマホを置くの画面" width="540" height="960" loading="lazy" />
+        <div><p>盤の横にスタンドを置いて、スマホを立てます。盤ぜんたいと四隅が映るように向きを合わせます。盤から 15cm ほど離すのが目安です。手で持たず、対局中は動かしません。</p><p class="small"><a href="/komadori/placement.html">置き方の図（15cm・60°）</a>　<a href="/komadori/gear.html">対応している盤と駒</a></p></div>
+      </div>
+    </section>
+    <section class="step" id="step2">
+      <h2><span class="no">2</span>記録を始める <button type="button" class="jump" data-t="14">動画 0:14</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-2.jpg" alt="記録を始めるの画面" width="540" height="960" loading="lazy" />
+        <div><p>「対局を記録する」を押し、説明を読んで「はじめる」を押します。手合割で「平手」を選んで「つぎへ」。駒を並べ終えたら「固定した」を押します。盤の枠が見つかったら、先手の側（手前なら「画面の下」）を押すと、3・2・1 で記録が始まり、「よろしくおねがいします」と声が出ます。</p></div>
+      </div>
+    </section>
+    <section class="step" id="step3">
+      <h2><span class="no">3</span>対局する <button type="button" class="jump" data-t="37">動画 0:37</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-3.jpg" alt="対局するの画面" width="540" height="960" loading="lazy" />
+        <div><p>ふだんどおり指します。スマホは置いたままです。指した手を読み上げて、画面に並べます。対局中はスマホに触らなくて大丈夫です。途中で止めずに、最後まで記録します。</p></div>
+      </div>
+    </section>
+    <section class="step" id="step4">
+      <h2><span class="no">4</span>対局を終える <button type="button" class="jump" data-t="60">動画 1:00</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-4.jpg" alt="対局を終えるの画面" width="540" height="960" loading="lazy" />
+        <div><p>終わったら、駒を片づける前に「対局おわり」を押し、投了・中断などの終わり方を選びます。少し待つと棋譜ができます。手数と盤面を確かめてください。</p><p class="small"><a href="/komadori/support.html">うまく棋譜にならないとき</a></p></div>
+      </div>
+    </section>
+    <section class="step" id="step5">
+      <h2><span class="no">5</span>棋譜を直す <button type="button" class="jump" data-t="75">動画 1:15</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-5.jpg" alt="棋譜を直すの画面" width="540" height="960" loading="lazy" />
+        <div><p>違う手があったときは「手を選んで直す」を押します。手を押すと、その手を盤の上で指し直せます。長押しすると続いた手をまとめて選べて、まとめて消すか、盤で並べ直せます。</p></div>
+      </div>
+    </section>
+    <section class="step" id="step6">
+      <h2><span class="no">6</span>棋譜を渡す <button type="button" class="jump" data-t="91">動画 1:31</button></h2>
+      <div class="row">
+        <img src="/komadori/howto-6.jpg" alt="棋譜を渡すの画面" width="540" height="960" loading="lazy" />
+        <div><p>「ほかのアプリ・サイトへ渡す」を押して、渡す先を選びます。ぴよ将棋、KENTO、パソコンへの KIF などです。棋譜はホームにたまり、名前・日付・手数で探せます。</p></div>
+      </div>
+    </section>
+
+    <h2>もっと詳しく</h2>
+    <ul>
+      <li><a href="/komadori/placement.html">スマホと盤の置き方</a> — スタンドの位置と角度の図、端末ごとの置き方</li>
+      <li><a href="/komadori/gear.html">対応している盤と駒</a> — 動画から棋譜になることを確かめた盤と駒</li>
+      <li><a href="/komadori/support.html">サポート</a> — うまく棋譜にならないときの確かめ方、動作環境、お問い合わせ</li>
+      <li><a href="/blog/komadori-shooting.html">撮り方のコツ（ブログ）</a> — スタンドの選び方、真上から撮るとき</li>
+      <li><a href="/komadori/privacy.html">プライバシーポリシー</a> — 梅と竹で送るもの</li>
+    </ul>
+
+    <h2>アプリ</h2>
+    <p class="stores">
+      <a href="https://apps.apple.com/jp/app/id6800334202">iPhone・iPad 版（App Store）</a>
+      <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori">Android 版（Google Play）</a>
+    </p>
+
+  </main>
+
+  <footer>
+    <div class="wrap">コマドリ（iPhone版・Android版）／ 運営者：佐藤 旭 ／ <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></div>
+  </footer>
+  <script>
+    (function(){
+      var v=document.getElementById('howto');
+      document.querySelectorAll('[data-t]').forEach(function(b){
+        b.addEventListener('click',function(){
+          v.currentTime=Number(b.getAttribute('data-t'));
+          v.scrollIntoView({behavior:'smooth',block:'center'});
+          v.play();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

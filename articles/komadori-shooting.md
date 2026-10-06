@@ -19,4 +19,6 @@ date: 2026-09-08
 
 <video src="/komadori/howto.mp4" poster="/komadori/howto-poster.jpg" controls playsinline preload="none" style="display:block;width:100%;max-width:360px;aspect-ratio:9/16;background:#F7EFDF;border-radius:12px;margin:0 0 16px" title="コマドリの使い方"></video>
 
+<p>章ごとに見るには、<a href="/komadori/howto.html">コマドリの使い方</a>のページへ。</p>
+
 うまくいかないときは[サポートページ](/komadori/support.html)を見てください。
