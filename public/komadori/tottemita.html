@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>コマドリで撮ってみた | コマドリ（iPhone版・Android版）</title>
+  <meta name="description" content="対局を撮った映像と、そこからできた棋譜を、30秒ほどの動画で並べて見られます。アプリ「コマドリ」で記録するとどうなるかの見本です。" />
+  <meta property="og:title" content="コマドリで撮ってみた" />
+  <meta property="og:description" content="対局を撮った映像と、できた棋譜を 30 秒ほどの動画で。" />
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/komadori/tottemita/2026-09-01-78te-poster.jpg" />
+  <meta property="og:type" content="article" />
+  <style>
+    :root{ --bg:#ffffff; --card:#f9f9f9; --text:#111111; --muted:#555555; --accent:#0077cc; --border:#dddddd; }
+    *{ box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", Meiryo, "Noto Sans JP", sans-serif; line-height:1.8; }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    header{ padding:48px 20px 12px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px }
+    .title{ font-size:clamp(22px, 2.6vw, 32px); font-weight:800; letter-spacing:0.2px }
+    .sub{ color:var(--muted); margin-top:6px; font-size:14px }
+    main{ padding:28px 0 80px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin:16px 0 }
+    h2{ font-size:20px; margin:32px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border) }
+    h3{ font-size:16px; margin:22px 0 4px }
+    ul{ padding-left:1.2em; margin:6px 0 }
+    li{ margin:8px 0 }
+    p{ margin:10px 0 }
+    .muted{ color:var(--muted) }
+    .small{ font-size:13px }
+    footer{ border-top:1px solid var(--border); padding:20px; color:var(--muted); font-size:12px }
+    dl.contact dt{ font-weight:700; margin-top:10px }
+    dl.contact dd{ margin:2px 0 0 0 }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+  <style>
+    .note{ font-size:14px; color:var(--muted); margin:0 0 6px }
+    .game h2{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+    .game .no{ display:inline-grid; place-items:center; width:28px; height:28px; border-radius:50%; background:#e5672e; color:#fff; font-size:15px }
+    .game .date{ margin-left:auto; color:var(--muted); font-weight:400; font-size:13px }
+    .game .row{ display:flex; flex-wrap:wrap; gap:18px 24px; align-items:flex-start }
+    .game video{ display:block; width:100%; max-width:300px; aspect-ratio:9/16; background:#F7EFDF; border-radius:14px; border:1px solid var(--border) }
+    .game .text{ flex:1 1 260px }
+    .stores a{ display:inline-block; margin:4px 12px 4px 0; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:var(--card); font-weight:700 }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <header>
+    <div class="wrap">
+      <h1 class="title">コマドリで撮ってみた</h1>
+      <div class="sub">対局を撮った映像と、そこからできた棋譜を、30 秒ほどの動画にまとめています。1 局ずつ足していきます。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <div class="card">
+      <p class="note" style="margin:0">動画の右の盤と棋譜は、アプリと同じ認識システムで出したデモ用の画面です。アプリの画面そのものではありません。実際の画面は<a href="/komadori/howto.html">コマドリの使い方</a>で見られます。再生すると音が出ます。</p>
+    </div>
+
+    <section class="game" id="game1">
+      <h2><span class="no">1</span>自宅で 78 手、8 分の一局<span class="date">2026-09-01</span></h2>
+      <div class="row">
+        <video src="/komadori/tottemita/2026-09-01-78te.mp4" poster="/komadori/tottemita/2026-09-01-78te-poster.jpg" controls playsinline preload="none" title="コマドリで撮ってみた 1"></video>
+        <div class="text">
+          <p>iPhone を真上に向けて置いて撮った、8 分ほどの対局です。最初と最後の数手は実際の速さで、途中は早送りです。終わると、78 手の棋譜が並びます。</p>
+          <p class="small"><a href="/komadori/tottemita/2026-09-01-78te.kif" download>棋譜（KIF）を保存する</a> — ぴよ将棋などで開けます。</p>
+        </div>
+      </div>
+    </section>
+
+    <h2>自分の対局も撮ってみませんか</h2>
+    <p>盤の横にスマホを置いて、指すだけです。置くところから棋譜を渡すところまでは、<a href="/komadori/howto.html">コマドリの使い方</a>（2 分の動画）をご覧ください。</p>
+    <p class="stores">
+      <a href="https://apps.apple.com/jp/app/id6800334202">iPhone・iPad 版（App Store）</a>
+      <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori">Android 版（Google Play）</a>
+    </p>
+
+  </main>
+
+  <footer>
+    <div class="wrap">コマドリ（iPhone版・Android版）／ 運営者：佐藤 旭 ／ <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></div>
+  </footer>
+</body>
+</html>
