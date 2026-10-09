@@ -189,7 +189,7 @@
     @keyframes fill { to { background-position: 0 0; } }
     }}
     @supports (animation-timeline: view()) { @media (prefers-reduced-motion: no-preference) {
-    main > h2, main > p, figure.photo, .works li, .timeline li, .cta-in > *, .more-in {
+    main > h2, main > p, figure.photo, .works li, .timeline li, .cta-in > *, .more-in, .real-in > * {
       animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
     @keyframes rise { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: none; } }
     }}
@@ -222,6 +222,20 @@
     @media (min-width: 760px) {
       .story-steps li { min-height: 50vh; }
       .taikai { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+    /* 撮ってみた: 実際の対局の動画を 1 本。先に読むのはポスターの絵だけで、動画は押してから読む */
+    .real { padding: 44px 0 0; }
+    .real-in { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+    .real h2 { margin: 0 0 18px; }
+    .real-row { display: grid; gap: 22px; }
+    .real video { display: block; width: 100%; max-width: 280px; aspect-ratio: 9 / 16; margin: 0 auto; background: #f5f5f7; border-radius: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.14); }
+    .real-text p { margin: 0 0 .9em; }
+    .real .note { font-size: 13.5px; color: var(--muted); }
+    .real .go { margin: 16px 0 0; }
+    @media (min-width: 760px) {
+      .real { padding: 70px 0 0; }
+      .real-row { grid-template-columns: 280px 1fr; gap: 40px; align-items: center; }
+      .real video { margin: 0; }
     }
   </style>
   <style>
@@ -283,6 +297,7 @@
 
   <nav class="jump" aria-label="このページの中身">
     <a href="#steps">コマドリの使い方</a>
+    <a href="#tottemita">撮ってみた</a>
     <a href="#works">写真・動画から棋譜に</a>
     <a href="#taikai">大会・教室の方へ</a>
     <a href="#me">作っている人</a>
@@ -300,7 +315,21 @@
       </ol>
     </div>
     <p class="story-more">撮っておいた対局の動画からも棋譜にできます。違っていたところは、あとから直せます。<br>
-      <a href="/komadori/howto.html">使い方（動画）</a><a href="/komadori/tottemita.html">撮ってみた（動画）</a><a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">困ったときは</a></p>
+      <a href="/komadori/howto.html">使い方（動画）</a><a href="/komadori/placement.html">スマホと盤の置き方</a><a href="/komadori/gear.html">対応している盤と駒</a><a href="/komadori/support.html">困ったときは</a></p>
+  </section>
+
+  <section class="real" id="tottemita">
+    <div class="real-in">
+      <h2>実際の対局で撮ってみた</h2>
+      <div class="real-row">
+        <video src="/komadori/tottemita/2026-10-09-69te.mp4" poster="/komadori/tottemita/2026-10-09-69te-poster.jpg" controls playsinline preload="none" title="コマドリで撮ってみた：ねこまどで 69 手、10 秒将棋の二枚落ち"></video>
+        <div class="real-text">
+          <p>ねこまどで、北尾まどかさん（女流棋士）と指した二枚落ちの 10 秒将棋です。盤の横に iPhone を置いたまま、早指しの 69 手がそのまま棋譜になりました。</p>
+          <p class="note">36 秒・音が出ます。上は外から撮った様子と iPhone の画面収録、下の盤と棋譜はアプリと同じ認識システムで出したデモ用の画面です。</p>
+          <p class="go"><a class="btn ghost" href="/komadori/tottemita.html">ほかの対局も見る</a></p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="statement"><p><span>記録係がいなくても<br>あの一局が残ります</span></p></section>
