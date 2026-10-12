@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大会の棋譜あつめ — コマドリの QR を次々に読んでためる</title>
+  <meta name="description" content="大会の係が、対局者のコマドリの QR を PC やタブレットで次々に読んでため、まとめて KIF で保存・メールします。">
+  <!-- 係の道具なので検索には載せない -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="origin">
+
+  <!-- Google tag (gtag.js)。study.html と同じく page_location はパスだけ。
+       棋譜・メモ・メールアドレスはどのイベントにも載せない(件数と読み方・送り方だけ) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1', {
+      page_location: location.origin + location.pathname
+    });
+  </script>
+
+  <style>
+    /* 検討室と同じ設え(色・角丸・書体)。PC・タブレットでは左で読み、右に並べる */
+    * { box-sizing: border-box; }
+    /* display を指定した要素でも hidden を効かせる(video・grid・flex がブラウザ既定の hidden に勝つため) */
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; color: #222; background: #faf8f4;
+      font-family: "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.7; -webkit-text-size-adjust: 100%;
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 16px 16px 60px; }
+    h1 { font-size: 22px; margin: 10px 0 2px; }
+    h2 { font-size: 16px; margin: 0; }
+    .lead { color: #555; font-size: 14px; margin: 6px 0 18px; max-width: 46em; }
+    .card { background:#fff; border:1px solid #e5e1d8; border-radius: 12px; padding: 16px; }
+    .card + .card { margin-top: 14px; }
+    .card-label { font-size: 12.5px; color: #888; margin: 0 0 8px; font-weight: bold; }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      border:1px solid #d8d3c8; border-radius: 8px; background:#fff; color:#222;
+      padding: 10px 14px; font-size: 15px; cursor: pointer; font-family: inherit;
+      line-height: 1.4; text-decoration: none;
+    }
+    .btn-primary { background:#00695c; border-color:#00695c; color:#fff; font-weight:bold; }
+    .btn:disabled { opacity:.4; cursor: default; }
+    .btn[hidden] { display:none; }
+    .btn-sm { padding: 5px 10px; font-size: 13.5px; }
+    .btn-danger { color:#b3261e; border-color:#ecc8c0; }
+    .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #00695c; outline-offset: 2px; }
+    .row { display:flex; gap:8px; flex-wrap: wrap; align-items: center; }
+    .note { font-size: 12.5px; color: #888; margin: 6px 0 0; }
+    input[type=text], input[type=email], select {
+      width: 100%; font-family: inherit; font-size: 16px; color:#222;
+      border:1px solid #ddd; border-radius: 8px; padding: 8px 10px; background:#fff;
+    }
+    label.check { display:flex; gap:6px; align-items:center; font-size: 13.5px; color:#555; margin-top: 6px; }
+
+    .layout { display: grid; gap: 16px; }
+    @media (min-width: 900px) {
+      .layout { grid-template-columns: minmax(0, 330px) minmax(0, 1fr); align-items: start; }
+      .read-col { position: sticky; top: 12px; }
+    }
+    @media (min-width: 1200px) {
+      .layout { grid-template-columns: minmax(0, 400px) minmax(0, 1fr); }
+    }
+    /* タブレット横向きでは読んだ時刻を省いて、操作のボタンまで 1 行に収める */
+    @media (max-width: 1199px) { .col-time { display: none; } }
+
+    /* カメラ */
+    .cam { position: relative; background: #1f1f1f; border-radius: 10px; overflow: hidden;
+           aspect-ratio: 4 / 3; display:flex; align-items:center; justify-content:center; }
+    .cam video { width: 100%; height: 100%; object-fit: cover; display:block; }
+    .cam video.mirror { transform: scaleX(-1); }
+    .cam .aim { position:absolute; inset: 14% 22%; border: 3px solid rgba(255,255,255,.85);
+                border-radius: 14px; box-shadow: 0 0 0 999px rgba(0,0,0,.25); pointer-events:none; }
+    .cam .idle { color:#ddd; font-size: 14px; text-align:center; padding: 16px; }
+    .cam.hit .aim { border-color: #4caf50; }
+    .result { margin: 10px 0 0; padding: 10px 12px; border-radius: 8px; font-size: 14px;
+              background:#f4f2ed; color:#555; min-height: 2.9em; }
+    .result.ok { background:#e2efec; color:#00513f; }
+    .result.dup { background:#fff6dd; color:#6b5300; }
+    .result.ng { background:#fdf2f0; color:#8a2a1f; }
+    .sep { border-top: 1px solid #f0ede6; margin: 14px 0; }
+
+    /* 一覧 */
+    .list-head { display:flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .list-head .count { font-size: 28px; font-weight: bold; line-height: 1; font-variant-numeric: tabular-nums; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 12px; color: #888; font-weight: bold; padding: 6px 8px;
+         border-bottom: 1px solid #e5e1d8; white-space: nowrap; }
+    td { padding: 6px 8px; border-bottom: 1px solid #f0ede6; vertical-align: middle; }
+    td.num { font-variant-numeric: tabular-nums; white-space: nowrap; color:#555; }
+    td.memo { min-width: 7.5em; }
+    td.memo input, td.who input { font-size: 15px; padding: 5px 8px; }
+    td.who { min-width: 8em; }
+    td.who label { display:flex; align-items:center; gap: 4px; }
+    td.who label + label { margin-top: 4px; }
+    .mark { font-size: 13px; color:#888; flex: none; width: 1.1em; text-align:center; }
+    .names { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .names label { display:flex; align-items:center; gap: 4px; }
+    td.acts { white-space: nowrap; text-align: right; }
+    tr.fresh td { background: #eef7f4; }
+    .empty { color:#888; font-size: 14px; padding: 18px 4px; }
+    .send { display:grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 14px; }
+    .send .card-label { margin: 0 0 6px; }
+    .msg { font-size: 13.5px; color: #00695c; margin: 10px 0 0; }
+    .msg:empty { display:none; }
+
+    /* スマホ: 一覧は表をやめてカードに */
+    @media (max-width: 640px) {
+      thead { display:none; }
+      table, tbody, tr, td { display:block; width:100%; }
+      tr { padding: 10px 0; border-bottom: 1px solid #f0ede6; }
+      td { border: 0; padding: 2px 0; }
+      td.acts { text-align: left; padding-top: 6px; }
+      td.num { display:inline-block; width:auto; margin-right: 10px; font-size: 13px; }
+    }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html" aria-current="page">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+<main>
+  <h1>大会の棋譜あつめ</h1>
+  <p class="lead">対局者のコマドリの「QRで渡す」を、このページで次々に読んでためます。終わったら、まとめて保存するか、自分のメールへ送ります。棋譜はこの端末のこのブラウザの中だけに置き、どこにも送りません。</p>
+
+  <div class="layout">
+    <div class="read-col">
+      <section class="card" aria-labelledby="read-h">
+        <h2 id="read-h" class="card-label">QR を読む</h2>
+        <div class="cam" id="cam">
+          <video id="video" playsinline muted hidden></video>
+          <div class="aim" id="aim" hidden></div>
+          <p class="idle" id="cam-idle">「カメラで読む」を押して、対局者のスマホの QR をカメラに向けてもらってください。</p>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" id="btn-cam">カメラで読む</button>
+          <button class="btn" id="btn-cam-stop" hidden>止める</button>
+          <select id="cam-select" aria-label="使うカメラ" hidden style="flex:1;min-width:10em"></select>
+        </div>
+        <p class="result" id="result" aria-live="polite">まだ読んでいません。</p>
+
+        <div class="sep"></div>
+        <label class="card-label" for="paste">QR リーダー・貼り付けで読む</label>
+        <input type="text" id="paste" placeholder="https://shogi.nkkuma.tokyo/study.html#u=…" autocomplete="off" spellcheck="false">
+        <p class="note">USB の QR リーダーは、ここを押してから読ませてください。リンクを貼り付けて Enter でも足せます。</p>
+
+        <div class="sep"></div>
+        <label class="card-label" for="next-memo">次に読む局のメモ</label>
+        <input type="text" id="next-memo" maxlength="40" placeholder="例: 1回戦 1卓">
+        <label class="check"><input type="checkbox" id="bump" checked> 読むたびに最後の数字を 1 つ進める（1卓 → 2卓）</label>
+        <p class="card-label" style="margin-top:12px">次に読む局の対局者（入れなくても足せます）</p>
+        <div class="names">
+          <label><span class="mark" aria-hidden="true">☗</span><input type="text" id="next-sente" maxlength="20" placeholder="先手" aria-label="次に読む局の先手（駒落ちは下手）"></label>
+          <label><span class="mark" aria-hidden="true">☖</span><input type="text" id="next-gote" maxlength="20" placeholder="後手" aria-label="次に読む局の後手（駒落ちは上手）"></label>
+        </div>
+        <p class="note">駒落ちは ☗ が下手、☖ が上手です。足したら空になります。あとから一覧でも直せます。</p>
+      </section>
+    </div>
+
+    <div>
+      <section class="card" aria-labelledby="list-h">
+        <div class="list-head">
+          <span class="count" id="count">0</span><h2 id="list-h">局たまっています</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>メモ</th><th>対局者</th><th>手合割</th><th>手数</th><th>最後の手</th><th class="col-time">読んだ時刻</th><th></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="empty">まだありません。左で QR を読むと、ここに並びます。</p>
+
+        <div class="send" id="send" hidden>
+          <div>
+            <p class="card-label">この端末に保存</p>
+            <button class="btn btn-primary" id="btn-zip" style="width:100%">まとめて保存（ZIP）</button>
+            <p class="note">1 局が 1 つの .kifu ファイルになり、1 つの ZIP にまとまります。</p>
+          </div>
+          <div>
+            <p class="card-label">自分のメールへ</p>
+            <button class="btn" id="btn-share" style="width:100%" hidden>ファイルにして送る</button>
+            <input type="email" id="mail-to" placeholder="送り先のメールアドレス" autocomplete="email" style="margin-top:6px">
+            <button class="btn" id="btn-mail" style="width:100%;margin-top:6px">メールの本文にして送る</button>
+          </div>
+          <div>
+            <p class="card-label">ほか</p>
+            <button class="btn" id="btn-copy" style="width:100%">まとめてコピー</button>
+            <button class="btn btn-danger" id="btn-clear" style="width:100%;margin-top:6px">全部消す</button>
+          </div>
+        </div>
+        <p class="msg" id="send-msg" aria-live="polite"></p>
+      </section>
+      <p class="note">ブラウザの履歴やサイトのデータを消すと、ためた棋譜も消えます。大会が終わったら、その日のうちに保存するか送ってください。</p>
+    </div>
+  </div>
+</main>
+
+<script src="../js/usi-kif.js"></script>
+<script src="../js/kifu-box.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var box = window.KifuBox, reader = window.UsiKif;
+
+  function track(name, params) {
+    try { if (typeof window.gtag === 'function') { window.gtag('event', name, params || {}); } } catch (e) {}
+  }
+
+  // ---- 足す(カメラ・QR リーダー・貼り付けの共通の入口) ----
+  var freshId = null;
+  function say(kind, text) {
+    var r = $('result');
+    r.className = 'result ' + kind;
+    r.textContent = text;
+  }
+  function clean(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
+  function bumpMemo(m) {
+    // 最後の数字だけ 1 つ進める(「1回戦 2卓」→「1回戦 3卓」)。数字が無ければそのまま
+    return m.replace(/(\d+)(\D*)$/, function (_, d, rest) { return String(Number(d) + 1) + rest; });
+  }
+  function add(text, how) {
+    var r = reader.read(text);
+    if (r.error) { say('ng', r.error); beep(false); return false; }
+    var had = box.find(r.usi);
+    if (had) {
+      say('dup', 'この局はもう入っています（' + [had.memo, box.players(had), had.plies + ' 手'].filter(Boolean).join('・') + '）。');
+      freshId = had.id;
+      render();
+      beep(false);
+      return true;
+    }
+    var memo = clean($('next-memo').value);
+    var sente = clean($('next-sente').value), gote = clean($('next-gote').value);
+    var s = box.save({ usi: r.usi, kif: r.kif, plies: r.plies, teai: r.teai, last: r.last, memo: memo, sente: sente, gote: gote });
+    if (!s.ok) { say('ng', 'ためられませんでした。このブラウザが保存を許していません（プライベートモードなど）。'); return false; }
+    freshId = s.item.id;
+    var what = [memo, box.players(s.item)].filter(Boolean).join(' ');
+    say('ok', (what ? what + ' を' : '') + '足しました（' + r.teai + '・' + r.plies + ' 手）。');
+    if ($('bump').checked && memo) { $('next-memo').value = bumpMemo(memo); saveNextMemo(); }
+    // 対局者は局ごとに違うので、足したら空にする(前の局の名前が次の局に付かないように)
+    $('next-sente').value = ''; $('next-gote').value = '';
+    track('organizer_add', { how: how, n: box.list().length });
+    beep(true);
+    render();
+    return true;
+  }
+
+  // 読めた・読めなかったを音でも知らせる(係は画面を見ていないことが多い)
+  var audio = null;
+  function beep(ok) {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = ok ? 1320 : 440;
+      g.gain.value = 0.08;
+      o.connect(g); g.connect(audio.destination);
+      o.start(); o.stop(audio.currentTime + (ok ? 0.12 : 0.25));
+    } catch (e) {}
+  }
+
+  // ---- 次のメモはこの端末に覚える(読み込み直しても続きから) ----
+  var NEXT_KEY = 'kifuBoxNextMemo';
+  function saveNextMemo() { try { localStorage.setItem(NEXT_KEY, $('next-memo').value); } catch (e) {} }
+  try { $('next-memo').value = localStorage.getItem(NEXT_KEY) || ''; } catch (e) {}
+  $('next-memo').addEventListener('change', saveNextMemo);
+
+  // ---- QR リーダー・貼り付け ----
+  // USB の QR リーダーはキーボードのふりをして URL を打ち、最後に Enter を送る
+  $('paste').addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') { return; }
+    e.preventDefault();
+    var lines = $('paste').value.split(/\s*\n\s*|\s+(?=https?:)/).filter(Boolean);
+    lines.forEach(function (l) { add(l, 'reader'); });
+    $('paste').value = '';
+  });
+  $('paste').addEventListener('paste', function (e) {
+    var t = (e.clipboardData || window.clipboardData).getData('text');
+    if (!t || !/#u=/.test(t)) { return; }
+    e.preventDefault();
+    t.split(/\s+/).filter(function (x) { return /#u=/.test(x); }).forEach(function (l) { add(l, 'paste'); });
+  });
+
+  // ---- カメラ ----
+  // 読み取りは BarcodeDetector(Android・Mac の Chrome など)、無ければ jsQR(Safari・Firefox・Windows)
+  var cam = { stream: null, timer: null, detector: null, last: '', lastAt: 0, busy: false };
+  var canvas = document.createElement('canvas');
+  var ctx2d = canvas.getContext('2d', { willReadFrequently: true });
+
+  function loadJsQR() {
+    if (window.jsQR) { return Promise.resolve(); }
+    return new Promise(function (ok, ng) {
+      var s = document.createElement('script');
+      s.src = '../js/vendor/jsQR.js';
+      s.onload = ok; s.onerror = ng;
+      document.head.appendChild(s);
+    });
+  }
+  function setupDetector() {
+    if (!('BarcodeDetector' in window)) { return loadJsQR(); }
+    return window.BarcodeDetector.getSupportedFormats().then(function (f) {
+      if (f.indexOf('qr_code') >= 0) { cam.detector = new window.BarcodeDetector({ formats: ['qr_code'] }); return; }
+      return loadJsQR();
+    }, loadJsQR);
+  }
+  function startCam(deviceId) {
+    stopCam();
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      say('ng', 'このブラウザではカメラを使えません。QR リーダーか貼り付けで読んでください。');
+      return;
+    }
+    var video = { width: { ideal: 1280 }, height: { ideal: 720 } };
+    if (deviceId) { video.deviceId = { exact: deviceId }; } else { video.facingMode = { ideal: 'environment' }; }
+    $('cam-idle').textContent = 'カメラを準備しています…';
+    Promise.all([navigator.mediaDevices.getUserMedia({ video: video, audio: false }), setupDetector()])
+      .then(function (res) {
+        cam.stream = res[0];
+        var v = $('video');
+        v.srcObject = cam.stream;
+        var set = cam.stream.getVideoTracks()[0].getSettings ? cam.stream.getVideoTracks()[0].getSettings() : {};
+        // PC の前向きカメラは鏡に映したほうが QR を合わせやすい
+        v.classList.toggle('mirror', set.facingMode !== 'environment');
+        v.hidden = false; $('aim').hidden = false; $('cam-idle').hidden = true;
+        $('btn-cam').hidden = true; $('btn-cam-stop').hidden = false;
+        return v.play().then(function () { listCameras(set.deviceId); scan(); });
+      })
+      .catch(function (e) {
+        stopCam();
+        $('cam-idle').textContent = (e && e.name === 'NotAllowedError')
+          ? 'カメラが許可されていません。ブラウザのアドレス欄の近くからカメラを許可してください。'
+          : 'カメラを開けませんでした。QR リーダーか貼り付けで読んでください。';
+      });
+  }
+  function stopCam() {
+    if (cam.timer) { clearTimeout(cam.timer); cam.timer = null; }
+    if (cam.stream) { cam.stream.getTracks().forEach(function (t) { t.stop(); }); cam.stream = null; }
+    $('video').hidden = true; $('aim').hidden = true; $('cam-idle').hidden = false;
+    $('cam-idle').textContent = '「カメラで読む」を押して、対局者のスマホの QR をカメラに向けてもらってください。';
+    $('btn-cam').hidden = false; $('btn-cam-stop').hidden = true;
+  }
+  function listCameras(current) {
+    navigator.mediaDevices.enumerateDevices().then(function (ds) {
+      var cams = ds.filter(function (d) { return d.kind === 'videoinput'; });
+      var sel = $('cam-select');
+      sel.hidden = cams.length < 2;
+      sel.innerHTML = '';
+      cams.forEach(function (d, i) {
+        var o = document.createElement('option');
+        o.value = d.deviceId; o.textContent = d.label || ('カメラ ' + (i + 1));
+        if (d.deviceId === current) { o.selected = true; }
+        sel.appendChild(o);
+      });
+    }).catch(function () {});
+  }
+  $('cam-select').addEventListener('change', function () { startCam($('cam-select').value); });
+
+  function found(text) {
+    var now = Date.now();
+    // 同じ QR がカメラに映り続けても、3 秒は 1 回と数える
+    if (text === cam.last && now - cam.lastAt < 3000) { return; }
+    cam.last = text; cam.lastAt = now;
+    add(text, 'camera');
+    var c = $('cam');
+    c.classList.add('hit');
+    setTimeout(function () { c.classList.remove('hit'); }, 500);
+  }
+  function scan() {
+    if (!cam.stream) { return; }
+    var v = $('video');
+    var next = function () { cam.timer = setTimeout(scan, 150); };
+    if (v.readyState < 2) { return next(); }
+    if (cam.detector) {
+      cam.detector.detect(v).then(function (codes) {
+        if (codes && codes.length) { found(codes[0].rawValue); }
+      }).catch(function () {}).then(next);
+      return;
+    }
+    var w = v.videoWidth, h = v.videoHeight;
+    var scale = Math.min(1, 800 / Math.max(w, h));
+    canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale);
+    ctx2d.drawImage(v, 0, 0, canvas.width, canvas.height);
+    var img = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+    var code = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+    if (code && code.data) { found(code.data); }
+    next();
+  }
+  $('btn-cam').addEventListener('click', function () { startCam(null); });
+  $('btn-cam-stop').addEventListener('click', stopCam);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { stopCam(); } });
+
+  // ---- 一覧 ----
+  function render() {
+    var list = box.list();
+    $('count').textContent = String(list.length);
+    $('empty').hidden = list.length > 0;
+    $('send').hidden = list.length === 0;
+    $('btn-share').hidden = !canShareFiles(list);
+    var tb = $('rows');
+    tb.innerHTML = '';
+    list.forEach(function (item, i) {
+      var tr = document.createElement('tr');
+      if (item.id === freshId) { tr.className = 'fresh'; }
+      var td = function (cls, text) {
+        var c = document.createElement('td');
+        if (cls) { c.className = cls; }
+        if (text != null) { c.textContent = text; }
+        tr.appendChild(c);
+        return c;
+      };
+      td('num', String(i + 1));
+      var memo = document.createElement('input');
+      memo.type = 'text'; memo.maxLength = 40; memo.value = item.memo || '';
+      memo.placeholder = 'メモ';
+      memo.setAttribute('aria-label', (i + 1) + ' 局目のメモ');
+      memo.addEventListener('change', function () {
+        box.update(item.id, { memo: clean(memo.value) });
+      });
+      td('memo').appendChild(memo);
+      var who = td('who'), side = box.sideNames(item);
+      [['sente', '☗', side[0]], ['gote', '☖', side[1]]].forEach(function (f) {
+        var lab = document.createElement('label');
+        var mk = document.createElement('span');
+        mk.className = 'mark'; mk.textContent = f[1]; mk.setAttribute('aria-hidden', 'true');
+        var inp = document.createElement('input');
+        inp.type = 'text'; inp.maxLength = 20; inp.value = item[f[0]] || '';
+        inp.placeholder = f[2];
+        inp.setAttribute('aria-label', (i + 1) + ' 局目の' + f[2]);
+        inp.addEventListener('change', function () {
+          var o = {}; o[f[0]] = clean(inp.value);
+          box.update(item.id, o);
+        });
+        lab.appendChild(mk); lab.appendChild(inp);
+        who.appendChild(lab);
+      });
+      td('num', item.teai || '');
+      td('num', item.plies + ' 手');
+      td('num', item.last || '');
+      td('num col-time', box.clock(item.savedAt));
+      var acts = td('acts');
+      var open = document.createElement('a');
+      open.className = 'btn btn-sm'; open.textContent = '開く';
+      open.href = '../study.html#u=' + String(item.usi).split(/\s+/).join('_');
+      open.target = '_blank'; open.rel = 'noopener';
+      var dl = document.createElement('button');
+      dl.className = 'btn btn-sm'; dl.textContent = '保存';
+      dl.addEventListener('click', function () {
+        // 一覧で名前やメモを直したあとでも、いまの中身で書き出す
+        var cur = box.find(item.usi) || item;
+        download(new Blob([box.toKifu(cur)], { type: 'text/plain' }), box.fileName(cur, i + 1));
+      });
+      var del = document.createElement('button');
+      del.className = 'btn btn-sm btn-danger'; del.textContent = '消す';
+      del.addEventListener('click', function () {
+        var cur = box.find(item.usi) || item;
+        if (!confirm((i + 1) + ' 局目（' + [cur.memo, box.players(cur)].filter(Boolean).join('・') + '）を消します。よろしいですか。')) { return; }
+        box.remove(item.id);
+        render();
+      });
+      acts.appendChild(open); acts.appendChild(document.createTextNode(' '));
+      acts.appendChild(dl); acts.appendChild(document.createTextNode(' '));
+      acts.appendChild(del);
+      tb.appendChild(tr);
+    });
+  }
+
+  // ---- 書き出し ----
+  // 1 局 1 ファイル。メモが同じ局があっても、ファイル名が重ならないように番号を足す
+  function names(list) {
+    var used = {};
+    return list.map(function (item, i) {
+      var name = box.fileName(item, i + 1);
+      if (used[name]) {
+        var k = 2;
+        while (used[name.replace(/\.kifu$/, '-' + k + '.kifu')]) { k++; }
+        name = name.replace(/\.kifu$/, '-' + k + '.kifu');
+      }
+      used[name] = true;
+      return name;
+    });
+  }
+  function title(list) { return '棋譜 ' + list.length + ' 局（' + box.stamp(Date.now(), '/') + '）'; }
+  function bodyText(list) {
+    var out = [title(list), ''];
+    list.forEach(function (item, i) {
+      var who = box.players(item);
+      out.push('■ ' + (i + 1) + '. ' + (item.memo || ('棋譜' + (i + 1))) + (who ? ' ' + who : '') + '（' + item.plies + ' 手）');
+      out.push(box.toKifu(item).replace(/\r\n/g, '\n').trim());
+      out.push('');
+    });
+    return out.join('\n');
+  }
+  function download(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  // 無圧縮の ZIP(中身は数 KB の文字なので圧縮しない)。名前は UTF-8 の印(フラグ 11)を立てる
+  var CRC = (function () {
+    var t = [];
+    for (var n = 0; n < 256; n++) {
+      var c = n;
+      for (var k = 0; k < 8; k++) { c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; }
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+  function crc32(b) {
+    var c = 0xFFFFFFFF;
+    for (var i = 0; i < b.length; i++) { c = CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zip(files) {
+    var enc = new TextEncoder(), parts = [], dir = [], off = 0;
+    var d = new Date();
+    var time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    var date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    files.forEach(function (f) {
+      var name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+      var h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+      h.setUint16(8, 0, true); h.setUint16(10, time, true); h.setUint16(12, date, true);
+      h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true);
+      h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+      parts.push(h.buffer, name, data);
+      var c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true);
+      c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, time, true);
+      c.setUint16(14, date, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true);
+      c.setUint32(24, data.length, true); c.setUint16(28, name.length, true);
+      c.setUint32(42, off, true);
+      dir.push(c.buffer, name);
+      off += 30 + name.length + data.length;
+    });
+    var dirLen = dir.reduce(function (s, p) { return s + (p.byteLength || p.length); }, 0);
+    var e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+    e.setUint32(12, dirLen, true); e.setUint32(16, off, true);
+    return new Blob(parts.concat(dir, [e.buffer]), { type: 'application/zip' });
+  }
+
+  function sendMsg(t) { $('send-msg').textContent = t; }
+  $('btn-zip').addEventListener('click', function () {
+    var list = box.list();
+    if (!list.length) { return; }
+    var ns = names(list);
+    download(zip(list.map(function (item, i) { return { name: ns[i], text: box.toKifu(item) }; })),
+             '棋譜_' + box.stamp(Date.now(), '') + '.zip');
+    sendMsg(list.length + ' 局を ZIP にして保存しました。ダウンロードの場所を見てください。');
+    track('organizer_send', { method: 'zip', n: list.length });
+  });
+
+  function shareFiles(list) {
+    var ns = names(list);
+    return list.map(function (item, i) { return new File([box.toKifu(item)], ns[i], { type: 'text/plain' }); });
+  }
+  function canShareFiles(list) {
+    try {
+      return !!(navigator.canShare && navigator.share && list.length &&
+                navigator.canShare({ files: shareFiles(list) }));
+    } catch (e) { return false; }
+  }
+  $('btn-share').addEventListener('click', function () {
+    var list = box.list();
+    navigator.share({ files: shareFiles(list), title: title(list), text: title(list) }).then(function () {
+      sendMsg('送る画面へ渡しました。届いたのを確かめてから「全部消す」を押してください。');
+      track('organizer_send', { method: 'share', n: list.length });
+    }, function (e) {
+      if (e && e.name === 'AbortError') { return; }
+      sendMsg('ファイルで渡せませんでした。「まとめて保存」か「メールの本文にして送る」を使ってください。');
+    });
+  });
+
+  $('mail-to').value = box.getMailTo();
+  $('mail-to').addEventListener('change', function () { box.setMailTo($('mail-to').value.trim()); });
+  $('btn-mail').addEventListener('click', function () {
+    var list = box.list();
+    if (!list.length) { return; }
+    var to = $('mail-to').value.trim();
+    box.setMailTo(to);
+    track('organizer_send', { method: 'mailto', n: list.length });
+    location.href = 'mailto:' + encodeURIComponent(to).replace(/%40/g, '@') +
+      '?subject=' + encodeURIComponent(title(list)) +
+      '&body=' + encodeURIComponent(bodyText(list).replace(/\n/g, '\r\n'));
+  });
+
+  $('btn-copy').addEventListener('click', function () {
+    var list = box.list();
+    if (!list.length) { return; }
+    var t = bodyText(list);
+    var done = function () {
+      sendMsg(list.length + ' 局をコピーしました。メールなどに貼り付けてください。');
+      track('organizer_send', { method: 'copy', n: list.length });
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done, function () { sendMsg('コピーできませんでした。'); });
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { if (document.execCommand('copy')) { done(); } } catch (e) {}
+    ta.remove();
+  });
+
+  $('btn-clear').addEventListener('click', function () {
+    var n = box.list().length;
+    if (!confirm(n + ' 局を全部消します。保存か送るのを済ませてから押してください。よろしいですか。')) { return; }
+    box.clear();
+    freshId = null;
+    sendMsg('');
+    say('', 'まだ読んでいません。');
+    render();
+  });
+
+  // 別のタブで足した・消したときに並びを合わせる
+  window.addEventListener('storage', render);
+  render();
+})();
+</script>
+</body>
+</html>
