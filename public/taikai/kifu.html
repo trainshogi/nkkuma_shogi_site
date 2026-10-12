@@ -95,7 +95,13 @@
     td { padding: 6px 8px; border-bottom: 1px solid #f0ede6; vertical-align: middle; }
     td.num { font-variant-numeric: tabular-nums; white-space: nowrap; color:#555; }
     td.memo { min-width: 7.5em; }
-    td.memo input { font-size: 15px; padding: 5px 8px; }
+    td.memo input, td.who input { font-size: 15px; padding: 5px 8px; }
+    td.who { min-width: 8em; }
+    td.who label { display:flex; align-items:center; gap: 4px; }
+    td.who label + label { margin-top: 4px; }
+    .mark { font-size: 13px; color:#888; flex: none; width: 1.1em; text-align:center; }
+    .names { display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+    .names label { display:flex; align-items:center; gap: 4px; }
     td.acts { white-space: nowrap; text-align: right; }
     tr.fresh td { background: #eef7f4; }
     .empty { color:#888; font-size: 14px; padding: 18px 4px; }
@@ -185,6 +191,12 @@
         <label class="card-label" for="next-memo">次に読む局のメモ</label>
         <input type="text" id="next-memo" maxlength="40" placeholder="例: 1回戦 1卓">
         <label class="check"><input type="checkbox" id="bump" checked> 読むたびに最後の数字を 1 つ進める（1卓 → 2卓）</label>
+        <p class="card-label" style="margin-top:12px">次に読む局の対局者（入れなくても足せます）</p>
+        <div class="names">
+          <label><span class="mark" aria-hidden="true">☗</span><input type="text" id="next-sente" maxlength="20" placeholder="先手" aria-label="次に読む局の先手（駒落ちは下手）"></label>
+          <label><span class="mark" aria-hidden="true">☖</span><input type="text" id="next-gote" maxlength="20" placeholder="後手" aria-label="次に読む局の後手（駒落ちは上手）"></label>
+        </div>
+        <p class="note">駒落ちは ☗ が下手、☖ が上手です。足したら空になります。あとから一覧でも直せます。</p>
       </section>
     </div>
 
@@ -195,7 +207,7 @@
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>メモ</th><th>手合割</th><th>手数</th><th>最後の手</th><th class="col-time">読んだ時刻</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>メモ</th><th>対局者</th><th>手合割</th><th>手数</th><th>最後の手</th><th class="col-time">読んだ時刻</th><th></th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -245,6 +257,7 @@
     r.className = 'result ' + kind;
     r.textContent = text;
   }
+  function clean(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
   function bumpMemo(m) {
     // 最後の数字だけ 1 つ進める(「1回戦 2卓」→「1回戦 3卓」)。数字が無ければそのまま
     return m.replace(/(\d+)(\D*)$/, function (_, d, rest) { return String(Number(d) + 1) + rest; });
@@ -254,18 +267,22 @@
     if (r.error) { say('ng', r.error); beep(false); return false; }
     var had = box.find(r.usi);
     if (had) {
-      say('dup', 'この局はもう入っています（' + (had.memo || '') + '・' + had.plies + ' 手）。');
+      say('dup', 'この局はもう入っています（' + [had.memo, box.players(had), had.plies + ' 手'].filter(Boolean).join('・') + '）。');
       freshId = had.id;
       render();
       beep(false);
       return true;
     }
-    var memo = $('next-memo').value.replace(/\s+/g, ' ').trim();
-    var s = box.save({ usi: r.usi, kif: r.kif, plies: r.plies, teai: r.teai, last: r.last, memo: memo });
+    var memo = clean($('next-memo').value);
+    var sente = clean($('next-sente').value), gote = clean($('next-gote').value);
+    var s = box.save({ usi: r.usi, kif: r.kif, plies: r.plies, teai: r.teai, last: r.last, memo: memo, sente: sente, gote: gote });
     if (!s.ok) { say('ng', 'ためられませんでした。このブラウザが保存を許していません（プライベートモードなど）。'); return false; }
     freshId = s.item.id;
-    say('ok', (memo ? memo + ' を' : '') + '足しました（' + r.teai + '・' + r.plies + ' 手）。');
+    var what = [memo, box.players(s.item)].filter(Boolean).join(' ');
+    say('ok', (what ? what + ' を' : '') + '足しました（' + r.teai + '・' + r.plies + ' 手）。');
     if ($('bump').checked && memo) { $('next-memo').value = bumpMemo(memo); saveNextMemo(); }
+    // 対局者は局ごとに違うので、足したら空にする(前の局の名前が次の局に付かないように)
+    $('next-sente').value = ''; $('next-gote').value = '';
     track('organizer_add', { how: how, n: box.list().length });
     beep(true);
     render();
@@ -439,9 +456,25 @@
       memo.placeholder = 'メモ';
       memo.setAttribute('aria-label', (i + 1) + ' 局目のメモ');
       memo.addEventListener('change', function () {
-        box.update(item.id, memo.value.replace(/\s+/g, ' ').trim());
+        box.update(item.id, { memo: clean(memo.value) });
       });
       td('memo').appendChild(memo);
+      var who = td('who'), side = box.sideNames(item);
+      [['sente', '☗', side[0]], ['gote', '☖', side[1]]].forEach(function (f) {
+        var lab = document.createElement('label');
+        var mk = document.createElement('span');
+        mk.className = 'mark'; mk.textContent = f[1]; mk.setAttribute('aria-hidden', 'true');
+        var inp = document.createElement('input');
+        inp.type = 'text'; inp.maxLength = 20; inp.value = item[f[0]] || '';
+        inp.placeholder = f[2];
+        inp.setAttribute('aria-label', (i + 1) + ' 局目の' + f[2]);
+        inp.addEventListener('change', function () {
+          var o = {}; o[f[0]] = clean(inp.value);
+          box.update(item.id, o);
+        });
+        lab.appendChild(mk); lab.appendChild(inp);
+        who.appendChild(lab);
+      });
       td('num', item.teai || '');
       td('num', item.plies + ' 手');
       td('num', item.last || '');
@@ -454,12 +487,15 @@
       var dl = document.createElement('button');
       dl.className = 'btn btn-sm'; dl.textContent = '保存';
       dl.addEventListener('click', function () {
-        download(new Blob([box.toKifu(item)], { type: 'text/plain' }), names([item])[0]);
+        // 一覧で名前やメモを直したあとでも、いまの中身で書き出す
+        var cur = box.find(item.usi) || item;
+        download(new Blob([box.toKifu(cur)], { type: 'text/plain' }), box.fileName(cur, i + 1));
       });
       var del = document.createElement('button');
       del.className = 'btn btn-sm btn-danger'; del.textContent = '消す';
       del.addEventListener('click', function () {
-        if (!confirm((i + 1) + ' 局目（' + (item.memo || '') + '）を消します。よろしいですか。')) { return; }
+        var cur = box.find(item.usi) || item;
+        if (!confirm((i + 1) + ' 局目（' + [cur.memo, box.players(cur)].filter(Boolean).join('・') + '）を消します。よろしいですか。')) { return; }
         box.remove(item.id);
         render();
       });
@@ -489,7 +525,8 @@
   function bodyText(list) {
     var out = [title(list), ''];
     list.forEach(function (item, i) {
-      out.push('■ ' + (i + 1) + '. ' + (item.memo || ('棋譜' + (i + 1))) + '（' + item.plies + ' 手）');
+      var who = box.players(item);
+      out.push('■ ' + (i + 1) + '. ' + (item.memo || ('棋譜' + (i + 1))) + (who ? ' ' + who : '') + '（' + item.plies + ' 手）');
       out.push(box.toKifu(item).replace(/\r\n/g, '\n').trim());
       out.push('');
     });

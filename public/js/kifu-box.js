@@ -64,16 +64,24 @@
       teai: entry.teai || '',
       last: entry.last || '',
       memo: entry.memo || '',
+      sente: entry.sente || '', // 先手(駒落ちは下手)の名前
+      gote: entry.gote || '',   // 後手(駒落ちは上手)の名前
       savedAt: Date.now()
     };
     list.push(item);
     return { ok: write(list), item: item, index: list.length - 1, existed: false };
   }
 
-  function update(id, memo) {
+  // 直す欄だけ渡す: update(id, { memo: '1回戦 2卓' }) / update(id, { sente: '山田' })
+  function update(id, fields) {
     var list = read();
     for (var i = 0; i < list.length; i++) {
-      if (list[i].id === id) { list[i].memo = memo; return write(list); }
+      if (list[i].id === id) {
+        ['memo', 'sente', 'gote'].forEach(function (k) {
+          if (fields[k] != null) { list[i][k] = fields[k]; }
+        });
+        return write(list);
+      }
     }
     return false;
   }
@@ -94,8 +102,21 @@
     return pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
+  function oneLine(v) { return String(v || '').replace(/[\r\n]+/g, ' ').trim(); }
+  function handicap(item) { return !!item.teai && item.teai !== '平手'; }
+  // 名前の欄の見出し。駒落ちは KIF でも「下手」「上手」(下手が先手の欄、上手が後手の欄)
+  function sideNames(item) {
+    return handicap(item) ? ['下手', '上手'] : ['先手', '後手'];
+  }
+  // 「山田 対 佐藤」。片方しか無ければ、ある方だけ
+  function players(item) {
+    var a = oneLine(item.sente), b = oneLine(item.gote);
+    if (a && b) { return a + ' 対 ' + b; }
+    return a || b;
+  }
+
   // ためた 1 局 → .kifu の中身。対局日時は分からないので書かない(読んだ時刻を対局日と偽らない)。
-  // メモは「備考」に入れる(KIF 仕様にある欄。回戦・卓の欄は仕様に無い)
+  // メモは「備考」に入れる(KIF 仕様にある欄。回戦・卓の欄は仕様に無い)。名前は先手・後手の欄へ
   function toKifu(item) {
     var lines = String(item.kif || '').split('\n');
     var head = [], moves = [];
@@ -106,15 +127,20 @@
     var memo = String(item.memo || '').replace(/[\r\n]+/g, ' ').trim();
     if (memo) { out.push('備考：' + memo); }
     out = out.concat(head);
+    var side = sideNames(item);
+    if (oneLine(item.sente)) { out.push(side[0] + '：' + oneLine(item.sente)); }
+    if (oneLine(item.gote)) { out.push(side[1] + '：' + oneLine(item.gote)); }
     out.push('手数----指手---------消費時間--');
     out = out.concat(moves);
     return out.join('\r\n') + '\r\n';
   }
 
-  // ファイル名: メモ_読んだ日.kifu。メモが無ければ「棋譜n」。ファイル名に使えない字は「-」に
+  // ファイル名: メモ_先手-後手_読んだ日.kifu。メモが無ければ「棋譜n」。ファイル名に使えない字は「-」に
   function fileName(item, n) {
     var base = String(item.memo || '').trim() || ('棋譜' + n);
-    base = base.replace(/[\\\/:*?"<>|\r\n\t]+/g, '-').replace(/\s+/g, '_').slice(0, 40);
+    var who = [oneLine(item.sente), oneLine(item.gote)].filter(Boolean).join('-');
+    if (who) { base += '_' + who; }
+    base = base.replace(/[\\\/:*?"<>|\r\n\t]+/g, '-').replace(/\s+/g, '_').slice(0, 60);
     return base + '_' + stamp(item.savedAt, '') + '.kifu';
   }
 
@@ -127,7 +153,7 @@
 
   window.KifuBox = {
     list: read, find: find, save: save, update: update, remove: remove, clear: clear,
-    toKifu: toKifu, fileName: fileName, stamp: stamp, clock: clock,
+    toKifu: toKifu, fileName: fileName, players: players, sideNames: sideNames, stamp: stamp, clock: clock,
     getMailTo: getMailTo, setMailTo: setMailTo
   };
 })();
