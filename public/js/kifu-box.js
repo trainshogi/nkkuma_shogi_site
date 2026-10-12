@@ -1,9 +1,10 @@
-// ためた棋譜(大会の係が、対局者の QR から開いた棋譜をこの端末にためておく箱)。
+// ためた棋譜(大会の係が、対局者の QR から読んだ棋譜をこの端末にためておく箱)。
 //
 // ■ 何のためか
 //   コマドリの QR は study.html#u=<USI> で、棋譜はリンクの中にしかない(# 以降は
 //   サーバーに届かない)。大会の係が何局も QR を読むとき、1 局ずつメールするのは手間なので、
-//   読んだ分を端末にため、あとでまとめて自分のメールへ送れるようにする。
+//   読んだ分を端末にため、あとでまとめて保存するか自分のメールへ送れるようにする。
+//   検討室(study.html)とは分けてある(オーナー 2026-10-12: 係の道具は別にしたほうが安全)。
 //
 // ■ 決めたこと(オーナー 2026-10-11)
 //   ログインもサーバー保存も作らない。棋譜は localStorage(この端末のこのブラウザ)だけに置く。
@@ -13,7 +14,7 @@
 //   柿木 KIF 仕様 §2 で「.kifu は UTF-8」。ブラウザは Shift-JIS(.kif)を書けないので、
 //   UTF-8 の .kifu にする(iOS の KifExport が cp932 にできない字のときに落ちる組と同じ)。
 //
-// study.html と collect.html の両方から読む。グローバルは window.KifuBox ひとつ。
+// taikai/kifu.html から読む。グローバルは window.KifuBox ひとつ。
 (function () {
   'use strict';
 
@@ -58,8 +59,10 @@
     var item = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       usi: entry.usi,
-      kif: entry.kif,         // 手合割と指し手(study.html が #u= から作ったもの)
+      kif: entry.kif,         // 手合割と指し手(js/usi-kif.js が #u= から作ったもの)
       plies: entry.plies || 0,
+      teai: entry.teai || '',
+      last: entry.last || '',
       memo: entry.memo || '',
       savedAt: Date.now()
     };

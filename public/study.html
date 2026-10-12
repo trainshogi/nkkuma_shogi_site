@@ -59,15 +59,6 @@
     #error-box { background:#fdf2f0; border:1px solid #ecc8c0; border-radius:10px;
                  padding:10px 14px; margin-bottom:12px; font-size:14px; }
 
-    /* この端末にためる(大会の係が QR を何局も読むとき)。js/kifu-box.js と collect.html */
-    #keep-memo { width: 100%; font-family: inherit; font-size: 16px;
-                 border:1px solid #ddd; border-radius: 8px; padding: 8px; }
-    #keep-msg { font-size: 13.5px; color: #00695c; }
-    #keep-link { display:block; font-size: 14px; color:#00695c; font-weight:bold;
-                 text-decoration:none; }
-    #keep-link[hidden] { display:none; }
-    #keep-body:not([hidden]) + #keep-link:not([hidden]) { margin-top: 12px; }
-
     /* 入力カードの折り畳み(方向A: 棋譜を読み込んだら盤を主役にする) */
     .input-toggle { display:block; width:100%; text-align:left; background:none; border:none;
                     padding:0; font-family:inherit; font-size:13.5px; color:#00695c;
@@ -224,20 +215,6 @@
     </div>
   </div>
 
-  <div class="card" id="keep-card" hidden>
-    <div id="keep-body" hidden>
-      <div class="card-label">この棋譜をこの端末にためる</div>
-      <p class="note" style="margin:0 0 8px">QR を何局も読むときに使えます。ためた分は、あとでまとめて自分のメールへ送れます。棋譜はこの端末の中だけに置き、どこにも送りません。</p>
-      <input id="keep-memo" maxlength="40" placeholder="メモ（例: 1回戦 2卓）" enterkeyhint="done">
-      <div class="row" style="margin-top:8px">
-        <button class="btn btn-primary" id="btn-keep">ためる</button>
-        <span id="keep-msg"></span>
-      </div>
-      <p class="note" id="keep-last" style="margin:6px 0 0" hidden></p>
-    </div>
-    <a id="keep-link" href="./collect.html" hidden>ためた棋譜を見る・送る（<span id="keep-count">0</span> 局）›</a>
-  </div>
-
   <div id="viewer" hidden>
     <div class="hands" id="hands-gote"></div>
     <div id="board"></div>
@@ -278,7 +255,6 @@
   </p>
 </main>
 
-<script src="./js/kifu-box.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1170,58 +1146,6 @@
     return true;
   }
 
-  // ---- この端末にためる(大会の係が QR を何局も読むとき。js/kifu-box.js) ----
-  // ためられるのは #u= で開いた棋譜だけ ―― 箱には USI(開き直す用)と KIF(送る用)を両方置く。
-  // KIF にできない開始局面(途中図)は貼り付け欄が空なので、ためる欄を出さない
-  var keep = { usi: null, kif: null, plies: 0 };
-  function armKeep(usi) {
-    keep.usi = usi;
-    keep.kif = $('kif-in').value || null;
-    keep.plies = viewer.plies.length;
-    $('keep-msg').textContent = '';
-    renderKeepCard(true);
-  }
-  function renderKeepCard(fresh) {
-    var box = window.KifuBox;
-    if (!box) { return; }
-    var list = box.list();
-    var canKeep = !!(keep.usi && keep.kif);
-    $('keep-body').hidden = !canKeep;
-    $('keep-link').hidden = list.length === 0;
-    $('keep-count').textContent = String(list.length);
-    $('keep-card').hidden = !canKeep && list.length === 0;
-    if (!canKeep) { return; }
-    var had = box.find(keep.usi);
-    $('btn-keep').textContent = had ? 'メモを直す' : 'ためる';
-    if (fresh) {
-      $('keep-memo').value = had ? (had.memo || '') : '';
-      if (had) { $('keep-msg').textContent = 'この棋譜はもうためてあります'; }
-    }
-    // 前の局のメモを見せる(次の卓番号を打つ手がかり。入れておくと直し忘れで同じメモが並ぶので、見せるだけ)
-    var last = list.length ? list[list.length - 1] : null;
-    var showLast = !had && last && last.memo;
-    $('keep-last').hidden = !showLast;
-    $('keep-last').textContent = showLast ? '前にためた局のメモ: ' + last.memo : '';
-  }
-  function doKeep() {
-    var box = window.KifuBox;
-    if (!box || !keep.usi || !keep.kif) { return; }
-    var memo = $('keep-memo').value.replace(/\s+/g, ' ').trim();
-    var r = box.save({ usi: keep.usi, kif: keep.kif, plies: keep.plies, memo: memo });
-    if (!r.ok) {
-      $('keep-msg').textContent = 'ためられませんでした(この端末のブラウザが保存を許していません)';
-      return;
-    }
-    $('keep-msg').textContent = r.existed ? 'メモを直しました'
-      : 'ためました（全部で ' + box.list().length + ' 局）';
-    track('box_save', { n: box.list().length, existed: r.existed ? 1 : 0 });
-    renderKeepCard(false);
-  }
-  $('btn-keep').addEventListener('click', doKeep);
-  $('keep-memo').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); doKeep(); }
-  });
-
   // URLパラメータ: #u=... / ?sfen=... / ?kif=...(encodeURIComponent済み)
   var params = new URLSearchParams(location.search);
   var hashU = location.hash.match(/^#u=(.+)$/);
@@ -1234,7 +1158,6 @@
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
     metrics.entry = 'u_hash';
     track('study_load_kif', { method: 'u_hash' });
-    armKeep(decodeHashU(hashU[1]));
   } else if (params.get('sfen') && looksLikeUsiPosition(params.get('sfen'))) {
     // ?sfen= に手順つきのUSIが来ることもある(#u= と同じ形)。手順を黙って捨てない
     if (loadUsiMoves(params.get('sfen'))) {
@@ -1271,12 +1194,6 @@
     } catch (e) {}
   }
 
-  // 箱に何か入っていれば、QR 以外で開いたときも「ためた棋譜」への道を出す
-  renderKeepCard(false);
-  // 別のタブでためた・消したときに数を合わせる
-  window.addEventListener('storage', function () { renderKeepCard(false); });
-  window.addEventListener('pageshow', function () { renderKeepCard(false); });
-
   // #u=リンクを「既に開いているタブで」踏んだときも反応する(従来はページ読み込み時のみ)。
   // 同一ハッシュの再クリックはブラウザがイベントを出さないため対象外
   window.addEventListener('hashchange', function () {
@@ -1287,12 +1204,9 @@
     if (loadUsiMoves(decodeHashU(h[1]))) {
       metrics.entry = 'u_hash';
       track('study_load_kif', { method: 'u_hash' });
-      armKeep(decodeHashU(h[1]));
       scrollToBoard();
     } else {
       showError('リンクの棋譜(#u=)が読めませんでした。');
-      keep.usi = null;
-      renderKeepCard(true);
     }
   });
 
