@@ -192,5 +192,7 @@
     return rows.join('/') + ' ' + (p.teban === 'sente' ? 'b' : 'w') + ' ' + (hand || '-');
   }
 
-  window.UsiKif = { read: read, extractUsi: extractUsi, HANDICAP_SFENS: HANDICAP_SFENS };
+  // parseSfen・apply・boardKey は運営の確認ページ(taikai/kakunin.html)が盤を作るのにも使う
+  window.UsiKif = { read: read, extractUsi: extractUsi, HANDICAP_SFENS: HANDICAP_SFENS,
+                   parseSfen: parseSfen, apply: apply, boardKey: boardKey };
 })();
