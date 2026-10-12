@@ -55,6 +55,7 @@
     </script>
 
     <link href="css/site.css" rel="stylesheet">
+    <link href="css/onescreen.css" rel="stylesheet">
     <style>
       /* α版限定のスタイル（site.cssは触らない） */
       .alpha-ribbon{
@@ -199,6 +200,7 @@
         <!-- done状態: 盤・編集・出力 -->
         <div class="result-done" data-role="done">
           <div class="card-label">認識結果（駒をタップで修正）</div>
+          <button type="button" class="btn one-reset" id="btn-reset2">やり直す</button>
 
           <div class="board-unit" id="board-unit">
             <div class="hand hand--gote" data-hand="gote"></div>
@@ -225,7 +227,7 @@
           <div class="output">
             <div class="output-label">形勢判断（β）</div>
             <div class="actions" data-role="eval-row" style="margin-top:4px">
-              <button type="button" class="btn" id="btn-eval">🧭 この局面の形勢を教えて</button>
+              <button type="button" class="btn" id="btn-eval">🧭 形勢を見る</button>
             </div>
             <div id="eval-out" hidden style="margin:8px 0 4px; text-align:left;
                  background:#f8f7f2; border:1px solid #e5e1d8; border-radius:10px; padding:10px 14px;">
@@ -344,5 +346,29 @@
     <!-- 唯一の外部依存: Compressor.js -->
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
     <script src="js/site-beta.js"></script>
+    <script>
+      // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
+      (function () {
+        var photo = document.getElementById('photo');
+        photo.addEventListener('click', function () {
+          if (document.body.getAttribute('data-state') === 'done') { document.body.classList.toggle('photo-big'); }
+        });
+        // 駒を直すパレットを開いたとき、選んだマスが下半分ならパレットを上から出す
+        var pal = document.getElementById('palette');
+        new MutationObserver(function () {
+          if (pal.hidden) { document.body.classList.remove('pal-top'); return; }
+          var sel = document.querySelector('.sq.selected, .chip.selected');
+          var r = sel && sel.getBoundingClientRect();
+          document.body.classList.toggle('pal-top', !!r && (r.top + r.bottom) / 2 > window.innerHeight / 2);
+        }).observe(pal, { attributes: true, attributeFilter: ['hidden'], childList: true });
+        // 形勢の答えは画面の下に重ねて出すので、押したら閉じる
+        var evalOut = document.getElementById('eval-out');
+        evalOut.addEventListener('click', function () { evalOut.hidden = true; });
+        document.getElementById('btn-reset2').addEventListener('click', function () {
+          document.body.classList.remove('photo-big');
+          document.getElementById('btn-reset').click();
+        });
+      })();
+    </script>
   </body>
 </html>
