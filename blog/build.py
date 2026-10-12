@@ -37,7 +37,9 @@ REQUIRED_KEYS = ("title", "description", "slug", "date")
 # ブログ以外で sitemap.xml に載せるページ。ビルドのたびに消えないようここに書く
 EXTRA_SITEMAP_PATHS = (
     "/komadori/gear.html",
+    "/komadori/howto.html",
     "/komadori/placement.html",
+    "/komadori/tottemita.html",
 )
 
 
