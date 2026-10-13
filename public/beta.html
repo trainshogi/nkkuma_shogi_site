@@ -361,6 +361,22 @@
           var r = sel && sel.getBoundingClientRect();
           document.body.classList.toggle('pal-top', !!r && (r.top + r.bottom) / 2 > window.innerHeight / 2);
         }).observe(pal, { attributes: true, attributeFilter: ['hidden'], childList: true });
+        // 盤の枠（#frame-overlay）を、写真が実際に出ている四角にぴったり重ねる。
+        // 小さい写真・大きい写真・パソコンの並びで、写真の箱と枠の箱がずれないように
+        var wrap = photo.parentNode;
+        function fitFrame() {
+          var svg = document.getElementById('frame-overlay');
+          if (!svg) { return; }
+          svg.style.left = photo.offsetLeft + 'px';
+          svg.style.top = photo.offsetTop + 'px';
+          svg.style.width = photo.offsetWidth + 'px';
+          svg.style.height = photo.offsetHeight + 'px';
+        }
+        new MutationObserver(fitFrame).observe(wrap, { childList: true });
+        new MutationObserver(fitFrame).observe(document.body, { attributes: true, attributeFilter: ['class', 'data-state'] });
+        if (window.ResizeObserver) { new ResizeObserver(fitFrame).observe(photo); }
+        photo.addEventListener('load', fitFrame);
+        window.addEventListener('resize', fitFrame);
         // 形勢の答えは画面の下に重ねて出すので、押したら閉じる
         var evalOut = document.getElementById('eval-out');
         evalOut.addEventListener('click', function () { evalOut.hidden = true; });

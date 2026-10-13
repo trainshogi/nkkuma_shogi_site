@@ -23,7 +23,7 @@ body[data-state="error"] .card-label { display: none; }
 body[data-state="done"] [data-role="reset"] { display: none; }
 body[data-state="done"] .card {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas: "photo seg reset" "board board board" "out out out";
   gap: 8px;
   align-items: center;
@@ -31,8 +31,10 @@ body[data-state="done"] .card {
 }
 body[data-state="done"] .result-done { display: contents; }
 body[data-state="done"] .card-label { display: none; }
-body[data-state="done"] .photo-wrap { grid-area: photo; width: 56px; height: 44px; }
-body[data-state="done"] .photo { width: 56px; height: 44px; object-fit: cover; border-radius: 8px; cursor: zoom-in; }
+/* 写真は縦横比を変えずに縮める（切り抜くと、上に重ねる盤の枠がずれるため） */
+body[data-state="done"] .photo-wrap { grid-area: photo; height: 44px; }
+body[data-state="done"] .photo { width: auto; height: 44px; max-width: 80px; border-radius: 8px; cursor: zoom-in; }
+body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 1.5px; }
 body[data-state="done"] .segment { grid-area: seg; margin: 0; }
 body[data-state="done"] .seg-btn { min-height: 44px; }
 body[data-state="done"] .one-reset { grid-area: reset; display: inline-flex; min-height: 44px; padding: 0 12px; font-size: 14px; }
@@ -42,6 +44,14 @@ body[data-state="done"] .board-unit { grid-area: board; margin: 0; gap: 2px; min
 body[data-state="done"] .board-frame { width: min(100%, calc((100svh - 320px) / 1.08 + 16px)); margin: 0 auto; }
 body[data-state="done"] .hand { min-height: 32px; padding: 0; gap: 3px; flex-wrap: nowrap; }
 body[data-state="done"] .chip { min-height: 30px; padding: 2px 3px; }
+/* 幅 320px ほどの小さいスマホでも、持ち駒 7 つを 1 列に収める（はみ出すより少し詰める） */
+body[data-state="done"] .chip { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+@media (max-width: 360px) {
+  body[data-state="done"] .hand { gap: 2px; }
+  body[data-state="done"] .chip { padding: 2px 1px; }
+  body[data-state="done"] .seg-btn { font-size: 13px; white-space: nowrap; }
+  body[data-state="done"] .one-reset { padding: 0 8px; }
+}
 
 /* 渡すボタン: 見出しを外して 2 段にまとめる（上: 検討アプリと画像、下: KIF/SFEN のコピーと保存） */
 body[data-state="done"] .output { grid-area: out; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; min-width: 0; }
@@ -78,7 +88,7 @@ body.pal-top[data-state="done"] .palette:not([hidden]) { top: 0; bottom: auto; b
 
 /* 小さな写真を押したら大きく見る（もう一度押すと戻る） */
 body.photo-big[data-state="done"] .photo-wrap { position: fixed; inset: 0; z-index: 70; width: auto; height: auto; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; }
-body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width: 96vw; max-height: 92svh; object-fit: contain; cursor: zoom-out; }
+body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width: 96vw; max-height: 92svh; cursor: zoom-out; }
 
 /* パソコン・タブレット横: 左に元の写真を大きく、右に盤と渡すボタン */
 @media (min-width: 900px) {
@@ -89,7 +99,8 @@ body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width:
     gap: 10px 16px; align-items: start; padding: 14px;
   }
   body[data-state="done"] .photo-wrap { width: 100%; height: auto; align-self: start; }
-  body[data-state="done"] .photo { width: 100%; height: auto; max-height: calc(100svh - 150px); object-fit: contain; cursor: zoom-in; }
+  body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); cursor: zoom-in; }
+  body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 4px; }
   body[data-state="done"] .segment { min-width: 260px; }
   body[data-state="done"] .board-unit, body[data-state="done"] .output { width: min(480px, calc((100svh - 350px) / 1.08 + 16px)); justify-self: center; }
   body[data-state="done"] .board-frame { width: 100%; }
