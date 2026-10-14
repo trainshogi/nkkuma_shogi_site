@@ -55,6 +55,7 @@
     </script>
 
     <link href="css/site.css" rel="stylesheet">
+    <link href="css/onescreen.css" rel="stylesheet">
     <style>
       /* α版限定のスタイル（site.cssは触らない） */
       .alpha-ribbon{
@@ -199,6 +200,8 @@
         <!-- done状態: 盤・編集・出力 -->
         <div class="result-done" data-role="done">
           <div class="card-label">認識結果（駒をタップで修正）</div>
+          <button type="button" class="btn one-reset" id="btn-reset2">やり直す</button>
+          <button type="button" class="btn one-view" id="btn-view" aria-pressed="false"><span class="v-photo">📷 写真</span><span class="v-board">盤に戻る</span></button>
 
           <div class="board-unit" id="board-unit">
             <div class="hand hand--gote" data-hand="gote"></div>
@@ -225,7 +228,7 @@
           <div class="output">
             <div class="output-label">形勢判断（β）</div>
             <div class="actions" data-role="eval-row" style="margin-top:4px">
-              <button type="button" class="btn" id="btn-eval">🧭 この局面の形勢を教えて</button>
+              <button type="button" class="btn" id="btn-eval">🧭 形勢を見る</button>
             </div>
             <div id="eval-out" hidden style="margin:8px 0 4px; text-align:left;
                  background:#f8f7f2; border:1px solid #e5e1d8; border-radius:10px; padding:10px 14px;">
@@ -344,5 +347,101 @@
     <!-- 唯一の外部依存: Compressor.js -->
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
     <script src="js/site-beta.js"></script>
+    <script>
+      // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
+      (function () {
+        var photo = document.getElementById('photo');
+        photo.addEventListener('click', function () {
+          if (document.body.getAttribute('data-state') === 'done') { document.body.classList.toggle('photo-big'); }
+        });
+        // 駒を直すパレットを開いたとき、選んだマスが下半分ならパレットを上から出す
+        var pal = document.getElementById('palette');
+        new MutationObserver(function () {
+          if (pal.hidden) { document.body.classList.remove('pal-top'); return; }
+          var sel = document.querySelector('.sq.selected, .chip.selected');
+          var r = sel && sel.getBoundingClientRect();
+          document.body.classList.toggle('pal-top', !!r && (r.top + r.bottom) / 2 > window.innerHeight / 2);
+        }).observe(pal, { attributes: true, attributeFilter: ['hidden'], childList: true });
+        // 盤の枠（#frame-overlay）を、写真が実際に出ている四角にぴったり重ねる。
+        // 小さい写真・大きい写真・パソコンの並びで、写真の箱と枠の箱がずれないように
+        var wrap = photo.parentNode;
+        function fitFrame() {
+          var svg = document.getElementById('frame-overlay');
+          if (!svg) { return; }
+          svg.style.left = photo.offsetLeft + 'px';
+          svg.style.top = photo.offsetTop + 'px';
+          svg.style.width = photo.offsetWidth + 'px';
+          svg.style.height = photo.offsetHeight + 'px';
+        }
+        new MutationObserver(fitFrame).observe(wrap, { childList: true });
+        new MutationObserver(fitFrame).observe(document.body, { attributes: true, attributeFilter: ['class', 'data-state'] });
+        if (window.ResizeObserver) { new ResizeObserver(fitFrame).observe(photo); }
+        photo.addEventListener('load', fitFrame);
+        window.addEventListener('resize', fitFrame);
+        // スマホ: 盤と元の写真を、同じ場所で入れ替えて見比べる（左上のボタン、または左右にスワイプ）
+        var phone = window.matchMedia('(max-width: 899px)');
+        var unit = document.getElementById('board-unit');
+        var viewBtn = document.getElementById('btn-view');
+        function sizeView() {
+          document.body.style.setProperty('--view-w', unit.offsetWidth + 'px');
+          document.body.style.setProperty('--view-h', unit.offsetHeight + 'px');
+        }
+        function setView(showPhoto) {
+          stopPeek();
+          if (showPhoto) { sizeView(); }
+          document.body.classList.toggle('show-photo', showPhoto);
+          viewBtn.setAttribute('aria-pressed', showPhoto ? 'true' : 'false');
+        }
+        viewBtn.addEventListener('click', function () { setView(!document.body.classList.contains('show-photo')); });
+        // 結果が出た直後に一度、盤を少し左へずらして写真の端をのぞかせ、横に払えることを見せる
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var peekTimer = null;
+        function stopPeek() {
+          clearTimeout(peekTimer);
+          document.body.classList.remove('peek');
+        }
+        function startPeek() {
+          stopPeek();
+          if (!phone.matches || reduceMotion.matches) { return; }
+          peekTimer = setTimeout(function () {
+            if (lastView !== 'done' || document.body.classList.contains('show-photo') || !pal.hidden) { return; }
+            sizeView();
+            // 写真の左端が、盤の右端から 56px 内側に来る位置
+            var cellW = unit.offsetWidth, pw = photo.offsetWidth;
+            document.body.style.setProperty('--peek-x', (cellW - 56 - (cellW - pw) / 2) + 'px');
+            document.body.classList.add('peek');
+          }, 600);
+        }
+        unit.addEventListener('animationend', stopPeek);
+        var lastView = document.body.getAttribute('data-state');
+        new MutationObserver(function () {
+          var s = document.body.getAttribute('data-state');
+          if (s === lastView) { return; }
+          lastView = s;
+          if (s === 'done') { sizeView(); startPeek(); } else { stopPeek(); setView(false); }
+        }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
+        window.addEventListener('resize', function () { if (lastView === 'done') { sizeView(); } });
+        // 形勢の答えは画面の下に重ねて出すので、押したら閉じる
+        var evalOut = document.getElementById('eval-out');
+        evalOut.addEventListener('click', function () { evalOut.hidden = true; });
+        var card = document.querySelector('.card');
+        var touch = null;
+        card.addEventListener('touchstart', function (e) {
+          stopPeek();
+          touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+        }, { passive: true });
+        card.addEventListener('touchend', function (e) {
+          if (!touch || !phone.matches || lastView !== 'done' || !pal.hidden || document.body.classList.contains('photo-big')) { touch = null; return; }
+          var dx = e.changedTouches[0].clientX - touch.x, dy = e.changedTouches[0].clientY - touch.y;
+          touch = null;
+          if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) { return; }
+          setView(dx < 0); // 左へ払うと写真、右へ払うと盤
+        });
+        document.getElementById('btn-reset2').addEventListener('click', function () {
+          document.body.classList.remove('photo-big');
+          document.getElementById('btn-reset').click();
+        });
+      })();
+    </script>
   </body>
 </html>

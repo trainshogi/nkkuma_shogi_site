@@ -1,4 +1,4 @@
-/* 写真を選ぶ → 変換 → 直す → 渡す を、スクロールせずに 1 画面で済ませるための並び（いまは alpha.html だけが読む）。
+/* 写真を選ぶ → 変換 → 直す → 渡す を、スクロールせずに 1 画面で済ませるための並び（alpha.html と beta.html が読む）。
    site.js と各ボタンの id には触らず、状態（body[data-state]）ごとに見せ方だけを変える。 */
 
 /* 写真を選んだあとは、入口の帯・ロゴ・くまを畳んで道具に場所を譲る */
@@ -33,7 +33,7 @@ body[data-state="done"] .result-done { display: contents; }
 body[data-state="done"] .card-label { display: none; }
 /* スマホ: 写真は盤と同じ場所・同じ大きさに置き、左上のボタンか左右のスワイプで盤と入れ替える。
    写真は縦横比を変えずに縮める（切り抜くと、上に重ねる盤の枠がずれるため）。
-   --view-w / --view-h は盤（持ち駒込み）の大きさで、alpha.html のスクリプトが入れる */
+   --view-w / --view-h は盤（持ち駒込み）の大きさで、各ページのスクリプトが入れる */
 .one-view { display: none; }
 @media (max-width: 899px) {
   body[data-state="done"] .one-view { grid-area: photo; display: inline-flex; min-height: 44px; padding: 0 10px; font-size: 13px; white-space: nowrap; }
@@ -47,7 +47,7 @@ body[data-state="done"] .card-label { display: none; }
   body.show-photo[data-state="done"] .photo-wrap { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
   body.show-photo[data-state="done"] .board-unit { visibility: hidden; opacity: 0; transform: translateX(-32px); }
   /* 結果が出た直後に一度だけ、盤を少し左へずらして右から写真の端をのぞかせ、横に払えることを見せる。
-     --peek-x は写真の左端が盤の右端から 56px 入る位置で、alpha.html のスクリプトが入れる */
+     --peek-x は写真の左端が盤の右端から 56px 入る位置で、各ページのスクリプトが入れる */
   body.peek[data-state="done"]:not(.show-photo) .board-unit { animation: nk-peek-board 1.4s ease-in-out 1; }
   body.peek[data-state="done"]:not(.show-photo) .photo-wrap { visibility: visible; opacity: 1; transition: none; animation: nk-peek-photo 1.4s ease-in-out 1; }
   /* 入れ替えの動きで、隠れている側が横にはみ出してスクロールが出ないように */
@@ -106,9 +106,13 @@ body[data-state="done"] .palette:not([hidden]) .palette-row { margin-bottom: 3px
 body[data-state="done"] .palette:not([hidden]) .palette-row:first-child { grid-template-columns: repeat(7, 1fr); }
 body[data-state="done"] .palette:not([hidden]) .palette-close { min-height: 40px; margin-top: 4px; }
 /* 直すマスが画面の下半分なら、パレットは上から出す（マスが隠れないように） */
-/* 形勢の答えは、盤を隠さないよう画面の下に重ねて出す。押すと閉じる */
-body[data-state="done"] #eval-out:not([hidden]) { position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; max-width: 520px; margin: 0 auto !important; border-radius: 16px 16px 0 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,.15); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important; cursor: pointer; }
-body[data-state="done"] #eval-out:not([hidden])::after { content: "押すと閉じます"; display: block; margin-top: 6px; font-size: 12px; color: #888; text-align: center; }
+/* 形勢の答えは、渡すボタンの段の上に重ねて出す（盤と持ち駒は隠さない）。押すと閉じる */
+body[data-state="done"] .output { position: relative; }
+body[data-state="done"] #eval-out:not([hidden]) { position: absolute; left: 0; right: 0; bottom: 0; min-height: 100%; z-index: 5; box-sizing: border-box; margin: 0 !important; padding: 6px 30px 6px 10px !important; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.12); cursor: pointer; }
+body[data-state="done"] #eval-out:not([hidden]) > div:first-child { height: 10px !important; margin-bottom: 4px !important; }
+body[data-state="done"] #eval-text { font-size: 13px !important; line-height: 1.35; }
+body[data-state="done"] #eval-text small { font-size: 10.5px; }
+body[data-state="done"] #eval-out:not([hidden])::after { content: "×"; position: absolute; top: 4px; right: 10px; font-size: 18px; line-height: 1; color: #888; }
 body.pal-top[data-state="done"] .palette:not([hidden]) { top: 0; bottom: auto; border-radius: 0 0 16px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
 
 /* 小さな写真を押したら大きく見る（もう一度押すと戻る） */
