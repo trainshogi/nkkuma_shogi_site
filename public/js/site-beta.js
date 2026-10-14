@@ -187,7 +187,8 @@
     var side = cp >= 0 ? '先手' : '後手';
     var grade = a < 200 ? '互角' : a < 500 ? side + 'がやや有利' :
                 a < 1200 ? side + 'が有利' : a < 2500 ? side + 'が優勢' : side + 'が勝勢';
-    return grade + '（' + side + (cp >= 0 ? '+' : '') + cp + '）';
+    // 数字は先手から見た評価値。ボタン 1 つ分に収まるよう、判定と同じ行に短く添える
+    return grade + ' ' + (cp >= 0 ? '+' : '−') + a;
   }
 
   function showEval(r) {
@@ -201,8 +202,8 @@
     var best = usiToJp(r.bestmove, state.result.ban_result, senteToMove);
     document.getElementById('eval-text').innerHTML =
       '<b>' + evalJudgeText(r.cp, r.mate, senteToMove) + '</b>' +
-      (best ? '<br>次の一手の候補: ' + best : '') +
-      '<br><small style="color:#888">エンジン: YaneuraOu (NAGISA_V3) / 深さ' + (r.depth || '-') + '（β）</small>';
+      (best ? '<br>次の一手 ' + best : '') +
+      '<br class="ev-engine"><small class="ev-engine" style="color:#888">エンジン: YaneuraOu (NAGISA_V3) / 深さ' + (r.depth || '-') + '（β）</small>';
     out.hidden = false;
   }
 
@@ -227,8 +228,8 @@
       console.error(err);
       restore();
       var out = document.getElementById('eval-out');
-      document.getElementById('eval-text').textContent =
-        'ごめんなさい、いま形勢を計算できませんでした。少し待ってもう一度お試しください。';
+      document.getElementById('eval-text').innerHTML =
+        '<b>計算できませんでした</b><br>少し待って、もう一度';
       document.getElementById('eval-bar-sente').style.width = '50%';
       out.hidden = false;
     });

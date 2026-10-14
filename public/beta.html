@@ -421,9 +421,12 @@
           if (s === 'done') { sizeView(); startPeek(); } else { stopPeek(); setView(false); }
         }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
         window.addEventListener('resize', function () { if (lastView === 'done') { sizeView(); } });
-        // 形勢の答えは画面の下に重ねて出すので、押したら閉じる
+        // 形勢の答えは「形勢を見る」ボタンの場所に出す（出ている間はボタンを隠す）。押すとボタンに戻る
         var evalOut = document.getElementById('eval-out');
         evalOut.addEventListener('click', function () { evalOut.hidden = true; });
+        function syncEval() { document.body.classList.toggle('eval-on', !evalOut.hidden); }
+        new MutationObserver(syncEval).observe(evalOut, { attributes: true, attributeFilter: ['hidden'] });
+        syncEval();
         var card = document.querySelector('.card');
         var touch = null;
         card.addEventListener('touchstart', function (e) {

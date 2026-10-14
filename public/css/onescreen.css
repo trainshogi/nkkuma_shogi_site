@@ -106,13 +106,18 @@ body[data-state="done"] .palette:not([hidden]) .palette-row { margin-bottom: 3px
 body[data-state="done"] .palette:not([hidden]) .palette-row:first-child { grid-template-columns: repeat(7, 1fr); }
 body[data-state="done"] .palette:not([hidden]) .palette-close { min-height: 40px; margin-top: 4px; }
 /* 直すマスが画面の下半分なら、パレットは上から出す（マスが隠れないように） */
-/* 形勢の答えは、渡すボタンの段の上に重ねて出す（盤と持ち駒は隠さない）。押すと閉じる */
-body[data-state="done"] .output { position: relative; }
-body[data-state="done"] #eval-out:not([hidden]) { position: absolute; left: 0; right: 0; bottom: 0; min-height: 100%; z-index: 5; box-sizing: border-box; margin: 0 !important; padding: 6px 30px 6px 10px !important; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,.12); cursor: pointer; }
-body[data-state="done"] #eval-out:not([hidden]) > div:first-child { height: 10px !important; margin-bottom: 4px !important; }
-body[data-state="done"] #eval-text { font-size: 13px !important; line-height: 1.35; }
-body[data-state="done"] #eval-text small { font-size: 10.5px; }
-body[data-state="done"] #eval-out:not([hidden])::after { content: "×"; position: absolute; top: 4px; right: 10px; font-size: 18px; line-height: 1; color: #888; }
+/* 形勢の答えは「形勢を見る」ボタンの場所に、ボタン 1 つ分の大きさで出す。
+   盤・持ち駒・ぴよ将棋・コピーなどの渡すボタンは隠さない。押すとボタンに戻る */
+body.eval-on[data-state="done"] #btn-eval { display: none; }
+body[data-state="done"] #eval-out:not([hidden]) { order: 1; grid-column: span 2; position: relative; align-self: stretch; box-sizing: border-box; min-width: 0; min-height: 40px; margin: 0 !important; padding: 3px 16px 3px 8px !important; border-radius: 10px !important; display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
+body[data-state="done"] #eval-out:not([hidden]) > div:first-child { height: 4px !important; margin-bottom: 2px !important; border-radius: 3px !important; }
+body[data-state="done"] #eval-text { font-size: 12px !important; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body[data-state="done"] #eval-text .ev-engine { display: none; }
+body[data-state="done"] #eval-out:not([hidden])::after { content: "×"; position: absolute; top: 2px; right: 6px; font-size: 14px; line-height: 1; color: #888; }
+@media (max-width: 360px) {
+  body[data-state="done"] #eval-out:not([hidden]) { padding: 3px 12px 3px 6px !important; }
+  body[data-state="done"] #eval-text { font-size: 11px !important; }
+}
 body.pal-top[data-state="done"] .palette:not([hidden]) { top: 0; bottom: auto; border-radius: 0 0 16px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
 
 /* 小さな写真を押したら大きく見る（もう一度押すと戻る） */
