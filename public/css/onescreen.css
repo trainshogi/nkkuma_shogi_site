@@ -1,0 +1,107 @@
+/* 写真を選ぶ → 変換 → 直す → 渡す を、スクロールせずに 1 画面で済ませるための並び（いまは alpha.html だけが読む）。
+   site.js と各ボタンの id には触らず、状態（body[data-state]）ごとに見せ方だけを変える。 */
+
+/* 写真を選んだあとは、入口の帯・ロゴ・くまを畳んで道具に場所を譲る */
+body:not([data-state="empty"]) .nk-band,
+body:not([data-state="empty"]) .app > .logo,
+body:not([data-state="empty"]) .app > .howto,
+body:not([data-state="empty"]) .alpha-note,
+body:not([data-state="empty"]) .alpha-ribbon { display: none; }
+body:not([data-state="empty"]) .app { padding-top: 8px; }
+body:not([data-state="empty"]) .card { margin-top: 0; }
+
+/* 写真・変換中・失敗: 写真は画面の残りに収まる大きさにする */
+body[data-state="photo"] .photo,
+body[data-state="busy"] .photo,
+body[data-state="error"] .photo { width: auto; max-width: 100%; max-height: calc(100svh - 260px); margin: 0 auto; }
+body[data-state="photo"] .card-label,
+body[data-state="busy"] .card-label,
+body[data-state="error"] .card-label { display: none; }
+
+/* 結果: 小さな元の写真・手番・やり直す を 1 行に、その下に盤、いちばん下に渡すボタン */
+.one-reset { display: none; }
+body[data-state="done"] [data-role="reset"] { display: none; }
+body[data-state="done"] .card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "photo seg reset" "board board board" "out out out";
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+}
+body[data-state="done"] .result-done { display: contents; }
+body[data-state="done"] .card-label { display: none; }
+/* 写真は縦横比を変えずに縮める（切り抜くと、上に重ねる盤の枠がずれるため） */
+body[data-state="done"] .photo-wrap { grid-area: photo; height: 44px; }
+body[data-state="done"] .photo { width: auto; height: 44px; max-width: 80px; border-radius: 8px; cursor: zoom-in; }
+body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 1.5px; }
+body[data-state="done"] .result-done .segment { grid-area: seg; margin: 0; }
+body[data-state="done"] .result-done .seg-btn { min-height: 44px; }
+body[data-state="done"] .one-reset { grid-area: reset; display: inline-flex; min-height: 44px; padding: 0 12px; font-size: 14px; }
+
+/* 盤は「画面の高さ − ほかの部品」に収まる幅にする（背の高い画面では横幅いっぱい）。持ち駒の列は横幅いっぱいのまま */
+body[data-state="done"] .board-unit { grid-area: board; margin: 0; gap: 2px; min-width: 0; }
+body[data-state="done"] .board-frame { width: min(100%, calc((100svh - 320px) / 1.08 + 16px)); margin: 0 auto; }
+body[data-state="done"] .hand { min-height: 32px; padding: 0; gap: 3px; flex-wrap: nowrap; }
+body[data-state="done"] .chip { min-height: 30px; padding: 2px 3px; }
+/* 幅 320px ほどの小さいスマホでも、持ち駒 7 つを 1 列に収める（はみ出すより少し詰める） */
+body[data-state="done"] .chip { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+@media (max-width: 360px) {
+  body[data-state="done"] .hand { gap: 2px; }
+  body[data-state="done"] .chip { padding: 2px 1px; }
+  body[data-state="done"] .result-done .seg-btn { font-size: 13px; white-space: nowrap; }
+  body[data-state="done"] .one-reset { padding: 0 8px; }
+}
+
+/* 渡すボタン: 見出しを外して 2 段にまとめる（上: 検討アプリと画像、下: KIF/SFEN のコピーと保存） */
+body[data-state="done"] .output { grid-area: out; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; min-width: 0; }
+body[data-state="done"] .output-label { display: none; }
+body[data-state="done"] .app-links,
+body[data-state="done"] .copy-row { display: contents; }
+body[data-state="done"] .linkbtn { justify-content: center; min-height: 40px; padding: 4px 6px; min-width: 0; }
+body[data-state="done"] .linkbtn img { height: 20px; width: auto; max-width: 100%; }
+body[data-state="done"] .output .btn,
+body[data-state="done"] .format-select { min-height: 40px; font-size: 13px; padding: 0 4px; white-space: nowrap; min-width: 0; }
+body[data-state="done"] .output [data-role="eval-row"] { display: contents; }
+body[data-state="done"] #btn-eval { order: 1; grid-column: span 2; margin: 0; }
+body[data-state="done"] #btn-piyo, body[data-state="done"] #btn-kento { order: 1; }
+body[data-state="done"] #format, body[data-state="done"] #btn-copy, body[data-state="done"] #btn-save { order: 2; }
+body[data-state="done"] #btn-save { grid-column: span 2; }
+
+/* 駒を直すパレットは盤を押し下げず、画面の下から出す */
+body[data-state="done"] .palette:not([hidden]) {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; margin: 0;
+  max-width: 520px; margin-inline: auto;
+  border-radius: 16px 16px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,.15);
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+body[data-state="done"] .palette:not([hidden]) .pcell { aspect-ratio: auto; height: 40px; font-size: 16px; }
+body[data-state="done"] .palette:not([hidden]) .palette-row { margin-bottom: 3px; }
+body[data-state="done"] .palette:not([hidden]) .palette-row:first-child { grid-template-columns: repeat(7, 1fr); }
+body[data-state="done"] .palette:not([hidden]) .palette-close { min-height: 40px; margin-top: 4px; }
+/* 直すマスが画面の下半分なら、パレットは上から出す（マスが隠れないように） */
+/* 形勢の答えは、盤を隠さないよう画面の下に重ねて出す。押すと閉じる */
+body[data-state="done"] #eval-out:not([hidden]) { position: fixed; left: 0; right: 0; bottom: 0; z-index: 55; max-width: 520px; margin: 0 auto !important; border-radius: 16px 16px 0 0 !important; box-shadow: 0 -10px 30px rgba(0,0,0,.15); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) !important; cursor: pointer; }
+body[data-state="done"] #eval-out:not([hidden])::after { content: "押すと閉じます"; display: block; margin-top: 6px; font-size: 12px; color: #888; text-align: center; }
+body.pal-top[data-state="done"] .palette:not([hidden]) { top: 0; bottom: auto; border-radius: 0 0 16px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.15); padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
+
+/* 小さな写真を押したら大きく見る（もう一度押すと戻る） */
+body.photo-big[data-state="done"] .photo-wrap { position: fixed; inset: 0; z-index: 70; width: auto; height: auto; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; }
+body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width: 96vw; max-height: 92svh; cursor: zoom-out; }
+
+/* パソコン・タブレット横: 左に元の写真を大きく、右に盤と渡すボタン */
+@media (min-width: 900px) {
+  body:not([data-state="empty"]) .app { max-width: 1040px; }
+  body[data-state="done"] .card {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas: "photo seg reset" "photo board board" "photo out out";
+    gap: 10px 16px; align-items: start; padding: 14px;
+  }
+  body[data-state="done"] .photo-wrap { width: 100%; height: auto; align-self: start; }
+  body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); cursor: zoom-in; }
+  body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 4px; }
+  body[data-state="done"] .result-done .segment { min-width: 260px; }
+  body[data-state="done"] .board-unit, body[data-state="done"] .output { width: min(480px, calc((100svh - 350px) / 1.08 + 16px)); justify-self: center; }
+  body[data-state="done"] .board-frame { width: 100%; }
+}

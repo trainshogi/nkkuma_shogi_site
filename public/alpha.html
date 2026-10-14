@@ -31,6 +31,7 @@
     <meta name="robots" content="noindex, nofollow">
 
     <link href="css/site.css" rel="stylesheet">
+    <link href="css/onescreen.css" rel="stylesheet">
     <style>
       /* α版限定のスタイル（site.cssは触らない） */
       .alpha-ribbon{
@@ -65,6 +66,12 @@
       .mochi-postproc-row{ display:flex; align-items:center; gap:8px; margin-top:12px; cursor:pointer; font-size:14px; }
       .mochi-postproc-row input{ width:18px; height:18px; flex:none; }
       .mochi-postproc-row small{ color:var(--muted); font-size:12px; font-weight:400; }
+      /* 認識の設定は、写真を選んだあとは 1 行にたたむ（押すと開く）。結果の画面では隠す */
+      .alpha-opts > summary{ margin-top:10px; cursor:pointer; font-size:13px; font-weight:700; color:var(--muted); }
+      .alpha-opts-now{ font-weight:400; }
+      body[data-state="busy"] .alpha-opts, body[data-state="done"] .alpha-opts{ display:none; }
+      /* 1 画面の並び: 形勢ボタンが無いので、ぴよ将棋と KENTO で 1 段目を埋める */
+      body[data-state="done"] #btn-piyo, body[data-state="done"] #btn-kento{ grid-column: span 2; }
     </style>
   <style>
     /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
@@ -131,6 +138,8 @@
         <button type="button" class="btn btn-ghost" id="btn-howto">❓ はじめての方へ：使い方をみる</button>
       </div>
 
+      <details class="alpha-opts" open>
+      <summary>認識の設定 <span class="alpha-opts-now" id="alpha-opts-now"></span></summary>
       <!-- α: 駒認識モデル v1/v2/v3 切替（デフォルトv2＝推奨。モデル詳細は非公開） -->
       <div class="card-label" style="margin-top:10px;">駒認識モデル</div>
       <div class="segment model-toggle" role="group" aria-label="駒認識モデル">
@@ -170,6 +179,7 @@
         <input type="checkbox" id="joint-solver">
         <span>持ち駒情報で盤面も補正する（joint）<small>（実験的・model=v1/v2のみ有効）</small></span>
       </label>
+      </details>
 
       <!-- 3. 操作列（empty / photo） -->
       <div class="actions" data-role="pick">
@@ -206,6 +216,7 @@
         <!-- done状態: 盤・編集・出力 -->
         <div class="result-done" data-role="done">
           <div class="card-label">認識結果（駒をタップで修正）</div>
+          <button type="button" class="btn one-reset" id="btn-reset2">やり直す</button>
 
           <div class="board-unit" id="board-unit">
             <div class="hand hand--gote" data-hand="gote"></div>
@@ -336,5 +347,61 @@
     <!-- 唯一の外部依存: Compressor.js -->
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
     <script src="js/site-alpha.js"></script>
+    <script>
+      // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
+      (function () {
+        var photo = document.getElementById('photo');
+        photo.addEventListener('click', function () {
+          if (document.body.getAttribute('data-state') === 'done') { document.body.classList.toggle('photo-big'); }
+        });
+        // 駒を直すパレットを開いたとき、選んだマスが下半分ならパレットを上から出す
+        var pal = document.getElementById('palette');
+        new MutationObserver(function () {
+          if (pal.hidden) { document.body.classList.remove('pal-top'); return; }
+          var sel = document.querySelector('.sq.selected, .chip.selected');
+          var r = sel && sel.getBoundingClientRect();
+          document.body.classList.toggle('pal-top', !!r && (r.top + r.bottom) / 2 > window.innerHeight / 2);
+        }).observe(pal, { attributes: true, attributeFilter: ['hidden'], childList: true });
+        // 盤の枠（#frame-overlay）を、写真が実際に出ている四角にぴったり重ねる。
+        // 小さい写真・大きい写真・パソコンの並びで、写真の箱と枠の箱がずれないように
+        var wrap = photo.parentNode;
+        function fitFrame() {
+          var svg = document.getElementById('frame-overlay');
+          if (!svg) { return; }
+          svg.style.left = photo.offsetLeft + 'px';
+          svg.style.top = photo.offsetTop + 'px';
+          svg.style.width = photo.offsetWidth + 'px';
+          svg.style.height = photo.offsetHeight + 'px';
+        }
+        new MutationObserver(fitFrame).observe(wrap, { childList: true });
+        new MutationObserver(fitFrame).observe(document.body, { attributes: true, attributeFilter: ['class', 'data-state'] });
+        if (window.ResizeObserver) { new ResizeObserver(fitFrame).observe(photo); }
+        photo.addEventListener('load', fitFrame);
+        window.addEventListener('resize', fitFrame);
+        // 認識の設定: 最初の画面では開き、写真を選んだら 1 行（いまの設定）にたたむ
+        var opts = document.querySelector('.alpha-opts');
+        var optsNow = document.getElementById('alpha-opts-now');
+        function showOpts() {
+          var on = function (sel) { var b = document.querySelector(sel + ' .seg-btn.active'); return b ? b.textContent.trim() : '-'; };
+          var marks = [['mochi-ocr', 'OCR'], ['mochi-postproc', '補正'], ['joint-solver', 'joint']]
+            .filter(function (c) { var el = document.getElementById(c[0]); return el && el.checked && !el.disabled; })
+            .map(function (c) { return c[1]; });
+          optsNow.textContent = '（駒 ' + on('.model-toggle') + '・枠 ' + on('.waku-toggle') + '・持ち駒 ' + on('.mochi-crop-toggle') +
+            (marks.length ? '・' + marks.join('・') : '') + '）';
+        }
+        opts.addEventListener('click', function () { setTimeout(showOpts, 0); });
+        opts.addEventListener('change', showOpts);
+        var lastState = document.body.getAttribute('data-state');
+        new MutationObserver(function () {
+          var s = document.body.getAttribute('data-state');
+          if (s !== lastState) { opts.open = (s === 'empty'); lastState = s; }
+        }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
+        showOpts();
+        document.getElementById('btn-reset2').addEventListener('click', function () {
+          document.body.classList.remove('photo-big');
+          document.getElementById('btn-reset').click();
+        });
+      })();
+    </script>
   </body>
 </html>

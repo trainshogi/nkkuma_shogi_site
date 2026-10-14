@@ -283,7 +283,7 @@
 
   function renderTeban() {
     var t = state.result.teban;
-    var btns = document.querySelectorAll('.seg-btn');
+    var btns = document.querySelectorAll('.seg-btn[data-teban]');
     for (var i = 0; i < btns.length; i++) {
       btns[i].classList.toggle('active', btns[i].getAttribute('data-teban') === t);
     }
@@ -766,8 +766,8 @@
       bumpMochi(chip.getAttribute('data-side'), chip.getAttribute('data-koma'));
     });
 
-    // 手番セグメント
-    var segBtns = document.querySelectorAll('.seg-btn');
+    // 手番セグメント（設定の切り替えボタンも .seg-btn なので、手番のボタンだけに絞る）
+    var segBtns = document.querySelectorAll('.seg-btn[data-teban]');
     for (var i = 0; i < segBtns.length; i++) {
       (function (btn) {
         btn.addEventListener('click', function () {
