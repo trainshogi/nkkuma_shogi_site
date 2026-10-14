@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>【α版】特定商取引法に基づく表記 | Shogiban to Kif</title>
+  <!-- α版: どこからもリンクしない。「出して」で /tokushoho.html に移し、フッターと taikai・お問い合わせからつなぐ -->
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #222; background: #fff; line-height: 1.8; -webkit-text-size-adjust: 100%;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+    h1 { font-size: 23px; line-height: 1.5; margin: 6px 0 8px; }
+    .lead { color: #555; margin: 0 0 20px; font-size: 15px; }
+    a { color: #0b67c2; }
+    table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    th, td { text-align: left; vertical-align: top; padding: 12px 10px; border-top: 1px solid #e5e1d8; }
+    tr:last-child th, tr:last-child td { border-bottom: 1px solid #e5e1d8; }
+    th { width: 34%; background: #fafaf8; font-weight: 700; }
+    td p { margin: 0 0 .6em; } td p:last-child { margin: 0; }
+    .muted { color: #666; font-size: 14px; }
+    @media (max-width: 560px) {
+      table, tbody, tr, th, td { display: block; width: 100%; }
+      th { border-top: 1px solid #e5e1d8; padding: 10px 10px 4px; }
+      td { border-top: 0; padding: 4px 10px 14px; }
+      tr:last-child th { border-bottom: 0; }
+    }
+    .updated { color: #888; font-size: 13px; margin-top: 16px; }
+    .site-foot { border-top: 1px solid #e5e5e5; margin-top: 24px; padding: 18px 16px; text-align: center; color: #888; font-size: 13px; }
+    .site-foot a { color: #0b67c2; }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>特定商取引法に基づく表記</h1>
+    <p class="lead">大会・教室・例会の対局を撮って棋譜にするサービス（出張での撮影と棋譜づくり）についての表記です。アプリ「コマドリ」と、写真や動画から棋譜にするこのサイトの機能には、いまは費用をいただいていません。</p>
+
+    <table>
+      <tr><th>事業者の名前</th><td>佐藤 旭（えぬっくま）</td></tr>
+      <tr><th>運営の責任者</th><td>佐藤 旭</td></tr>
+      <tr><th>住所</th><td>ご請求があれば、遅れずにお知らせします。<a href="/contact-alpha.html?topic=other">お問い合わせ</a>またはメールでお知らせください。</td></tr>
+      <tr><th>電話番号</th><td>ご請求があれば、遅れずにお知らせします。</td></tr>
+      <tr><th>メールアドレス</th><td><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></td></tr>
+      <tr><th>サービスの内容</th><td>大会・教室・例会の会場に撮影の機材を持ち込み、対局を撮って、棋譜（KIF など）にしてお渡しします。運営の方には、映像を見ながら棋譜を確かめて直せるページもお渡しします。</td></tr>
+      <tr><th>値段</th><td>
+        <p>棋譜にしてお渡しできた対局の数 × 1 局あたりの金額です。うまく棋譜にならなかった対局の分はいただきません。</p>
+        <p>1 局あたりの金額は、お申し込みの前にメールでお見積りをお送りし、ご了承をいただいてから決めます。</p>
+      </td></tr>
+      <tr><th>値段のほかにかかる費用</th><td>
+        <p>交通費（お見積りのときにお知らせします）</p>
+        <p>お振込みの手数料（お客さまのご負担です）</p>
+      </td></tr>
+      <tr><th>お支払いの方法</th><td>銀行振込（棋譜をお渡ししたあとに、請求書をメールでお送りします）</td></tr>
+      <tr><th>お支払いの時期</th><td>請求書に書いた期日まで（請求書をお送りしてから 2 週間ほどを目安にしています）</td></tr>
+      <tr><th>サービスをお渡しする時期</th><td>撮影は、お申し込みのときに決めた日に行います。棋譜は、対局のあと当日から 1 週間以内にお渡しします。</td></tr>
+      <tr><th>お申し込みの取り消し</th><td>
+        <p>棋譜をお渡しする前なら、いつでも取り消せます。棋譜の分の費用はかかりません。</p>
+        <p>前日・当日の取り消しで、すでに交通費がかかっているときは、その分だけご相談させてください。</p>
+      </td></tr>
+      <tr><th>お渡ししたあと</th><td>棋譜に誤りがあったときは、こちらで直してお送りし直します。直してもお渡しできなかった対局の分は、いただきません。</td></tr>
+    </table>
+    <p class="updated">2026年10月 作成</p>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+</body>
+</html>
