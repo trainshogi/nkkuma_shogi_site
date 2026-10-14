@@ -264,11 +264,16 @@
 
   <script>
   (function () {
-    // 受け口。Google フォームを作ったら action と entries を埋める（作り方はスレッドの Apps Script）。
-    // 空のあいだは、入力から作った文をメールで送ってもらう。
+    // 受け口は Google フォーム「えぬっくま お問い合わせ」（nkkumaservice のドライブ）。届くと nkkumaservice にメールが来る。
+    // action を空にすると、入力から作った文をメールで送ってもらう形に戻る。
     var FORM = {
-      action: '',   // 'https://docs.google.com/forms/d/e/…/formResponse'
-      entries: {}   // { kind: 'entry.123', title: 'entry.456', … }
+      action: 'https://docs.google.com/forms/d/e/1FAIpQLSftTWiNv1j84GrCaS4s4cgwHXG5XNKbuh5xSJZGBmORiBukBg/formResponse',
+      entries: {
+        topic: 'entry.926417295', kind: 'entry.1672490922', title: 'entry.524897082', date: 'entry.530375494',
+        time: 'entry.868939106', place: 'entry.621169865', scope: 'entry.985053546', boards: 'entry.676775318',
+        players: 'entry.1032774729', device: 'entry.495001034', person: 'entry.1057541542', email: 'entry.287817065',
+        tel: 'entry.404903896', note: 'entry.1953443790'
+      }
     };
     var TO = 'nkkumaservice@gmail.com';
 
