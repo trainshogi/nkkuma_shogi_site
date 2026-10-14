@@ -62,6 +62,46 @@ def parse_front_matter(text, path):
     return meta, text[m.end():]
 
 
+X_POST_RE = re.compile(r"^https://(?:x|twitter)\.com/([A-Za-z0-9_]{1,15})/status/([0-9]+)$")
+X_WIDGETS = '<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>'
+
+
+def x_posts_html(meta, path):
+    """front matter の x_posts から「X の投稿」の節を作る。
+
+    x_posts: https://x.com/<名前>/status/<番号> 表示名, https://x.com/... 表示名
+    のように、カンマ区切りで並べる（表示名は省略できる）。
+    X の埋め込み（blockquote.twitter-tweet + widgets.js）で出し、
+    スクリプトが動かないときも投稿へのリンクとして読めるようにする。
+    """
+    raw = meta.get("x_posts", "")
+    if not raw:
+        return ""
+    items = []
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        url, _, name = entry.partition(" ")
+        m = X_POST_RE.match(url)
+        if not m:
+            sys.exit(f"{path}: x_posts の URL は https://x.com/<名前>/status/<番号> の形にしてください: {url}")
+        handle, status = m.groups()
+        url = f"https://x.com/{handle}/status/{status}"
+        who = f"{html.escape(name.strip())}（@{handle}）の投稿" if name.strip() else f"@{handle} の投稿"
+        items.append(
+            '<blockquote class="twitter-tweet" data-lang="ja" data-dnt="true">'
+            f'<p>{who}</p>'
+            f'<p><a href="{url}">X で見る</a></p></blockquote>'
+        )
+    return (
+        '<section class="x-posts">\n<h2>X の投稿</h2>\n'
+        + "\n".join(items)
+        + "\n</section>\n"
+        + X_WIDGETS
+    )
+
+
 def render(template, meta, content_html):
     out = template
     for k in ("title", "description", "slug", "date"):
@@ -82,6 +122,12 @@ def main():
         with open(path, encoding="utf-8") as f:
             meta, body = parse_front_matter(f.read(), path)
         content = markdown.markdown(body, extensions=["extra", "sane_lists"])
+        # 本文の {{x_posts}} の行に「X の投稿」の節を置く（無ければ本文の最後）
+        x_html = x_posts_html(meta, path)
+        if "<p>{{x_posts}}</p>" in content:
+            content = content.replace("<p>{{x_posts}}</p>", x_html)
+        elif x_html:
+            content += "\n" + x_html
         page = render(template, meta, content)
         # このサイトのCloudFront構成はサブディレクトリのindex自動配信をしない
         # (ルートのDefaultRootObjectのみ)。既存(faq.html等)と同じフラットな
