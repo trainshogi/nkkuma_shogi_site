@@ -260,7 +260,8 @@
         この一局を:
         <a id="ext-piyo" href="#">ぴよ将棋アプリ</a> ・
         <a id="ext-piyow" href="#" target="_blank" rel="noopener">ぴよ将棋w</a> ・
-        <a id="ext-extend" href="#" target="_blank" rel="noopener">SHOGI-EXTEND</a>
+        <a id="ext-extend" href="#" target="_blank" rel="noopener">SHOGI-EXTEND</a> ・
+        <a id="ext-shogihome" href="#" target="_blank" rel="noopener">ShogiHome</a>
       </p>
       <p class="note" id="ext-note" hidden></p>
     </div>
@@ -1164,6 +1165,45 @@
     if (!viewer.positions) { return; }
     showExtNote('');
     window.open('https://www.shogi-extend.com/adapter?body=' + encodeUrl(gameUsi()), '_blank', 'noopener');
+  });
+
+  // ShogiHome の Web 版は ?usen= で棋譜を受け取る(sunfish-shogi/shogihome src/renderer/store/webapp.ts)。
+  // USEN は ShogiHome が使う tsshogi の Record.usen と同じ書き方:
+  //   開始局面(平手なら空。'/'→'_'、空白→'.'、'+'→'z') + '~0.' + 手の並び + '.'
+  //   1手 = ((元 * 81 + 先) * 2 + 成) を36進3桁。マスは (段-1)*9 + (筋-1)、
+  //   打つ駒の元は 81 + 番号(金9 歩10 香11 桂12 銀13 角14 飛15)
+  // 反則の手もそのまま読む(先方は ignoreValidation で並べる)ので、ぴよ将棋wのように手前で切らない。
+  // ?ply= は今見ている手。スマホ・タブレットは公式の入口と同じく ?mobile を付ける
+  var USEN_HAND = { ki: 90, fu: 91, ky: 92, ke: 93, gi: 94, ka: 95, hi: 96 };
+  function usenSquare(sq) { return (sq[1] - 1) * 9 + (sq[0] - 1); }
+  function gameUsen() {
+    var start = toSfen(viewer.positions[0], 1);
+    var head = handicapNameFor(start) === '平手' ? '' :
+      start.replace(/ 1$/, '').split('/').join('_').split(' ').join('.').split('+').join('z');
+    var mv = viewer.plies.map(function (p) {
+      var m = p.move;
+      var from = m.from ? usenSquare(m.from) : USEN_HAND[BASE[m.kind] || m.kind];
+      var code = (from * 81 + usenSquare(m.to)) * 2 + (m.promote ? 1 : 0);
+      return ('00' + code.toString(36)).slice(-3);
+    }).join('');
+    return head + '~0.' + mv + '.';
+  }
+  function shogiHomeUrl() {
+    var mobile = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var url = 'https://sunfish-shogi.github.io/shogihome/webapp/index.html?' + (mobile ? 'mobile&' : '') +
+              'usen=' + gameUsen() + '&ply=' + viewer.idx;
+    var handicap = viewer.startName && viewer.startName !== '平手';
+    var bname = kifHeader(handicap ? '下手' : '先手') || kifHeader(handicap ? '先手' : '下手');
+    var wname = kifHeader(handicap ? '上手' : '後手') || kifHeader(handicap ? '後手' : '上手');
+    if (bname) { url += '&bname=' + encodeUrl(bname); }
+    if (wname) { url += '&wname=' + encodeUrl(wname); }
+    return url;
+  }
+  $('ext-shogihome').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!viewer.positions) { return; }
+    showExtNote('');
+    window.open(shogiHomeUrl(), '_blank', 'noopener');
   });
 
   // ---- 紙に印刷(アプリ 1.4.9 の「紙に印刷」と同じ形。組み方は js/kifu-paper.js) ----
