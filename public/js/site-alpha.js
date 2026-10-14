@@ -622,7 +622,7 @@
     var fd = new FormData();
     fd.append('upfile', state.blob);
     fd.append('hidden_rotate', '0');
-    fd.append('hidden_sengo', '0');       // API仕様更新: 手番は0固定(先手基準)
+    fd.append('hidden_sengo', 'true');    // 'true' のときだけ先手番で返る（docs/RECOGNITION_PARAMS.md）。'0' だと毎回「後手番」で開いていた
     fd.append('mode', 'all');             // API仕様更新: mode 必須
     fd.append('model', state.modelVersion); // v1/v2/v3 の駒認識モデル切替(API推奨v2)
     fd.append('waku', state.wakuVersion);   // 枠検出 v1/v2
@@ -678,11 +678,24 @@
       });
   }
 
+  // 持ち駒は 1 枚以上の駒だけ残す。0 枚の駒が { fu: 0 } の形で来ると、KIF では「歩」（1 枚）、
+  // SFEN では「0P」になり、ぴよ将棋などが読めない局面を渡してしまうため
+  function cleanMochi(mochi) {
+    var out = {};
+    for (var i = 0; i < HAND_KOMA.length; i++) {
+      var code = HAND_KOMA[i];
+      if (!mochi || !(code in mochi)) { continue; }
+      var n = mochi[code] === '' ? 1 : Number(mochi[code]);
+      if (n > 0) { out[code] = n; }
+    }
+    return out;
+  }
+
   function applyResult(data) {
     state.result = {
       ban_result: data.ban_result || {},
-      sente_mochi: data.sente_mochi || {},
-      gote_mochi: data.gote_mochi || {},
+      sente_mochi: cleanMochi(data.sente_mochi),
+      gote_mochi: cleanMochi(data.gote_mochi),
       teban: data.teban || 'sente'
     };
     state.points = (data.points && data.points.length === 4) ? data.points : null;
