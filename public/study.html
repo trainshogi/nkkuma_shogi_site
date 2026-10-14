@@ -88,17 +88,24 @@
     .board-row { display: flex; }
     .coord-side { display: grid; grid-template-rows: repeat(9, 1fr); width: 16px; padding: 2px 0;
                   font-size: 10.5px; color: #8a7a62; text-align: center; align-items: center; }
+    /* 盤と駒の絵はアプリ(コマドリ)と同じ。木目・罫線・星は画像1枚なので、升に線を引き直さない */
     #board { flex: 1; display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
-             border: 2px solid #7a5c39; border-radius: 3px;
-             background: linear-gradient(160deg, #f6dfae 0%, #efd29a 55%, #ecca8c 100%);
-             box-shadow: 0 2px 6px rgba(80, 55, 20, .18); }
-    #board .sq { aspect-ratio: 1; border: 0.5px solid rgba(122, 92, 57, .55); display: flex;
-                 align-items: center; justify-content: center;
-                 font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
-                 font-weight: 600; font-size: 22px; line-height: 1; color: #1d1a16; user-select: none; }
+             background: #e9c98a url(img/komadori/ban-mokume.jpg) center / 100% 100% no-repeat;
+             border: 1.4px solid #1f170d; box-shadow: 0 2px 6px rgba(80, 55, 20, .18); }
+    #board .sq { aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+                 font-size: 22px; line-height: 1; color: #1f170d; user-select: none; }
+    #board .sq img { height: 93%; width: auto; max-width: 100%; display: block; pointer-events: none; }
     #board .sq.gote { transform: rotate(180deg); }
-    #board .sq.last { background: rgba(240, 150, 70, .45); }
-    .hands { max-width: 342px; margin: 4px auto; font-size: 14px; color: #444; }
+    #board .sq.last { background: rgba(255, 149, 0, .5); }
+    #board .sq.from { background: rgba(255, 149, 0, .25); }
+    .hands { max-width: 342px; margin: 4px auto; font-size: 14px; color: #444;
+             display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 30px; }
+    .hand-mark { font-size: 15px; color: #1f170d; margin-right: 2px; }
+    .hand-chip { display: inline-flex; align-items: center; gap: 1px; }
+    .hand-chip img { height: 26px; width: auto; display: block; }
+    .hand-chip.gote img { transform: rotate(180deg); }
+    .hand-count { font-size: 12px; color: #888; font-variant-numeric: tabular-nums; }
+    .hand-none { font-size: 12px; color: #888; }
     .nav-row { display: flex; justify-content: center; align-items: center;
                gap: 6px; margin: 10px 0 4px; }
     #ply-label { font-size: 13.5px; min-width: 5.5em; text-align: center; }
@@ -634,34 +641,72 @@
   var viewer = { positions: null, plies: [], labels: [], idx: 0, evals: null,
                  startName: null, kifText: '', times: [], terminal: null };
 
-  function renderHandLine(el, hand, mark) {
-    var t = mark + '持駒：';
+  // 駒と盤の絵はアプリ(コマドリ)と同じもの: Shogi Images(久保良介)の二文字駒と木目盤、CC0。
+  // 駒は先手ぶんだけ持ち、後手は1枚を180°回す(アプリの PieceArt.swift と同じ)
+  var KOMA_IMG = { fu: 'fu', ky: 'kyo', ke: 'kei', gi: 'gin', ki: 'kin', ka: 'kaku', hi: 'hi',
+                   ou: 'gyoku', to: 'to', ny: 'nkyo', nk: 'nkei', ng: 'ngin', um: 'uma', ry: 'ryu' };
+  function komaImg(kind) {
+    var img = document.createElement('img');
+    img.src = 'img/komadori/koma/' + KOMA_IMG[kind] + '.png';
+    img.alt = KANJI_1[kind] || '';
+    img.draggable = false;
+    return img;
+  }
+
+  // 駒台(アプリの HandRow と同じ見せ方): 印、駒の絵、2枚以上は「×n」、空なら「持ち駒なし」
+  function renderHandLine(el, hand, mark, gote) {
+    el.innerHTML = '';
+    var m = document.createElement('span');
+    m.className = 'hand-mark';
+    m.textContent = mark;
+    el.appendChild(m);
     var any = false;
     HAND_ORDER.forEach(function (k) {
       var n = hand[k] || 0;
-      if (n > 0) { any = true; t += KANJI_1[k] + (n > 1 ? n : '') + ' '; }
+      if (n <= 0) { return; }
+      any = true;
+      var chip = document.createElement('span');
+      chip.className = 'hand-chip' + (gote ? ' gote' : '');
+      chip.appendChild(komaImg(k));
+      if (n > 1) {
+        var c = document.createElement('span');
+        c.className = 'hand-count';
+        c.textContent = '×' + n;
+        chip.appendChild(c);
+      }
+      el.appendChild(chip);
     });
-    el.textContent = any ? t : t + 'なし';
+    if (!any) {
+      var none = document.createElement('span');
+      none.className = 'hand-none';
+      none.textContent = '持ち駒なし';
+      el.appendChild(none);
+    }
   }
 
-  function renderBoard(pos, lastTo) {
+  // last = 直前の手({from, to})。移動元は薄く、移動先は濃く塗る(アプリと同じ)
+  function renderBoard(pos, last) {
     var board = $('board');
     board.innerHTML = '';
+    var to = last && last.to, from = last && last.from;
     for (var d = 1; d <= 9; d++) {
       for (var s = 9; s >= 1; s--) {
         var sq = document.createElement('div');
         sq.className = 'sq';
         var v = pos.ban[String(s) + String(d)];
         if (v && v !== ' * ') {
-          sq.textContent = KANJI_1[v.substr(1)] || '';
+          var kind = v.substr(1);
+          if (KOMA_IMG[kind]) { sq.appendChild(komaImg(kind)); }
+          else { sq.textContent = KANJI_1[kind] || ''; }
           if (v.charAt(0) === 'v') { sq.className += ' gote'; }
         }
-        if (lastTo && lastTo[0] === s && lastTo[1] === d) { sq.className += ' last'; }
+        if (to && to[0] === s && to[1] === d) { sq.className += ' last'; }
+        else if (from && from[0] === s && from[1] === d) { sq.className += ' from'; }
         board.appendChild(sq);
       }
     }
-    renderHandLine($('hands-gote'), pos.hands.gote, '△');
-    renderHandLine($('hands-sente'), pos.hands.sente, '▲');
+    renderHandLine($('hands-gote'), pos.hands.gote, '☖', true);
+    renderHandLine($('hands-sente'), pos.hands.sente, '☗', false);
   }
 
   function evalLabel(e) {
@@ -675,8 +720,8 @@
     if (!viewer.positions) { return; }
     viewer.idx = Math.max(0, Math.min(i, viewer.positions.length - 1));
     var pos = viewer.positions[viewer.idx];
-    var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
-    renderBoard(pos, lastTo);
+    var last = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move : null;
+    renderBoard(pos, last);
     showPositionLabel();
     var items = document.querySelectorAll('#move-list li');
     for (var k = 0; k < items.length; k++) {
@@ -865,14 +910,14 @@
     if (!viewer.positions) { return; }
     var moves = study.pvMoves || [];
     var pos = viewer.positions[viewer.idx];
-    var lastTo = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move.to : null;
+    var last = viewer.idx > 0 ? viewer.plies[viewer.idx - 1].move : null;
     for (var i = 0; i < step && i < moves.length; i++) {
       var mv = usiToMove(moves[i], pos);
       if (!mv) { step = i; break; }
       pos = applyMoveLocal(pos, mv);
-      lastTo = mv.to;
+      last = mv;
     }
-    renderBoard(pos, lastTo);
+    renderBoard(pos, last);
     study.previewStep = step;
     if (step > 0) { study.armed = true; }
     $('btn-study-close').hidden = step === 0;
