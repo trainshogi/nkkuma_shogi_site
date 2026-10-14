@@ -5,8 +5,7 @@
 body:not([data-state="empty"]) .nk-band,
 body:not([data-state="empty"]) .app > .logo,
 body:not([data-state="empty"]) .app > .howto,
-body:not([data-state="empty"]) .alpha-note,
-body:not([data-state="empty"]) .alpha-ribbon { display: none; }
+body:not([data-state="empty"]) .alpha-note { display: none; }
 body:not([data-state="empty"]) .app { padding-top: 8px; }
 body:not([data-state="empty"]) .card { margin-top: 0; }
 
