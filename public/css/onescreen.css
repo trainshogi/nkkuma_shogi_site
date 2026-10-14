@@ -123,8 +123,8 @@ body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width:
     grid-template-areas: "photo seg reset" "photo board board" "photo out out";
     gap: 10px 16px; align-items: start; padding: 14px;
   }
-  body[data-state="done"] .photo-wrap { grid-area: photo; width: 100%; height: auto; align-self: start; }
-  body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); cursor: zoom-in; }
+  body[data-state="done"] .photo-wrap { grid-area: photo; width: 100%; height: auto; align-self: center; }  /* 横長の写真でも盤の高さの真ん中に */
+  body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); margin: 0 auto; cursor: zoom-in; }
   body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 4px; }
   body[data-state="done"] .result-done .segment { min-width: 260px; }
   body[data-state="done"] .board-unit, body[data-state="done"] .output { width: min(480px, calc((100svh - 350px) / 1.08 + 16px)); justify-self: center; }
