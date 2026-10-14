@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
-  <title>お問い合わせ</title>
-  <!-- 相談フォームは /contact-alpha.html にまとめた。前に渡したこのアドレスからも開けるように -->
-  <meta http-equiv="refresh" content="0; url=/contact-alpha.html?topic=kiroku">
-  <script>location.replace('/contact-alpha.html?topic=kiroku');</script>
+  <title>移動しました</title>
+  <!-- α版は本番に移した。前に渡したアドレスからも開けるように -->
+  <meta http-equiv="refresh" content="0; url=/contact.html?topic=kiroku">
+  <script>location.replace('/contact.html?topic=kiroku' + (location.search && '/contact.html?topic=kiroku'.indexOf('?') < 0 ? location.search : ''));</script>
 </head>
-<body><p><a href="/contact-alpha.html?topic=kiroku">お問い合わせのページへ</a></p></body>
+<body><p><a href="/contact.html?topic=kiroku">新しいページへ</a></p></body>
 </html>

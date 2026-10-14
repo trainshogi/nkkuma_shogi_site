@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>お問い合わせ | Shogiban to Kif</title>
+  <meta name="description" content="大会・教室・例会の記録のご相談、アプリ「コマドリ」、写真や動画から棋譜にするこのサイトについてのお問い合わせ。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/contact.html">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; color: #222; background: #fff;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.8; -webkit-text-size-adjust: 100%;
+    }
+    main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+    h1 { font-size: 23px; line-height: 1.5; margin: 6px 0 6px; }
+    .lead { color: #555; margin: 0 0 22px; }
+    a { color: #0b67c2; }
+
+    fieldset { border: 0; margin: 0 0 20px; padding: 0; min-width: 0; }
+    legend, .lab { display: block; font-weight: 700; font-size: 15px; margin: 0 0 6px; padding: 0; }
+    .req::after { content: "必須"; margin-left: 8px; padding: 1px 7px; border-radius: 4px; background: #e5672e; color: #fff; font-size: 11px; font-weight: 700; vertical-align: 2px; }
+    .opt::after { content: "なくても可"; margin-left: 8px; color: #999; font-size: 12px; font-weight: 400; }
+    .hint { color: #777; font-size: 13px; margin: 4px 0 0; }
+    .field { margin: 0 0 20px; }
+
+    input[type=text], input[type=email], input[type=tel], input[type=number], input[type=date], textarea {
+      width: 100%; padding: 10px 12px; font-size: 16px; font-family: inherit;
+      border: 1px solid #d6d2c8; border-radius: 8px; background: #fff; color: #222;
+    }
+    textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+    input:focus, textarea:focus { outline: 2px solid #e5672e; outline-offset: 1px; border-color: #e5672e; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .row > input[type=date] { flex: 1 1 180px; }
+    .row > input[type=number] { flex: 0 0 110px; }
+    .unit { color: #555; }
+
+    /* 種類・撮りたい対局: 押しやすい札 */
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chips label { position: relative; }
+    .chips input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .chips span {
+      display: inline-block; padding: 8px 16px; border: 1px solid #d6d2c8; border-radius: 999px;
+      background: #fff; font-size: 15px; line-height: 1.4; cursor: pointer; user-select: none;
+    }
+    .chips input:checked + span { background: #00695c; border-color: #00695c; color: #fff; font-weight: 700; }
+    .chips input:focus-visible + span { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: #444; white-space: nowrap; }
+    .check input { width: 18px; height: 18px; margin: 0; }
+
+    .sec-lead { color: #555; font-size: 14.5px; margin: -4px 0 18px; }
+    .err { color: #b3261e; font-size: 13px; margin: 4px 0 0; }
+    .bad input, .bad textarea { border-color: #b3261e; }
+    .bad .chips span { border-color: #b3261e; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px 22px; border-radius: 999px; border: 1px solid #d6d2c8; background: #fff; color: #222;
+      font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; text-decoration: none;
+    }
+    .btn-primary { background: #e5672e; border-color: #e5672e; color: #fff; width: 100%; }
+    .btn-primary:disabled { opacity: .6; cursor: default; }
+    .after { color: #777; font-size: 13px; margin: 10px 0 0; text-align: center; }
+
+    .done { border: 1px solid #e0e0e0; border-radius: 12px; background: #fafaf8; padding: 18px 16px; }
+    .done h2 { font-size: 19px; margin: 0 0 8px; }
+    .done pre {
+      white-space: pre-wrap; word-break: break-all; font-family: inherit; font-size: 14px;
+      background: #fff; border: 1px solid #e5e1d8; border-radius: 8px; padding: 10px 12px; margin: 10px 0;
+    }
+    .done .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+    .site-foot { border-top: 1px solid #e5e5e5; margin-top: 24px; padding: 18px 16px; text-align: center; color: #888; font-size: 13px; }
+    .site-foot a { color: #0b67c2; }
+  </style>
+  <style>
+    /* 共通ヘッダー（taikai.html と同じもの） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>お問い合わせ</h1>
+    <p class="lead">ご用件を選んで書いてください。nkkumaservice@gmail.com から、メールでお返事します。</p>
+
+    <form id="f" novalidate>
+      <fieldset class="field" id="g-topic">
+        <legend class="req">ご用件</legend>
+        <div class="chips">
+          <label><input type="radio" name="topic" value="記録のご相談"><span>大会・教室・例会の記録</span></label>
+          <label><input type="radio" name="topic" value="コマドリ（アプリ）"><span>コマドリ（アプリ）</span></label>
+          <label><input type="radio" name="topic" value="写真・動画から棋譜（サイト）"><span>写真・動画から棋譜（このサイト）</span></label>
+          <label><input type="radio" name="topic" value="そのほか"><span>取材・連携・そのほか</span></label>
+        </div>
+      </fieldset>
+
+      <!-- 記録のご相談だけ -->
+      <div id="sec-kiroku" hidden>
+        <p class="sec-lead">日にちと場所、撮りたい対局の数を教えてください。伺えるかどうかと、何台まで撮れるかをお返事します。</p>
+
+        <fieldset class="field" id="g-kind">
+          <legend class="req">どんな会ですか</legend>
+          <div class="chips">
+            <label><input type="radio" name="kind" value="大会"><span>大会</span></label>
+            <label><input type="radio" name="kind" value="教室"><span>教室</span></label>
+            <label><input type="radio" name="kind" value="例会"><span>例会</span></label>
+            <label><input type="radio" name="kind" value="そのほか"><span>そのほか</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="lab opt" for="title">会の名前</label>
+          <input type="text" id="title" name="title" autocomplete="off" placeholder="例: 第10回 ○○将棋大会、○○こども教室">
+        </div>
+
+        <div class="field" id="g-date">
+          <label class="lab req" for="date">日にち</label>
+          <div class="row">
+            <input type="date" id="date" name="date">
+            <label class="check"><input type="checkbox" id="undecided" name="undecided">まだ決まっていない</label>
+          </div>
+          <input type="text" id="time" name="time" autocomplete="off" placeholder="時間（例: 10時〜17時、決勝は15時ごろ）" style="margin-top:8px">
+          <p class="hint">教室や例会で何回か続けて撮りたいときは、下の「ほかに伝えたいこと」に書いてください。</p>
+        </div>
+
+        <div class="field" id="g-place">
+          <label class="lab req" for="place">場所</label>
+          <input type="text" id="place" name="place" autocomplete="off" placeholder="例: ○○市民センター（東京都品川区）">
+        </div>
+
+        <fieldset class="field" id="g-scope">
+          <legend class="req">撮りたい対局</legend>
+          <div class="chips">
+            <label><input type="radio" name="scope" value="決勝戦だけ"><span>決勝戦だけ</span></label>
+            <label><input type="radio" name="scope" value="上位の数局"><span>上位の数局</span></label>
+            <label><input type="radio" name="scope" value="なるべく全部"><span>なるべく全部</span></label>
+            <label><input type="radio" name="scope" value="相談したい"><span>相談したい</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label class="lab opt" for="boards">同時に撮りたい盤の数</label>
+          <div class="row">
+            <input type="number" id="boards" name="boards" inputmode="numeric" min="1" max="200" placeholder="例: 4"><span class="unit">盤</span>
+          </div>
+          <p class="hint">分からなければ空けてください。盤の数に合わせて、撮れる台数をお返事します。</p>
+        </div>
+
+        <div class="field">
+          <label class="lab opt" for="players">参加するおおよその人数</label>
+          <div class="row">
+            <input type="number" id="players" name="players" inputmode="numeric" min="1" max="2000" placeholder="例: 40"><span class="unit">人くらい</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- コマドリのことだけ -->
+      <div class="field" id="sec-app" hidden>
+        <label class="lab opt" for="device">お使いの端末</label>
+        <input type="text" id="device" name="device" autocomplete="off" placeholder="例: iPhone 15、iPad（第10世代）、Pixel 8">
+        <p class="hint">うまく棋譜にならないときは、<a href="/komadori/support.html">サポート</a>の確かめ方も見てみてください。</p>
+      </div>
+
+      <div id="sec-common" hidden>
+        <div class="field" id="g-note">
+          <label class="lab opt" id="note-label" for="note">ほかに伝えたいこと</label>
+          <textarea id="note" name="note"></textarea>
+        </div>
+
+        <div class="field">
+          <label class="lab opt" id="person-label" for="person">お名前</label>
+          <input type="text" id="person" name="person" autocomplete="name">
+        </div>
+
+        <div class="field" id="g-email">
+          <label class="lab req" for="email">返信先のメールアドレス</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" placeholder="例: name@example.jp">
+        </div>
+
+        <div class="field" id="sec-tel" hidden>
+          <label class="lab opt" for="tel">電話番号</label>
+          <input type="tel" id="tel" name="tel" autocomplete="tel" inputmode="tel">
+          <p class="hint">当日の連絡用です。メールでのお返事が先になります。</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="send">送る</button>
+        <p class="after">返信は <a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a> から届きます。<br>書いていただいた内容は、このお問い合わせのお返事にだけ使います。</p>
+      </div>
+    </form>
+
+    <!-- 受け付けたあと（受け口がフォームのとき） -->
+    <div class="done" id="done-form" hidden>
+      <h2>受け付けました</h2>
+      <p>ありがとうございます。<span id="done-email"></span> あてに、nkkumaservice@gmail.com からお返事します。数日たっても届かないときは、迷惑メールのフォルダも見てみてください。</p>
+      <p>送った内容:</p>
+      <pre id="done-text"></pre>
+    </div>
+
+    <!-- 受け口がまだメールだけのとき、または送れなかったとき -->
+    <div class="done" id="done-mail" hidden>
+      <h2 id="mail-title">メールで送ってください</h2>
+      <p>メールのアプリが開きます。そのまま送ってください。開かないときは、下の文をコピーして <b>nkkumaservice@gmail.com</b> あてに送ってください。</p>
+      <pre id="mail-text"></pre>
+      <div class="btns">
+        <a class="btn" id="mail-open" href="#">メールを開く</a>
+        <button type="button" class="btn" id="mail-copy">文をコピーする</button>
+        <button type="button" class="btn" id="mail-back">入力に戻る</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a> ｜ <a href="/tokushoho.html">特定商取引法に基づく表記</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+
+  <script>
+  (function () {
+    // 受け口。Google フォームを作ったら action と entries を埋める（作り方はスレッドの Apps Script）。
+    // 空のあいだは、入力から作った文をメールで送ってもらう。
+    var FORM = {
+      action: '',   // 'https://docs.google.com/forms/d/e/…/formResponse'
+      entries: {}   // { kind: 'entry.123', title: 'entry.456', … }
+    };
+    var TO = 'nkkumaservice@gmail.com';
+
+    var f = document.getElementById('f');
+    var $ = function (id) { return document.getElementById(id); };
+    var undecided = $('undecided'), date = $('date');
+    undecided.addEventListener('change', function () { date.disabled = undecided.checked; if (undecided.checked) date.value = ''; });
+
+    function picked(name) { var r = f.querySelector('input[name=' + name + ']:checked'); return r ? r.value : ''; }
+    function fmtDate(v) {
+      if (!v) return '';
+      var d = new Date(v + 'T00:00:00');
+      if (isNaN(d)) return v;
+      return d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日（' + '日月火水木金土'[d.getDay()] + '）';
+    }
+
+    var KIROKU = '記録のご相談', APP = 'コマドリ（アプリ）';
+    var NOTE_PH = {
+      '記録のご相談': '例: 子どもの部と一般の部があります／会場の Wi-Fi はありません／まずは見学に来てほしい',
+      'コマドリ（アプリ）': '例: 竹で撮った局の棋譜が届かない、いつ・どんな画面で止まったか',
+      '写真・動画から棋譜（サイト）': '例: この写真がうまく読めない、使い方が分からない',
+      'そのほか': '例: 取材のご依頼、連携のご相談'
+    };
+    function setTopic(t) {
+      var k = t === KIROKU;
+      f.querySelectorAll('.bad').forEach(function (g) { g.classList.remove('bad'); var e = g.querySelector('.err'); if (e) e.remove(); });
+      $('sec-kiroku').hidden = !k;
+      $('sec-app').hidden = t !== APP;
+      $('sec-tel').hidden = !k;
+      $('sec-common').hidden = !t;
+      $('note-label').textContent = k ? 'ほかに伝えたいこと' : 'お問い合わせの内容';
+      $('note-label').className = 'lab ' + (k ? 'opt' : 'req');
+      $('person-label').textContent = k ? 'ご担当の方のお名前' : 'お名前';
+      $('note').placeholder = NOTE_PH[t] || '';
+      $('send').textContent = k ? 'この内容で相談する' : '送る';
+    }
+    f.addEventListener('change', function (ev) { if (ev.target.name === 'topic') setTopic(ev.target.value); });
+    // ?topic=kiroku / app / site / other で最初から選んでおく（taikai.html などからのリンク用）
+    var PRE = { kiroku: KIROKU, app: APP, site: '写真・動画から棋譜（サイト）', other: 'そのほか' }[new URLSearchParams(location.search).get('topic')];
+    if (PRE) { f.querySelector('input[name=topic][value="' + PRE + '"]').checked = true; setTopic(PRE); }
+
+    function collect() {
+      var t = picked('topic'), k = t === KIROKU;
+      return {
+        topic: t,
+        device: t === APP ? $('device').value.trim() : '',
+        note: $('note').value.trim(),
+        person: $('person').value.trim(),
+        email: $('email').value.trim(),
+        tel: k ? $('tel').value.trim() : '',
+        kind: !k ? '' : picked('kind'),
+        title: k ? $('title').value.trim() : '',
+        date: !k ? '' : undecided.checked ? 'まだ決まっていない' : fmtDate(date.value),
+        time: k ? $('time').value.trim() : '',
+        place: k ? $('place').value.trim() : '',
+        scope: k ? picked('scope') : '',
+        boards: k ? $('boards').value.trim() : '',
+        players: k ? $('players').value.trim() : ''
+      };
+    }
+
+    var LABELS = [
+      ['topic', 'ご用件'], ['device', '端末'], ['kind', '会の種類'], ['title', '会の名前'], ['date', '日にち'], ['time', '時間'], ['place', '場所'],
+      ['scope', '撮りたい対局'], ['boards', '同時に撮りたい盤の数'], ['players', '参加の人数'],
+      ['person', 'お名前'], ['email', 'メール'], ['tel', '電話'], ['note', '内容']
+    ];
+    function asText(v) {
+      return LABELS.map(function (p) {
+        var x = v[p[0]];
+        if (!x) return null;
+        if (p[0] === 'boards') x += ' 盤';
+        if (p[0] === 'players') x += ' 人くらい';
+        return p[0] === 'note' ? p[1] + ':\n' + x : p[1] + ': ' + x;
+      }).filter(Boolean).join('\n');
+    }
+    function subject(v) {
+      if (v.topic === KIROKU) return '記録のご相談（' + v.kind + (v.title ? '・' + v.title : '') + '）';
+      return 'お問い合わせ（' + v.topic + '）';
+    }
+
+    function check(v) {
+      var bad = [];
+      function mark(id, ok, msg) {
+        var g = $(id), e = g.querySelector('.err');
+        if (e) e.remove();
+        g.classList.toggle('bad', !ok);
+        if (!ok) { var p = document.createElement('p'); p.className = 'err'; p.textContent = msg; g.appendChild(p); bad.push(g); }
+      }
+      mark('g-topic', !!v.topic, 'ご用件を選んでください。');
+      if (!v.topic) return false;
+      var k = v.topic === KIROKU;
+      if (k) {
+        mark('g-kind', !!v.kind, '大会・教室・例会・そのほか から選んでください。');
+        mark('g-date', !!v.date, '日にちを選ぶか、「まだ決まっていない」にしてください。');
+        mark('g-place', !!v.place, '会場の名前か、市や区だけでも書いてください。');
+        mark('g-scope', !!v.scope, 'どれかを選んでください。分からなければ「相談したい」で大丈夫です。');
+      } else {
+        mark('g-note', !!v.note, 'お問い合わせの内容を書いてください。');
+      }
+      mark('g-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email), 'お返事を送るメールアドレスを書いてください。');
+      if (bad.length) bad[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return !bad.length;
+    }
+
+    function showMail(v, failed) {
+      var text = asText(v);
+      $('mail-title').textContent = failed ? 'うまく送れませんでした。メールで送ってください' : 'メールで送ってください';
+      $('mail-text').textContent = text;
+      var href = 'mailto:' + TO + '?subject=' + encodeURIComponent(subject(v)) + '&body=' + encodeURIComponent(text);
+      $('mail-open').href = href;
+      f.hidden = true; $('done-mail').hidden = false;
+      window.scrollTo(0, 0);
+      location.href = href;
+    }
+
+    // 直したところから、赤い印を消す
+    f.addEventListener('input', function (ev) {
+      var g = ev.target.closest('.bad');
+      if (!g) return;
+      g.classList.remove('bad');
+      var e = g.querySelector('.err'); if (e) e.remove();
+    });
+
+    $('mail-copy').addEventListener('click', function () {
+      var t = 'あて先: ' + TO + '\n件名: ' + subject(collect()) + '\n\n' + $('mail-text').textContent;
+      var b = this;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () {
+        b.textContent = 'コピーしました';
+      }, function () {
+        var r = document.createRange(); r.selectNodeContents($('mail-text'));
+        var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+        b.textContent = '選んだ文をコピーしてください';
+      });
+    });
+    $('mail-back').addEventListener('click', function () { $('done-mail').hidden = true; f.hidden = false; });
+
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var v = collect();
+      if (!check(v)) return;
+      try { gtag('event', 'contact_send', { topic: v.topic, kind: v.kind, scope: v.scope, via: FORM.action ? 'form' : 'mail' }); } catch (e) {}
+      if (!FORM.action) { showMail(v, false); return; }
+
+      var body = new URLSearchParams();
+      Object.keys(FORM.entries).forEach(function (k) { if (v[k]) body.append(FORM.entries[k], v[k]); });
+      var btn = $('send'); btn.disabled = true; btn.textContent = '送っています…';
+      // Google フォームは別のドメインなので返事は読めない（no-cors）。届かなかったときだけ例外になる
+      fetch(FORM.action, { method: 'POST', mode: 'no-cors', body: body }).then(function () {
+        $('done-email').textContent = v.email;
+        $('done-text').textContent = asText(v);
+        f.hidden = true; $('done-form').hidden = false;
+        window.scrollTo(0, 0);
+      }, function () {
+        btn.disabled = false; setTopic(v.topic);
+        showMail(v, true);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
