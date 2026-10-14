@@ -1,4 +1,4 @@
-/* 写真を選ぶ → 変換 → 直す → 渡す を、スクロールせずに 1 画面で済ませるための並び（いまは beta.html だけが読む）。
+/* 写真を選ぶ → 変換 → 直す → 渡す を、スクロールせずに 1 画面で済ませるための並び（いまは alpha.html だけが読む）。
    site.js と各ボタンの id には触らず、状態（body[data-state]）ごとに見せ方だけを変える。 */
 
 /* 写真を選んだあとは、入口の帯・ロゴ・くまを畳んで道具に場所を譲る */
@@ -35,8 +35,8 @@ body[data-state="done"] .card-label { display: none; }
 body[data-state="done"] .photo-wrap { grid-area: photo; height: 44px; }
 body[data-state="done"] .photo { width: auto; height: 44px; max-width: 80px; border-radius: 8px; cursor: zoom-in; }
 body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 1.5px; }
-body[data-state="done"] .segment { grid-area: seg; margin: 0; }
-body[data-state="done"] .seg-btn { min-height: 44px; }
+body[data-state="done"] .result-done .segment { grid-area: seg; margin: 0; }
+body[data-state="done"] .result-done .seg-btn { min-height: 44px; }
 body[data-state="done"] .one-reset { grid-area: reset; display: inline-flex; min-height: 44px; padding: 0 12px; font-size: 14px; }
 
 /* 盤は「画面の高さ − ほかの部品」に収まる幅にする（背の高い画面では横幅いっぱい）。持ち駒の列は横幅いっぱいのまま */
@@ -49,7 +49,7 @@ body[data-state="done"] .chip { flex: 0 1 auto; min-width: 0; overflow: hidden; 
 @media (max-width: 360px) {
   body[data-state="done"] .hand { gap: 2px; }
   body[data-state="done"] .chip { padding: 2px 1px; }
-  body[data-state="done"] .seg-btn { font-size: 13px; white-space: nowrap; }
+  body[data-state="done"] .result-done .seg-btn { font-size: 13px; white-space: nowrap; }
   body[data-state="done"] .one-reset { padding: 0 8px; }
 }
 
@@ -101,7 +101,7 @@ body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width:
   body[data-state="done"] .photo-wrap { width: 100%; height: auto; align-self: start; }
   body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); cursor: zoom-in; }
   body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 4px; }
-  body[data-state="done"] .segment { min-width: 260px; }
+  body[data-state="done"] .result-done .segment { min-width: 260px; }
   body[data-state="done"] .board-unit, body[data-state="done"] .output { width: min(480px, calc((100svh - 350px) / 1.08 + 16px)); justify-self: center; }
   body[data-state="done"] .board-frame { width: 100%; }
 }
