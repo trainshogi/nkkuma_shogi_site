@@ -407,22 +407,44 @@
           document.body.style.setProperty('--view-h', unit.offsetHeight + 'px');
         }
         function setView(showPhoto) {
+          stopPeek();
           if (showPhoto) { sizeView(); }
           document.body.classList.toggle('show-photo', showPhoto);
           viewBtn.setAttribute('aria-pressed', showPhoto ? 'true' : 'false');
         }
         viewBtn.addEventListener('click', function () { setView(!document.body.classList.contains('show-photo')); });
+        // 結果が出た直後に一度、盤を少し左へずらして写真の端をのぞかせ、横に払えることを見せる
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var peekTimer = null;
+        function stopPeek() {
+          clearTimeout(peekTimer);
+          document.body.classList.remove('peek');
+        }
+        function startPeek() {
+          stopPeek();
+          if (!phone.matches || reduceMotion.matches) { return; }
+          peekTimer = setTimeout(function () {
+            if (lastView !== 'done' || document.body.classList.contains('show-photo') || !pal.hidden) { return; }
+            sizeView();
+            // 写真の左端が、盤の右端から 56px 内側に来る位置
+            var cellW = unit.offsetWidth, pw = photo.offsetWidth;
+            document.body.style.setProperty('--peek-x', (cellW - 56 - (cellW - pw) / 2) + 'px');
+            document.body.classList.add('peek');
+          }, 600);
+        }
+        unit.addEventListener('animationend', stopPeek);
         var lastView = document.body.getAttribute('data-state');
         new MutationObserver(function () {
           var s = document.body.getAttribute('data-state');
           if (s === lastView) { return; }
           lastView = s;
-          if (s === 'done') { sizeView(); } else { setView(false); }
+          if (s === 'done') { sizeView(); startPeek(); } else { stopPeek(); setView(false); }
         }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
         window.addEventListener('resize', function () { if (lastView === 'done') { sizeView(); } });
         var card = document.querySelector('.card');
         var touch = null;
         card.addEventListener('touchstart', function (e) {
+          stopPeek();
           touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
         }, { passive: true });
         card.addEventListener('touchend', function (e) {
