@@ -54,8 +54,10 @@
     }
     </script>
 
+    <!-- ぴよ将棋へ渡すときのサーバーに、先に接続だけしておく（押してからの待ちを少し縮める） -->
+    <link rel="preconnect" href="https://us-central1-shogiban2kif.cloudfunctions.net" crossorigin>
     <link href="css/site.css" rel="stylesheet">
-    <link href="css/onescreen.css?v=20261015a" rel="stylesheet">
+    <link href="css/onescreen.css?v=20261015b" rel="stylesheet">
     <style>
       /* α版限定のスタイル（site.cssは触らない） */
       .alpha-note{
@@ -340,7 +342,7 @@
 
     <!-- 唯一の外部依存: Compressor.js -->
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
-    <script src="js/site-beta.js?v=20261014b"></script>
+    <script src="js/site-beta.js?v=20261015b"></script>
     <script>
       // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
       (function () {

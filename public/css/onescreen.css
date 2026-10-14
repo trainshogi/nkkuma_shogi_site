@@ -78,6 +78,10 @@ body[data-state="done"] .app-links,
 body[data-state="done"] .copy-row { display: contents; }
 body[data-state="done"] .linkbtn { justify-content: center; min-height: 40px; padding: 4px 6px; min-width: 0; }
 body[data-state="done"] .linkbtn img { height: 20px; width: auto; max-width: 100%; }
+/* ぴよ将棋へ渡している間（サーバーに棋譜を置いて URL をもらうまで）は、押したことが分かるように */
+.linkbtn.is-busy { position: relative; cursor: progress; }
+.linkbtn.is-busy img { opacity: .25; }
+.linkbtn.is-busy::after { content: "開いています…"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #333; white-space: nowrap; }
 body[data-state="done"] .output .btn,
 body[data-state="done"] .format-select { min-height: 40px; font-size: 13px; padding: 0 4px; white-space: nowrap; min-width: 0; }
 body[data-state="done"] .output [data-role="eval-row"] { display: contents; }
