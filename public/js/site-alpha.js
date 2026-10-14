@@ -516,8 +516,18 @@
     window.open(url, '_blank');
   }
 
+  // ぴよ将棋へは、棋譜をいったんサーバー（米国の Google Cloud）に置いてから URL で渡すので、
+  // 押してから開くまで少し待つ。待っている間はボタンに「開いています…」と出し、二度押しを防ぐ
+  function setPiyoBusy(busy) {
+    var btn = $('btn-piyo');
+    if (!btn) { return; }
+    btn.disabled = busy;
+    btn.classList.toggle('is-busy', busy);
+  }
+
   function jumpPiyo() {
     var kif = json_to_kif(state.result);
+    setPiyoBusy(true);
     fetch(PIYO_SAVE_URL + '?message=' + encodeURIComponent(kif))
       .then(function (res) {
         if (!res.ok) { throw new Error('save_kif failed'); }
@@ -525,9 +535,12 @@
       })
       .then(function (data) {
         location.href = 'piyoshogi://?url=' + data;
+        // アプリが開かなかったとき（ダイアログで断ったときなど）も、ボタンを押せる形に戻す
+        setTimeout(function () { setPiyoBusy(false); }, 1500);
       })
       .catch(function (err) {
         console.error(err);
+        setPiyoBusy(false);
         alert('連携に失敗しました。');
       });
   }
