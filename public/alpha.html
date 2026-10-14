@@ -33,6 +33,7 @@
     <!-- ぴよ将棋へ渡すときのサーバーに、先に接続だけしておく（押してからの待ちを少し縮める） -->
     <link rel="preconnect" href="https://us-central1-shogiban2kif.cloudfunctions.net" crossorigin>
     <link href="css/site.css" rel="stylesheet">
+    <link href="css/tool-foot.css?v=20261015a" rel="stylesheet">
     <link href="css/onescreen.css?v=20261015b" rel="stylesheet">
     <style>
       /* α版限定のスタイル（site.cssは触らない） */
@@ -263,64 +264,40 @@
       </div>
 
       <!-- 7. フッター -->
-      <footer class="site-foot">
-        <br>
-
-        <!-- FC2カウンター ここから -->
-        <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" /></noscript>
-        <!-- FC2カウンター ここまで -->
-        人目の訪問です。<br>
-        <button class="btn faq" id="btn-faq">FAQ</button>
-        <div id="share-wrap" style="text-align:center; margin-top:12px;">
-          <div class="share-row" style="display:flex; gap:8px; justify-content:center;">
-            <!-- Xポスト -->
-            <a id="share-x" href="#" aria-label="Xでポストする"
-               style="display:inline-flex; align-items:center; gap:4px;
-                      background:#000; color:#fff;
-                      padding:4px 10px;
-                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-              <span aria-hidden="true">𝕏</span>
-              ポスト
-            </a>
-            <!-- Facebookシェア -->
-            <a id="share-fb" href="#" aria-label="Facebookでシェアする"
-               style="display:inline-flex; align-items:center; gap:4px;
-                      background:#1877f2; color:#fff;
-                      padding:4px 10px;
-                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-              <span aria-hidden="true">f</span>
-              シェア
-            </a>
-          </div>
+      <footer class="site-foot tool-foot">
+        <!-- 広める・よくある質問（ボタンの id は js で使う） -->
+        <div class="tf-row">
+          <a id="share-x" class="tf-pill tf-x" href="#" aria-label="Xでポストする"><span class="tf-mark" aria-hidden="true">𝕏</span>ポスト</a>
+          <a id="share-fb" class="tf-pill tf-fb" href="#" aria-label="Facebookでシェアする"><span class="tf-mark" aria-hidden="true">f</span>シェア</a>
+          <button type="button" class="tf-pill" id="btn-faq">よくある質問</button>
         </div>
-        <br>
-        <p><font size="1">このサービスを利用することで、
-          <a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>
-          に同意したものとみなされます。</font>
-        </p>
 
-        <br>開発：nkkuma　twitter始めました<br>
-        <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
-        class="twitter-follow-button" data-show-count="false">
-        Follow @nkkuma_service
-        </a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        <div class="tf-support">
+          <p>このサービスが役立ったら、<br>コーヒーで応援していただけると嬉しいです ☕</p>
+          <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="34" width="142"></a>
+        </div>
 
-        <div style="margin-top:16px; text-align:center; font-size:14px; color:#555;">
-          <p style="margin-bottom:8px;">
-            このサービスが役立ったら<br>
-            コーヒーで応援していただけると嬉しいです ☕
+        <nav class="tf-nav" aria-label="ほかのページ">
+          <a href="/">写真から棋譜化（トップ）</a>
+          <a href="/video.html">動画まるごと棋譜化（β）</a>
+          <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ（iPhone・iPad）</a>
+          <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
+          <a href="/taikai.html">大会・教室</a>
+          <a href="/about.html">えぬっくまについて</a>
+          <a href="/contact.html">お問い合わせ</a>
+        </nav>
+
+        <div class="tf-small">
+          <p>このサービスを利用することで、<br><a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>に同意したものとみなされます。</p>
+          <p>開発：えぬっくま ・ <a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">X @nkkuma_service</a></p>
+          <p class="tf-count">
+            <!-- FC2カウンター ここから -->
+            <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" /></noscript>
+            <!-- FC2カウンター ここまで -->
+            人目の訪問です
           </p>
-          <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
-            <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
-                 alt="Buy Me A Coffee" height="36" width="150"
-                 style="opacity:0.9;">
-          </a>
+          <p>&copy; 2019-2026 Shogiban to Kif（えぬっくま）</p>
         </div>
-        <p>
-          &copy; 2025 Shogiban to Kif |
-          <a href="/privacy.html">プライバシーポリシー・利用規約</a>
-        </p>
       </footer>
     </main>
 

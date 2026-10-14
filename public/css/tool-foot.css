@@ -1,0 +1,20 @@
+/* 写真を KIF にする道具のページ（いまはアルファ・ベータ）のフッター。
+   上から「広める・よくある質問」→「応援」→「ほかのページ」→「小さな文字」の順に、まとまりごとに置く */
+.site-foot.tool-foot { margin: 32px 0 0; padding: 22px 0 28px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 13px; line-height: 1.7; }
+.tool-foot a { color: #444; text-decoration: none; }
+.tool-foot a:hover { text-decoration: underline; }
+.tool-foot p { margin: 0; }
+.tool-foot .tf-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.tool-foot .tf-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; margin: 0; padding: 0 14px; border-radius: 999px; border: 1px solid #e3e3e8; background: #fff; color: #222; font: inherit; font-size: 13px; font-weight: 700; line-height: 1; cursor: pointer; text-decoration: none; }
+.tool-foot .tf-pill:hover { background: #f6f6f8; text-decoration: none; }
+.tool-foot .tf-pill .tf-mark { font-weight: 900; }
+.tool-foot .tf-x .tf-mark { color: #000; }
+.tool-foot .tf-fb .tf-mark { color: #1877f2; font-family: Arial, sans-serif; }
+.tool-foot .tf-support { margin: 22px auto 0; max-width: 420px; padding: 14px 16px; border-radius: 14px; background: #fff8f1; border: 1px solid #f6e3cf; color: #6b4a2b; font-size: 13px; }
+.tool-foot .tf-support a { display: inline-block; margin-top: 8px; line-height: 0; }
+.tool-foot .tf-support img { height: 34px; width: auto; }
+.tool-foot .tf-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin: 22px 0 0; font-size: 13px; }
+.tool-foot .tf-small { margin-top: 18px; font-size: 11.5px; color: #999; line-height: 1.8; }
+.tool-foot .tf-small a { color: #888; text-decoration: underline; }
+.tool-foot .tf-count { display: inline-flex; align-items: center; gap: 2px; }
+.tool-foot .tf-count img { vertical-align: middle; }
