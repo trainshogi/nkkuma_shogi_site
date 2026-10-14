@@ -31,10 +31,24 @@ body[data-state="done"] .card {
 }
 body[data-state="done"] .result-done { display: contents; }
 body[data-state="done"] .card-label { display: none; }
-/* 写真は縦横比を変えずに縮める（切り抜くと、上に重ねる盤の枠がずれるため） */
-body[data-state="done"] .photo-wrap { grid-area: photo; height: 44px; }
-body[data-state="done"] .photo { width: auto; height: 44px; max-width: 80px; border-radius: 8px; cursor: zoom-in; }
-body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 1.5px; }
+/* スマホ: 写真は盤と同じ場所・同じ大きさに置き、左上のボタンか左右のスワイプで盤と入れ替える。
+   写真は縦横比を変えずに縮める（切り抜くと、上に重ねる盤の枠がずれるため）。
+   --view-w / --view-h は盤（持ち駒込み）の大きさで、alpha.html のスクリプトが入れる */
+.one-view { display: none; }
+@media (max-width: 899px) {
+  body[data-state="done"] .one-view { grid-area: photo; display: inline-flex; min-height: 44px; padding: 0 10px; font-size: 13px; white-space: nowrap; }
+  body[data-state="done"] .one-view .v-board,
+  body.show-photo[data-state="done"] .one-view .v-photo { display: none; }
+  body.show-photo[data-state="done"] .one-view .v-board { display: inline; }
+  body[data-state="done"] .board-unit,
+  body[data-state="done"] .photo-wrap { transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s; }
+  body[data-state="done"] .photo-wrap { grid-area: board; justify-self: center; align-self: center; visibility: hidden; opacity: 0; transform: translateX(32px); }
+  body[data-state="done"] .photo { width: auto; height: auto; max-width: var(--view-w, 100%); max-height: var(--view-h, 0px); cursor: zoom-in; }
+  body.show-photo[data-state="done"] .photo-wrap { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
+  body.show-photo[data-state="done"] .board-unit { visibility: hidden; opacity: 0; transform: translateX(-32px); }
+  /* 入れ替えの動きで、隠れている側が横にはみ出してスクロールが出ないように */
+  body[data-state="done"] .card { overflow-x: clip; }
+}
 body[data-state="done"] .result-done .segment { grid-area: seg; margin: 0; }
 /* 手番の字はボタンの真ん中に（アルファ・ベータは .seg-btn を縦並びにしているので、iPhone の Safari でも上に寄らないよう明示する） */
 body[data-state="done"] .result-done .seg-btn { min-height: 44px; display: flex; flex-direction: row; align-items: center; justify-content: center; padding: 0 4px; line-height: 1.2; }
@@ -99,7 +113,7 @@ body.photo-big[data-state="done"] .photo { width: auto; height: auto; max-width:
     grid-template-areas: "photo seg reset" "photo board board" "photo out out";
     gap: 10px 16px; align-items: start; padding: 14px;
   }
-  body[data-state="done"] .photo-wrap { width: 100%; height: auto; align-self: start; }
+  body[data-state="done"] .photo-wrap { grid-area: photo; width: 100%; height: auto; align-self: start; }
   body[data-state="done"] .photo { width: auto; height: auto; max-width: 100%; max-height: calc(100svh - 150px); cursor: zoom-in; }
   body[data-state="done"]:not(.photo-big) #frame-overlay polygon { stroke-width: 4px; }
   body[data-state="done"] .result-done .segment { min-width: 260px; }
