@@ -79,7 +79,21 @@
     }
     </script>
 
+    <!-- ぴよ将棋へ渡すときのサーバーに、先に接続だけしておく（押してからの待ちを少し縮める） -->
+    <link rel="preconnect" href="https://us-central1-shogiban2kif.cloudfunctions.net" crossorigin>
     <link href="css/site.css" rel="stylesheet">
+    <link href="css/onescreen.css?v=20261016a" rel="stylesheet">
+    <link href="css/tool-foot.css?v=20261016a" rel="stylesheet">
+    <style>
+      /* 1 画面の並び（トップだけ）: 渡すボタンは 3 段（検討アプリ / KIF・SFEN / 局面画像）なので、盤をその分だけ小さくする */
+      body[data-state="done"] #btn-piyo, body[data-state="done"] #btn-kento { grid-column: span 2; }
+      body[data-state="done"] #btn-img-share, body[data-state="done"] #btn-img-save { order: 3; grid-column: span 2; }
+      body[data-state="done"] .board-frame { width: min(100%, calc((100svh - 366px) / 1.08 + 16px)); }
+      @media (min-width: 900px) {
+        body[data-state="done"] .board-unit, body[data-state="done"] .output { width: min(480px, calc((100svh - 396px) / 1.08 + 16px)); }
+        body[data-state="done"] .board-frame { width: 100%; }
+      }
+    </style>
   <style>
     /* 共通ヘッダー（ほかのページと同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
     .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
@@ -190,6 +204,8 @@
         <!-- done状態: 盤・編集・出力 -->
         <div class="result-done" data-role="done">
           <div class="card-label">認識結果（駒をタップで修正）</div>
+          <button type="button" class="btn one-reset" id="btn-reset2">やり直す</button>
+          <button type="button" class="btn one-view" id="btn-view" aria-pressed="false"><span class="v-photo">📷 写真</span><span class="v-board">盤に戻る</span></button>
 
           <div class="board-unit" id="board-unit">
             <div class="hand hand--gote" data-hand="gote"></div>
@@ -238,6 +254,9 @@
           </div>
         </div>
       </section>
+
+      <!-- 利用規約への同意: 最初は選ぶボタンの下、写真を選んだあとは変換するボタンの下に来る（結果カードのすぐ後ろ） -->
+      <p class="tf-consent">このサービスを利用することで、<a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>に同意したものとみなされます。</p>
 
       <!-- 6. 最初からやり直す（done / error） -->
       <div class="actions" data-role="reset">
@@ -309,75 +328,42 @@
       </script>
 
       <!-- 7. フッター -->
-      <footer class="site-foot">
-        <!-- 旧トップにあった導線を維持(動画棋譜化・β・大会・ブログ・About) -->
-        <nav style="margin:12px 0; font-size:13.5px; line-height:2;">
-          <a href="/video.html">動画まるごと棋譜化（β）</a> ・
-          <a href="/beta.html">写真認識 新エンジン版（β）</a><br>
-          <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ(iPhone・iPad) — App Storeで見る</a><br>
-          <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ(Android) — Google Playで見る</a><br>
-          <a href="/taikai.html">大会・教室で棋譜を残す</a> ・
-          <a href="/howto.html">使い方ガイド</a> ・
-          <a href="/blog.html">ブログ</a> ・
-          <a href="/about.html">About</a>
-        </nav>
-        <br>
-
-        <!-- FC2カウンター ここから -->
-        <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" /></noscript>
-        <!-- FC2カウンター ここまで -->
-        人目の訪問です。<br>
-        <button class="btn faq" id="btn-faq">FAQ</button>
-        <div id="share-wrap" style="text-align:center; margin-top:12px;">
-          <div class="share-row" style="display:flex; gap:8px; justify-content:center;">
-            <!-- Xポスト -->
-            <a id="share-x" href="#" aria-label="Xでポストする"
-               style="display:inline-flex; align-items:center; gap:4px;
-                      background:#000; color:#fff;
-                      padding:4px 10px;
-                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-              <span aria-hidden="true">𝕏</span>
-              ポスト
-            </a>
-            <!-- Facebookシェア -->
-            <a id="share-fb" href="#" aria-label="Facebookでシェアする"
-               style="display:inline-flex; align-items:center; gap:4px;
-                      background:#1877f2; color:#fff;
-                      padding:4px 10px;
-                      border-radius:6px; font-size:13px; line-height:1; text-decoration:none;">
-              <span aria-hidden="true">f</span>
-              シェア
-            </a>
-          </div>
+      <footer class="site-foot tool-foot">
+        <!-- 広める・よくある質問（ボタンの id は js で使う） -->
+        <div class="tf-row">
+          <a id="share-x" class="tf-pill tf-x" href="#" aria-label="Xでポストする"><span class="tf-mark" aria-hidden="true">𝕏</span>ポスト</a>
+          <a id="share-fb" class="tf-pill tf-fb" href="#" aria-label="Facebookでシェアする"><span class="tf-mark" aria-hidden="true">f</span>シェア</a>
+          <button type="button" class="tf-pill" id="btn-faq">よくある質問</button>
         </div>
-        <br>
-        <p><font size="1">このサービスを利用することで、
-          <a href="/privacy.html" target="_blank">プライバシーポリシー・利用規約</a>
-          に同意したものとみなされます。</font>
-        </p>
 
-        <br>開発：えぬっくま<br>
-        <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw"
-        class="twitter-follow-button" data-show-count="false">
-        Follow @nkkuma_service
-        </a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-        <div style="margin-top:16px; text-align:center; font-size:14px; color:#555;">
-          <p style="margin-bottom:8px;">
-            このサービスが役立ったら<br>
-            コーヒーで応援していただけると嬉しいです ☕
-          </p>
-          <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener">
-            <img src="https://cdn.buymeacoffee.com/buttons/default-orange.png"
-                 alt="Buy Me A Coffee" height="36" width="150"
-                 style="opacity:0.9;">
-          </a>
+        <div class="tf-support">
+          <p>このサービスが役立ったら、<br>コーヒーで応援していただけると嬉しいです ☕</p>
+          <a href="https://www.buymeacoffee.com/nkkuma" target="_blank" rel="noopener"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="34" width="142"></a>
         </div>
-        <p>
-          &copy; 2025 Shogiban to Kif |
+
+        <nav class="tf-nav" aria-label="ほかのページ">
+          <a href="/beta.html">写真認識 新エンジン版（β）</a>
+          <a href="/video.html">動画まるごと棋譜化（β）</a>
+          <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ（iPhone・iPad）</a>
+          <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
+          <a href="/taikai.html">大会・教室で棋譜を残す</a>
+          <a href="/howto.html">使い方ガイド</a>
+          <a href="/blog.html">ブログ</a>
+          <a href="/about.html">えぬっくまについて</a>
+          <a href="/contact.html">お問い合わせ</a>
           <a href="/privacy.html">プライバシーポリシー・利用規約</a>
-        </p>
+        </nav>
+
+        <div class="tf-small">
+          <p>開発：えぬっくま ・ <a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">X @nkkuma_service</a></p>
+          <p class="tf-count">
+            <!-- FC2カウンター ここから -->
+            <script language="javascript" type="text/javascript" src="//counter1.fc2.com/counter.php?id=33316434&main=1"></script><noscript><img src="//counter1.fc2.com/counter_img.php?id=33316434&main=1" /></noscript>
+            <!-- FC2カウンター ここまで -->
+            人目の訪問です
+          </p>
+          <p>&copy; 2019-2026 Shogiban to Kif（えぬっくま）</p>
+        </div>
       </footer>
     </main>
 
@@ -402,6 +388,99 @@
     <!-- 唯一の外部依存: Compressor.js -->
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
     <script src="js/kyokumen.js"></script>
-    <script src="js/site.js"></script>
+    <script src="js/site.js?v=20261016a"></script>
+    <script>
+      // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
+      (function () {
+        var photo = document.getElementById('photo');
+        photo.addEventListener('click', function () {
+          if (document.body.getAttribute('data-state') === 'done') { document.body.classList.toggle('photo-big'); }
+        });
+        // 駒を直すパレットを開いたとき、選んだマスが下半分ならパレットを上から出す
+        var pal = document.getElementById('palette');
+        new MutationObserver(function () {
+          if (pal.hidden) { document.body.classList.remove('pal-top'); return; }
+          var sel = document.querySelector('.sq.selected, .chip.selected');
+          var r = sel && sel.getBoundingClientRect();
+          document.body.classList.toggle('pal-top', !!r && (r.top + r.bottom) / 2 > window.innerHeight / 2);
+        }).observe(pal, { attributes: true, attributeFilter: ['hidden'], childList: true });
+        // 盤の枠（#frame-overlay）を、写真が実際に出ている四角にぴったり重ねる。
+        // 小さい写真・大きい写真・パソコンの並びで、写真の箱と枠の箱がずれないように
+        var wrap = photo.parentNode;
+        function fitFrame() {
+          var svg = document.getElementById('frame-overlay');
+          if (!svg) { return; }
+          svg.style.left = photo.offsetLeft + 'px';
+          svg.style.top = photo.offsetTop + 'px';
+          svg.style.width = photo.offsetWidth + 'px';
+          svg.style.height = photo.offsetHeight + 'px';
+        }
+        new MutationObserver(fitFrame).observe(wrap, { childList: true });
+        new MutationObserver(fitFrame).observe(document.body, { attributes: true, attributeFilter: ['class', 'data-state'] });
+        if (window.ResizeObserver) { new ResizeObserver(fitFrame).observe(photo); }
+        photo.addEventListener('load', fitFrame);
+        window.addEventListener('resize', fitFrame);
+        // スマホ: 盤と元の写真を、同じ場所で入れ替えて見比べる（左上のボタン、または左右にスワイプ）
+        var phone = window.matchMedia('(max-width: 899px)');
+        var unit = document.getElementById('board-unit');
+        var viewBtn = document.getElementById('btn-view');
+        function sizeView() {
+          document.body.style.setProperty('--view-w', unit.offsetWidth + 'px');
+          document.body.style.setProperty('--view-h', unit.offsetHeight + 'px');
+        }
+        function setView(showPhoto) {
+          stopPeek();
+          if (showPhoto) { sizeView(); }
+          document.body.classList.toggle('show-photo', showPhoto);
+          viewBtn.setAttribute('aria-pressed', showPhoto ? 'true' : 'false');
+        }
+        viewBtn.addEventListener('click', function () { setView(!document.body.classList.contains('show-photo')); });
+        // 結果が出た直後に一度、盤を少し左へずらして写真の端をのぞかせ、横に払えることを見せる
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var peekTimer = null;
+        function stopPeek() {
+          clearTimeout(peekTimer);
+          document.body.classList.remove('peek');
+        }
+        function startPeek() {
+          stopPeek();
+          if (!phone.matches || reduceMotion.matches) { return; }
+          peekTimer = setTimeout(function () {
+            if (lastView !== 'done' || document.body.classList.contains('show-photo') || !pal.hidden) { return; }
+            sizeView();
+            // 写真の左端が、盤の右端から 56px 内側に来る位置
+            var cellW = unit.offsetWidth, pw = photo.offsetWidth;
+            document.body.style.setProperty('--peek-x', (cellW - 56 - (cellW - pw) / 2) + 'px');
+            document.body.classList.add('peek');
+          }, 600);
+        }
+        unit.addEventListener('animationend', stopPeek);
+        var lastView = document.body.getAttribute('data-state');
+        new MutationObserver(function () {
+          var s = document.body.getAttribute('data-state');
+          if (s === lastView) { return; }
+          lastView = s;
+          if (s === 'done') { sizeView(); startPeek(); } else { stopPeek(); setView(false); }
+        }).observe(document.body, { attributes: true, attributeFilter: ['data-state'] });
+        window.addEventListener('resize', function () { if (lastView === 'done') { sizeView(); } });
+        var card = document.querySelector('.card');
+        var touch = null;
+        card.addEventListener('touchstart', function (e) {
+          stopPeek();
+          touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : null;
+        }, { passive: true });
+        card.addEventListener('touchend', function (e) {
+          if (!touch || !phone.matches || lastView !== 'done' || !pal.hidden || document.body.classList.contains('photo-big')) { touch = null; return; }
+          var dx = e.changedTouches[0].clientX - touch.x, dy = e.changedTouches[0].clientY - touch.y;
+          touch = null;
+          if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) { return; }
+          setView(dx < 0); // 左へ払うと写真、右へ払うと盤
+        });
+        document.getElementById('btn-reset2').addEventListener('click', function () {
+          document.body.classList.remove('photo-big');
+          document.getElementById('btn-reset').click();
+        });
+      })();
+    </script>
   </body>
 </html>

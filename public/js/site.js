@@ -511,8 +511,18 @@
     window.open(url, '_blank');
   }
 
+  // ぴよ将棋へは、棋譜をいったんサーバー（米国の Google Cloud）に置いてから URL で渡すので、
+  // 押してから開くまで少し待つ。待っている間はボタンに「開いています…」と出し、二度押しを防ぐ
+  function setPiyoBusy(busy) {
+    var btn = $('btn-piyo');
+    if (!btn) { return; }
+    btn.disabled = busy;
+    btn.classList.toggle('is-busy', busy);
+  }
+
   function jumpPiyo() {
     var kif = json_to_kif(state.result);
+    setPiyoBusy(true);
     fetch(PIYO_SAVE_URL + '?message=' + encodeURIComponent(kif))
       .then(function (res) {
         if (!res.ok) { throw new Error('save_kif failed'); }
@@ -520,9 +530,12 @@
       })
       .then(function (data) {
         location.href = 'piyoshogi://?url=' + data;
+        // アプリが開かなかったとき（ダイアログで断ったときなど）も、ボタンを押せる形に戻す
+        setTimeout(function () { setPiyoBusy(false); }, 1500);
       })
       .catch(function (err) {
         console.error(err);
+        setPiyoBusy(false);
         alert('連携に失敗しました。');
       });
   }
@@ -654,11 +667,24 @@
       });
   }
 
+  // 持ち駒は 1 枚以上の駒だけ残す。0 枚の駒が { fu: 0 } の形で来ると、KIF では「歩」（1 枚）、
+  // SFEN では「0P」になり、ぴよ将棋などが読めない局面を渡してしまうため
+  function cleanMochi(mochi) {
+    var out = {};
+    for (var i = 0; i < HAND_KOMA.length; i++) {
+      var code = HAND_KOMA[i];
+      if (!mochi || !(code in mochi)) { continue; }
+      var n = mochi[code] === '' ? 1 : Number(mochi[code]);
+      if (n > 0) { out[code] = n; }
+    }
+    return out;
+  }
+
   function applyResult(data) {
     state.result = {
       ban_result: data.ban_result || {},
-      sente_mochi: data.sente_mochi || {},
-      gote_mochi: data.gote_mochi || {},
+      sente_mochi: cleanMochi(data.sente_mochi),
+      gote_mochi: cleanMochi(data.gote_mochi),
       teban: data.teban || 'sente'
     };
     state.selectedPos = null;
