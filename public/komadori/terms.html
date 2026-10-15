@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>利用規約 | コマドリ</title>
+  <meta name="description" content="アプリ「コマドリ」（iPhone版・Android版・Web版）の利用規約。使うときの約束と、してはいけないことを書いています。" />
+  <style>
+    :root{ --bg:#ffffff; --card:#f9f9f9; --text:#111111; --muted:#555555; --accent:#0077cc; --border:#dddddd; }
+    *{ box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Hiragino Kaku Gothic ProN", Meiryo, "Noto Sans JP", sans-serif; line-height:1.8; }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    header{ padding:48px 20px 12px; border-bottom:1px solid var(--border); background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent); }
+    .wrap{ max-width:760px; margin:0 auto; padding:0 20px }
+    .title{ font-size:clamp(22px, 2.6vw, 32px); font-weight:800; letter-spacing:0.2px }
+    .sub{ color:var(--muted); margin-top:6px; font-size:14px }
+    main{ padding:28px 0 80px }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 22px; margin:16px 0 }
+    h2{ font-size:20px; margin:32px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border) }
+    ul{ padding-left:1.2em; margin:6px 0 }
+    li{ margin:8px 0 }
+    ol{ padding-left:1.4em }
+    p{ margin:10px 0 }
+    .muted{ color:var(--muted) }
+    .small{ font-size:13px }
+    .badge{ display:inline-block; padding:2px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:var(--muted) }
+    footer{ border-top:1px solid var(--border); padding:20px; color:var(--muted); font-size:12px }
+    dl.contact dt{ font-weight:700; margin-top:10px }
+    dl.contact dd{ margin:2px 0 0 0 }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+  <header>
+    <div class="wrap">
+      <div class="badge">制定日：<time datetime="2026-10-15">2026年10月15日</time></div>
+      <h1 class="title">コマドリ 利用規約</h1>
+      <div class="sub">アプリ「コマドリ」（iPhone版・Android版）と、ブラウザで使うコマドリ（Web版）に適用されます。</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <p>この規約は、コマドリを使うときの約束です。使いはじめた時点で、この規約に同意したものとします。何を送り、何が残るかは、<a href="/komadori/privacy.html">コマドリ プライバシーポリシー</a>に書いています。</p>
+
+    <h2 id="kifu">棋譜の正しさ</h2>
+    <p>コマドリの棋譜は、映像から機械で読み取って作ります。読み違いや、手の抜けが起こることがあります。大会の記録など、正しさが大事な場面では、人の目で確かめてからお使いください。</p>
+
+    <h2 id="filming">撮影するときの約束</h2>
+    <p>対局相手やまわりの方が写るときは、使う方の責任で、了解を得てからお使いください。お子さまを撮るときは、保護者の方の了解を得てください。会場や主催者に決まりがあるときは、それに従ってください。</p>
+
+    <h2 id="prohibited">してはいけないこと</h2>
+    <p>次のことをしてはいけません。</p>
+    <ol>
+      <li>コマドリのプログラムを、逆アセンブル・逆コンパイル・解析（リバースエンジニアリング）すること。法令で認められる場合を除きます。</li>
+      <li>コマドリのプログラムを改変すること。改変したものを配ること。</li>
+      <li>コマドリに入っている、盤と駒を読み取る仕組み（学習済みのモデルと、その設定）を取り出すこと。取り出したものを使うこと、ほかの人に渡すこと。</li>
+      <li>コマドリに入っている、サーバーとやりとりするための鍵や認証の情報を取り出すこと。取り出したものを使うこと、ほかの人に渡すこと。</li>
+      <li>コマドリのサーバーを、コマドリを通さずに呼び出すこと。運営者が認めた場合を除きます。</li>
+      <li>サーバーに大量の要求を送るなど、運営をさまたげること。</li>
+      <li>将棋の対局と関係のない映像（人物や書類など）を、わざと送ること。</li>
+      <li>法令や公序良俗に反すること。肖像権・著作権など、ほかの方の権利を侵すこと。</li>
+    </ol>
+    <p>これらにあたるときは、知らせずに利用を止めることがあります。</p>
+
+    <h2 id="rights">権利</h2>
+    <p>コマドリのプログラム、盤と駒を読み取る仕組み（モデルを含みます）、画面のデザイン、キャラクターの権利は、運営者にあります。撮った映像と、できた棋譜は、撮った方のものです。サーバーに残る映像の扱いは、プライバシーポリシーのとおりです。</p>
+    <p>iPhone版には、App Store の標準の使用許諾（Apple の使用許諾契約）もかかります。この規約は、それに重ねて適用します。</p>
+
+    <h2 id="service">サービスの変更・休止・終了</h2>
+    <p>機能は、予告なく変えることがあります。メンテナンスや障害、費用などの理由で、サービスの一部または全部を休んだり、終えたりすることがあります。終えるときは、できるだけ前もってお知らせします。</p>
+
+    <h2 id="liability">損害について</h2>
+    <p>コマドリを使って生じた損害について、運営者に故意または重大な過失があるときを除き、運営者は責任を負いません。</p>
+
+    <h2 id="change">規約の変更</h2>
+    <p>この規約は、必要に応じて変えることがあります。変えるときは、このページを書き換え、上部の日付を新しくします。大事な変更は、前もってアプリかこのサイトでお知らせします。変更のあとも使い続けたときは、変更に同意したものとします。</p>
+
+    <h2 id="law">準拠法</h2>
+    <p>この規約は、日本の法律に従います。</p>
+
+    <h2 id="contact">運営者・お問い合わせ</h2>
+    <div class="card">
+      <dl class="contact">
+        <dt>運営者</dt>
+        <dd>佐藤 旭</dd>
+        <dt>連絡先</dt>
+        <dd><a href="mailto:nkkumaservice@gmail.com">nkkumaservice@gmail.com</a></dd>
+        <dt>サポート</dt>
+        <dd><a href="/komadori/support.html">コマドリ サポートページ</a></dd>
+      </dl>
+      <p class="small muted" style="margin-bottom:0">制定日：2026年10月15日</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      コマドリ（iPhone版・Android版・Web版）／ 運営者：佐藤 旭 ・
+      <a href="/komadori/privacy.html">コマドリ プライバシーポリシー</a> ・
+      <a href="/privacy.html">Webサイトのプライバシーポリシー・利用規約</a>
+    </div>
+  </footer>
+</body>
+</html>
