@@ -72,7 +72,7 @@
 
   <header>
     <div class="wrap">
-      <div class="badge">最終更新：<time datetime="2026-10-15">2026/10/15</time></div>
+      <div class="badge">最終更新：<time datetime="2026-10-16">2026/10/16</time></div>
       <h1 class="title">プライバシーポリシー・利用規約（統合）</h1>
       <div class="sub">本ページは、将棋盤認識サイトおよび提供するAPIサービス（以下「本サービス」）におけるデータの取扱いおよび利用条件を定めるものです。ご利用により本内容に同意いただいたものとみなします。</div>
       <div class="sub">アプリ「コマドリ」は取り扱いが異なります（使いかたによって、送るものと残るものが違います）。<a href="/komadori/privacy.html">コマドリ プライバシーポリシー</a> と <a href="/komadori/terms.html">コマドリ 利用規約</a> をご覧ください。</div>
@@ -86,6 +86,7 @@
       <div class="toc small">
         <a href="#collect">1. 収集する情報</a>
         <a href="#video">1-2. 動画アップロード機能（β）</a>
+        <a href="#kami">1-3. 紙の棋譜を写真でKIFに（試験版）</a>
         <a href="#purpose">2. 情報の利用目的</a>
         <a href="#retention">3. 保存期間・削除</a>
         <a href="#third">4. 第三者提供・外部送信</a>
@@ -129,6 +130,17 @@
       </ul>
     </section>
 
+    <section id="kami" class="card">
+      <h2>1-3. 紙の棋譜を写真でKIFに（試験版）における取扱い</h2>
+      <ul>
+        <li><strong>送る情報</strong>：記録用紙や棋譜ノートの写真（ブラウザで縮めたもの）と、選んだ手合割</li>
+        <li><strong>読み取りのしかた</strong>：写真は、Amazon Web Services（AWS）の Amazon Bedrock で動く Claude（Anthropic 社の AI モデル）に送り、書かれた字を読み取ります。Amazon Bedrock では、送った写真や読み取り結果がモデルの提供元（Anthropic 社）に渡ることはなく、モデルの学習にも使われません。</li>
+        <li><strong>保存しないもの</strong>：写真と読み取った棋譜は、結果を返したあと保存しません。認識精度向上やモデル学習にも使いません（1・3 の「原則すべて保存」は、この機能には当てはまりません）。</li>
+        <li>障害の調査のため、読み取りにかかった時間と手数だけを記録します。</li>
+        <li>用紙に対局者の氏名などが書かれている場合は、その部分も写真ごと送られます。気になる場合は、隠してから撮ってください。</li>
+      </ul>
+    </section>
+
     <section id="purpose" class="card">
       <h2>2. 情報の利用目的</h2>
       <ul>
@@ -150,9 +162,10 @@
 
     <section id="third" class="card">
       <h2>4. 第三者提供・外部送信</h2>
-      <p>当サービスは以下の Google 提供サービスを利用します。</p>
+      <p>当サービスは以下の外部サービスを利用します。</p>
       <ul>
         <li><strong>Google Analytics</strong><br>サイトの利用状況を把握し改善するために収集データを Google に送信します。送信される情報の例：Cookie 等の識別子、IP アドレス、閲覧ページ・滞在時間、端末・ブラウザ情報。設定により IP 匿名化を有効化します。管理・無効化の詳細は <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="nofollow noopener">Google のパートナーサイトにおけるデータの使用</a> および <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="nofollow noopener">Google アナリティクス オプトアウト アドオン</a> をご参照ください。</li>
+        <li><strong>Amazon Bedrock（AWS）</strong><br>「紙の棋譜を写真でKIFに」で、写真の字を読み取るために使います（<a href="#kami">1-3</a>）。送った写真はモデルの提供元に渡らず、学習にも使われません。詳細は <a href="https://aws.amazon.com/bedrock/faqs/" target="_blank" rel="nofollow noopener">Amazon Bedrock のよくある質問</a> をご参照ください。</li>
       </ul>
     </section>
 
