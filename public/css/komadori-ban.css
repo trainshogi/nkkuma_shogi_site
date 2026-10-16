@@ -1,0 +1,7 @@
+/* 盤と駒の絵をアプリ(コマドリ)・検討室と同じにする。木目・罫線・星は画像 1 枚なので、升に線を引き直さない */
+.board { background: #e9c98a url(../img/komadori/ban-mokume.jpg) center / 100% 100% no-repeat; border: 1.4px solid #1f170d; }
+.board .sq { border-color: transparent; }
+.board .star { display: none; }
+.sq img { height: 92%; width: auto; max-width: 100%; display: block; pointer-events: none; }
+.chip .koma img { height: 22px; width: auto; display: block; }
+.pcell img { height: 78%; width: auto; max-width: 100%; display: block; pointer-events: none; }

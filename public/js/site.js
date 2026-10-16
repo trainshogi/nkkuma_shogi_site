@@ -25,6 +25,18 @@
                    'vto', 'vny', 'vnk', 'vng', 'vum', 'vry'];
   var PROMOTED = ['to', 'ny', 'nk', 'ng', 'um', 'ry'];
 
+  // 盤と駒の絵はアプリ(コマドリ)・検討室と同じ: Shogi Images(久保良介)の二文字駒、CC0。
+  // 駒は先手ぶんだけ持ち、後手は升ごと 180° 回す
+  var KOMA_IMG = { fu: 'fu', ky: 'kyo', ke: 'kei', gi: 'gin', ki: 'kin', ka: 'kaku', hi: 'hi',
+                   ou: 'gyoku', to: 'to', ny: 'nkyo', nk: 'nkei', ng: 'ngin', um: 'uma', ry: 'ryu' };
+  function komaImg(kind) {
+    var img = document.createElement('img');
+    img.src = 'img/komadori/koma/' + KOMA_IMG[kind] + '.png';
+    img.alt = alphabet2kanji(kind) || '';
+    img.draggable = false;
+    return img;
+  }
+
   // ===== util.js から移植（出力互換） =====
   function alphabet2kanji(koma) {
     var alphabet = ['* ', 'fu', 'ky', 'ke', 'gi', 'ki', 'ka', 'hi', 'ou', 'to', 'ny', 'nk', 'ng', 'um', 'ry'];
@@ -206,7 +218,7 @@
           sq.classList.add('empty');
           sq.textContent = '・';
         } else {
-          sq.textContent = alphabet2kanji(koma.substr(1));
+          sq.appendChild(komaImg(koma.substr(1)));
           if (koma.charAt(0) === 'v') { sq.classList.add('gote'); }
           if (isPromoted(koma)) { sq.classList.add('promoted'); }
         }
@@ -252,7 +264,7 @@
       chip.setAttribute('data-koma', code);
       var koma = document.createElement('span');
       koma.className = 'koma';
-      koma.textContent = HAND_KANJI[i];
+      koma.appendChild(komaImg(code));
       var c = document.createElement('span');
       c.className = 'cnt';
       c.textContent = '×' + cnt;
@@ -344,7 +356,7 @@
       cell.classList.add('empty');
       cell.textContent = '空';
     } else {
-      cell.textContent = alphabet2kanji(code.substr(1));
+      cell.appendChild(komaImg(code.substr(1)));
       if (code.charAt(0) === 'v') { cell.classList.add('gote'); }
       if (isPromoted(code)) { cell.classList.add('promoted'); }
     }
