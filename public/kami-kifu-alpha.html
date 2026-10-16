@@ -65,6 +65,20 @@
     .pick img { display: block; max-width: 100%; max-height: 380px; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
     .pick .again { position: absolute; right: 10px; bottom: 10px; background: rgba(36,33,28,.78); color: #fff; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; }
     .hint { color: var(--ink-3); font-size: 12.5px; margin: 8px 0 0; }
+    .fit { max-width: 680px; margin: 18px auto 0; }
+    .fit h2 { font-size: 17px; margin: 0 0 4px; }
+    .fit > p { color: var(--ink-2); font-size: 13.5px; margin: 0 0 12px; }
+    .fit-grid { display: grid; gap: 10px; }
+    .fit-box { border-radius: 12px; padding: 12px 14px; background: #f4faf7; border: 1px solid #cfe5db; }
+    .fit-box.ng { background: #fdf3ef; border-color: #f0d3c6; }
+    .fit-box h3 { font-size: 14.5px; margin: 0 0 6px; color: var(--green); }
+    .fit-box.ng h3 { color: var(--accent-2); }
+    .fit-box ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.7; color: var(--ink-2); }
+    .fit-box code { font-family: var(--mincho); font-size: 14px; background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; color: var(--ink); display: inline-block; white-space: nowrap; margin: 1px 0; }
+    .fit-box .ryaku { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 4px 0 0; padding: 0; list-style: none; }
+    .fit-box .ryaku li { font-size: 12.5px; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; color: var(--ink-2); }
+    .fit-box .ryaku b { font-family: var(--mincho); color: var(--ink); font-size: 14px; margin-right: 2px; }
+    @media (min-width: 640px) { .fit-grid { grid-template-columns: 1.25fr 1fr; } }
     .row2 { display: grid; gap: 14px; margin: 16px 0 0; }
     select { width: 100%; padding: 11px 12px; font-size: 16px; font-family: inherit; border: 1px solid #d8ccb3; border-radius: 10px; background: #fff; color: var(--ink); }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: 999px; border: 1px solid #d8ccb3; background: #fff; color: var(--ink);
@@ -271,7 +285,7 @@
         </span>
         <span id="pick-photo" hidden></span>
       </label>
-      <p class="hint">用紙全体が入るように、真上から撮ると読みやすくなります。写真は AWS 上の Claude で字を読むためだけに使い、保存しません（<a href="/privacy.html#kami">プライバシーポリシー</a>）。</p>
+      <p class="hint">用紙全体が入るように、真上から撮ると読みやすくなります。写真は字を読むためだけに使い、保存しません（<a href="/privacy.html#kami">プライバシーポリシー</a>）。</p>
       <div class="row2">
         <div>
           <label class="lab" for="teai">手合割</label>
@@ -333,6 +347,34 @@
           <h2>読んだ手 <small>手を押すと、その局面を出します</small></h2>
           <div class="legend"><span><i style="background:var(--mark-bg);box-shadow:inset 0 0 0 1px #f0dc9d"></i>用紙と見比べてほしい手</span><span><i style="background:var(--stop-bg)"></i>続かなくなった手</span></div>
           <ol class="moves" id="moves"></ol>
+        </div>
+      </div>
+    </section>
+    <section class="card fit" aria-labelledby="fit-h">
+      <h2 id="fit-h">こんな用紙なら読めます</h2>
+      <p>1 局を 1 手ずつ、マスや行に分けて書いた用紙が向いています。</p>
+      <div class="fit-grid">
+        <div class="fit-box">
+          <h3>読める書き方</h3>
+          <ul>
+            <li>ふつうの書き方：<code>７六歩</code> <code>同銀</code> <code>５八金右</code> <code>２三歩打</code></li>
+            <li>記録用紙の略字：<code>76、</code> <code>□ヨ</code> <code>78へ</code> <code>22ク</code>
+              <ul class="ryaku">
+                <li><b>、</b>歩</li><li><b>キ</b>香</li><li><b>土</b>桂</li><li><b>ヨ</b>銀</li><li><b>へ</b>金</li><li><b>ク</b>角</li><li><b>ヒ</b>飛</li><li><b>○</b>玉</li><li><b>□</b>同</li>
+              </ul>
+            </li>
+            <li>▲△ や 先手・後手 の列に分けた記録用紙、棋譜ノート</li>
+            <li>平手と駒落ち（香落ち〜六枚落ち）</li>
+          </ul>
+        </div>
+        <div class="fit-box ng">
+          <h3>苦手なもの</h3>
+          <ul>
+            <li>2 枚以上にまたがる棋譜（1 回に 1 枚です）</li>
+            <li>途中の局面から書いた棋譜</li>
+            <li>斜め・暗い・端が切れた写真</li>
+            <li>線で消して書き直した手が多い用紙</li>
+          </ul>
         </div>
       </div>
     </section>
