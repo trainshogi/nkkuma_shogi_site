@@ -127,7 +127,7 @@
 
   <style>
     /* 入口の帯: 道具の上にコマドリとほかのページへのボタン。道具の中身と JS には触らない */
-    .nk-band { max-width: 640px; margin: 0 auto; padding: 4px 0 0; font-family: "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif; }
+    .nk-band { max-width: 640px; margin: 0 auto; padding: 12px 16px 4px; font-family: "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif; }
     .nk-kom { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: #fff7f1; color: #111; text-decoration: none; }
     .nk-kom img { width: 44px; height: 44px; border-radius: 10px; flex: none; }
     .nk-kom b { display: block; font-size: 15px; line-height: 1.4; }
@@ -135,19 +135,11 @@
     .nk-kom i { margin-left: auto; font-style: normal; color: #e5672e; font-weight: 700; }
     .nk-chips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 2px; scrollbar-width: none; }
     .nk-chips a { flex: none; padding: 6px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13px; font-weight: 700; line-height: 1.5; }
-    /* 開いてすぐの画面: 見出し・見本・選ぶボタンを最初の 1 画面に入れる */
-    .fv { text-align: center; padding: 6px 0 0; font-family: "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif; }
-    .fv-kicker { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .08em; color: #e5672e; }
-    .fv h1 { margin: 2px 0 6px; font-size: clamp(22px, 6.6vw, 28px); line-height: 1.3; font-weight: 900; color: #111; letter-spacing: .02em; }
-    .fv-sub { margin: 0 auto 10px; max-width: 26em; font-size: 13.5px; line-height: 1.65; color: #555; }
-    .fv-sample { display: block; width: 100%; height: auto; border-radius: 12px; }
-    body:not([data-state="empty"]) .fv { display: none; }
-    body[data-state="empty"] [data-role="pick"] { margin-top: 14px; }
+    /* 開いてすぐの画面: くまのすぐ下に選ぶボタン。「撮影する」をいちばん目立たせる */
     body[data-state="empty"] #btn-camera { background: #e5672e; border-color: #e5672e; color: #fff; }
-    body[data-state="empty"] [data-role="pick"] .btn { min-height: 52px; font-size: 16px; }
-    body[data-state="empty"] [data-role="help"] { margin: 4px 0 0; gap: 0; }
+    body[data-state="empty"] [data-role="pick"] .btn { min-height: 50px; font-size: 16px; }
+    body[data-state="empty"] [data-role="help"] { margin: 2px 0 0; gap: 0; }
     body[data-state="empty"] [data-role="help"] .btn { min-height: 36px; font-size: 12.5px; }
-    @media (max-height: 600px) { .fv-sub { display: none; } }
   </style>
   </head>
   <body data-state="empty">
@@ -161,14 +153,18 @@
       <a href="/about.html">About</a>
     </nav>
   </header>
+  <div class="nk-band">
+    <a class="nk-kom" href="/about.html#komadori"><img src="/img/about/komadori-icon.png" alt=""><div><b>コマドリ</b><span>スマホを盤の横に置いておけば、指した手がそのまま棋譜になります</span></div><i>→</i></a>
+    <nav class="nk-chips" aria-label="ほかのページ">
+      <a href="/taikai.html">大会・教室の方へ</a><a href="/about.html">えぬっくまについて</a><a href="/blog.html">ブログ</a>
+    </nav>
+  </div>
     <main class="app">
-      <!-- 1. 開いてすぐの説明: 何ができるかを 1 行で言い、写真が盤になる見本を見せる（写真を選んだら畳む） -->
-      <section class="fv" aria-labelledby="fv-title">
-        <p class="fv-kicker">Shogiban to Kif</p>
-        <h1 id="fv-title">将棋盤の写真から<br>棋譜（KIF）を作る</h1>
-        <p class="fv-sub">盤を撮って「変換する」を押すだけ。<br>違う駒は押して直し、ぴよ将棋や KENTO へ渡せます。</p>
-        <img class="fv-sample" src="img/top/fv-sample-20261017.jpg" width="648" height="300" alt="盤の写真を読み取り、将棋盤に並べた見本">
-      </section>
+      <!-- 1. ロゴ -->
+      <img class="logo" src="img/SHOGIWEB_TITLE.png" alt="Shogiban to Kif" width="100%">
+
+      <!-- 2. くま使い方画像（常時表示） -->
+      <img class="howto" src="img/shogi_intro.png" alt="使い方" width="100%">
 
       <!-- hidden file input（単一） -->
       <input type="file" id="file-input" accept="image/*" hidden>
@@ -266,14 +262,6 @@
       <div class="actions" data-role="help">
         <button type="button" class="btn btn-ghost" id="btn-howto">❓ 使い方をみる</button>
         <a class="btn btn-ghost" href="./classic.html">↩ 以前のデザイン</a>
-      </div>
-
-      <!-- 入口の帯: コマドリとほかのページへ（道具のあと。写真を選んだら畳む） -->
-      <div class="nk-band">
-        <a class="nk-kom" href="/about.html#komadori"><img src="/img/about/komadori-icon.png" alt=""><div><b>コマドリ</b><span>スマホを盤の横に置いておけば、指した手がそのまま棋譜になります</span></div><i>→</i></a>
-        <nav class="nk-chips" aria-label="ほかのページ">
-          <a href="/taikai.html">大会・教室の方へ</a><a href="/about.html">えぬっくまについて</a><a href="/blog.html">ブログ</a>
-        </nav>
       </div>
 
       <!-- 6. 最初からやり直す（done / error） -->
