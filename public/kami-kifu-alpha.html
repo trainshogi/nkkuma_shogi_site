@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>紙の棋譜を写真でKIFに（試験版） | Shogiban to Kif</title>
+  <meta name="description" content="手書きの記録用紙や棋譜ノートの写真から、KIF を作ります。">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <style>
+    :root {
+      --paper: #f6f1e7; --paper-2: #efe7d6; --ink: #24211c; --ink-2: #5d574d; --ink-3: #8b8477;
+      --line: #e3dac8; --accent: #e5672e; --accent-2: #c9531f; --green: #1f6f5c;
+      --board: #ecc98a; --board-2: #e2b86f; --grid: #6b4f2a; --mark: #f4b400; --mark-bg: #fff4cf; --stop-bg: #fde3df; --stop: #a3241a;
+      --mincho: "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0; color: var(--ink); background: var(--paper);
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      line-height: 1.8; -webkit-text-size-adjust: 100%;
+    }
+    a { color: #0b67c2; }
+    main { max-width: 1040px; margin: 0 auto; padding: 0 16px 56px; }
+
+    /* はじめの帯 */
+    .hero { display: grid; gap: 18px; align-items: center; padding: 28px 0 22px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 8px; color: var(--green); font-size: 13px; font-weight: 700; letter-spacing: .08em; }
+    .eyebrow b { padding: 1px 8px; border-radius: 4px; background: var(--green); color: #fff; font-size: 11.5px; letter-spacing: .04em; }
+    h1 { font-family: var(--mincho); font-size: 27px; line-height: 1.4; margin: 0 0 10px; letter-spacing: .02em; }
+    h1 em { font-style: normal; background: linear-gradient(transparent 62%, rgba(229,103,46,.28) 62%); }
+    .lead { color: var(--ink-2); margin: 0; font-size: 15px; }
+    .lead code { font-family: var(--mincho); font-size: 15px; background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+    .hero-art { width: 100%; max-width: 380px; justify-self: center; display: grid; grid-template-columns: 1fr 40px 1.05fr; align-items: center; gap: 4px; }
+    .art-paper { width: 100%; height: auto; }
+    .art-arrow { width: 40px; height: 32px; }
+    .art-board { padding: 6px; background: #fff; border-radius: 6px; box-shadow: 0 8px 20px rgba(90,67,32,.18); transform: rotate(2deg); }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+    .steps li { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 10px 9px; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+    .steps b { display: block; color: var(--ink); font-size: 14.5px; }
+    .steps i { font-style: normal; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; margin-right: 4px; vertical-align: 1px; }
+
+    /* 写真を選ぶ */
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-shadow: 0 1px 0 rgba(0,0,0,.02), 0 10px 30px rgba(80,60,20,.06); }
+    .upload { max-width: 680px; margin: 0 auto; }
+    .lab { display: block; font-weight: 700; font-size: 15px; margin: 0 0 8px; }
+    .pick { position: relative; display: flex; align-items: center; justify-content: center; min-height: 190px; border: 2px dashed #d8ccb3; border-radius: 14px;
+      background: repeating-linear-gradient(0deg, #fbf8f1 0 27px, #f1eadb 27px 28px); color: var(--ink-2); cursor: pointer; text-align: center; padding: 16px; overflow: hidden; transition: border-color .15s, background-color .15s; }
+    .pick:hover, .pick.drag { border-color: var(--accent); }
+    .pick input { display: none; }
+    .pick-empty { display: grid; justify-items: center; gap: 6px; }
+    .pick-empty svg { width: 44px; height: 44px; color: var(--accent); }
+    .pick-empty b { color: var(--ink); font-size: 16px; }
+    .pick-empty small { color: var(--ink-3); font-size: 12.5px; }
+    .pick img { display: block; max-width: 100%; max-height: 380px; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    .pick .again { position: absolute; right: 10px; bottom: 10px; background: rgba(36,33,28,.78); color: #fff; font-size: 12.5px; padding: 4px 10px; border-radius: 999px; }
+    .hint { color: var(--ink-3); font-size: 12.5px; margin: 8px 0 0; }
+    .row2 { display: grid; gap: 14px; margin: 16px 0 0; }
+    select { width: 100%; padding: 11px 12px; font-size: 16px; font-family: inherit; border: 1px solid #d8ccb3; border-radius: 10px; background: #fff; color: var(--ink); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; border-radius: 999px; border: 1px solid #d8ccb3; background: #fff; color: var(--ink);
+      font-size: 15.5px; font-weight: 700; font-family: inherit; cursor: pointer; text-decoration: none; line-height: 1.4; }
+    .btn:hover { border-color: var(--ink-3); }
+    .btn svg { width: 18px; height: 18px; }
+    .btn-primary { width: 100%; padding: 15px 22px; font-size: 17px; background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 6px 16px rgba(229,103,46,.28); }
+    .btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+    .btn-primary:disabled { opacity: .5; cursor: default; box-shadow: none; }
+    .after { color: var(--ink-3); font-size: 12.5px; margin: 10px 0 0; text-align: center; }
+    .err { color: var(--stop); background: var(--stop-bg); border-radius: 10px; padding: 10px 14px; font-size: 14px; margin: 12px 0 0; }
+
+    /* 読んでいるあいだ */
+    .reading { max-width: 680px; margin: 18px auto 0; display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: center; }
+    .scan { position: relative; width: 112px; height: 140px; border-radius: 10px; overflow: hidden; background: var(--paper-2); box-shadow: inset 0 0 0 1px var(--line); }
+    .scan img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.6); }
+    .scan::after { content: ""; position: absolute; left: 0; right: 0; height: 34px; top: -34px;
+      background: linear-gradient(180deg, rgba(229,103,46,0), rgba(229,103,46,.45) 80%, rgba(229,103,46,.9)); animation: scan 1.6s ease-in-out infinite; }
+    @keyframes scan { 0% { top: -34px; } 100% { top: 140px; } }
+    .stages { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14.5px; }
+    .stages li { display: flex; align-items: center; gap: 8px; color: var(--ink-3); }
+    .stages li::before { content: ""; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #d8ccb3; flex: none; }
+    .stages li.now { color: var(--ink); font-weight: 700; }
+    .stages li.now::before { border-color: var(--accent); border-right-color: transparent; animation: spin .8s linear infinite; }
+    .stages li.done { color: var(--ink-2); }
+    .stages li.done::before { border-color: var(--green); background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .clock { margin: 8px 0 0; font-variant-numeric: tabular-nums; color: var(--ink-3); font-size: 13px; }
+
+    /* 結果 */
+    .result { margin: 30px 0 0; }
+    .summary { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; border-radius: 16px; padding: 16px 18px; margin: 0 0 16px; }
+    .summary .icon { grid-row: span 2; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 900; font-size: 22px; }
+    .summary b { font-size: 17px; line-height: 1.5; }
+    .summary small { color: inherit; opacity: .85; font-size: 13.5px; line-height: 1.6; }
+    .summary.ok { background: #e3f1ea; color: #134e3f; } .summary.ok .icon { background: var(--green); }
+    .summary.warn { background: var(--mark-bg); color: #6a4a00; } .summary.warn .icon { background: var(--mark); }
+    .summary.bad { background: var(--stop-bg); color: #7d1b13; } .summary.bad .icon { background: var(--stop); }
+    .stats { display: flex; flex-wrap: wrap; gap: 6px 16px; grid-column: 2; margin-top: 2px; font-size: 12.5px; opacity: .85; }
+    .stats span b { font-size: 13px; }
+
+    .viewer-wrap { display: grid; gap: 16px; }
+    .viewer { padding: 14px; }
+    /* 盤と駒の絵はアプリ(コマドリ)・検討室と同じ。木目・罫線・星は画像1枚なので、升に線を引き直さない */
+    .coord-top { display: grid; grid-template-columns: repeat(9, 1fr); margin-right: 16px;
+                 padding: 0 2px; font-size: 10.5px; color: #8a7a62; text-align: center; line-height: 1.5; }
+    .board-row { display: flex; }
+    .coord-side { display: grid; grid-template-rows: repeat(9, 1fr); width: 16px; padding: 2px 0;
+                  font-size: 10.5px; color: #8a7a62; text-align: center; align-items: center; }
+    .ban { flex: 1; display: grid; grid-template-columns: repeat(9, 1fr); gap: 0;
+           background: #e9c98a url(img/komadori/ban-mokume.jpg) center / 100% 100% no-repeat;
+           border: 1.4px solid #1f170d; box-shadow: 0 2px 6px rgba(80, 55, 20, .18); user-select: none; }
+    .ban .sq { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .ban .sq img { height: 93%; width: auto; max-width: 100%; display: block; pointer-events: none; }
+    .ban .sq.gote img { transform: rotate(180deg); }
+    .ban .sq.last { background: rgba(255, 149, 0, .5); }
+    .ban .sq.from { background: rgba(255, 149, 0, .25); }
+    #board-wrap { margin: 4px 0; }
+    .hands { font-size: 14px; color: #444; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; min-height: 30px; margin: 4px 0; }
+    .hand-mark { font-size: 15px; color: #1f170d; margin-right: 2px; }
+    .hand-chip { display: inline-flex; align-items: center; gap: 1px; }
+    .hand-chip img { height: 26px; width: auto; display: block; }
+    .hand-chip.gote img { transform: rotate(180deg); }
+    .hand-count { font-size: 12px; color: #888; font-variant-numeric: tabular-nums; }
+    .hand-none { font-size: 12px; color: #888; }
+    .caption { margin: 10px 0 0; min-height: 52px; display: grid; gap: 4px; }
+    .caption .mv { font-size: 18px; font-weight: 700; font-family: var(--mincho); }
+    .caption .mv small { font-family: "Hiragino Sans", sans-serif; font-size: 12.5px; color: var(--ink-3); font-weight: 400; margin-right: 6px; }
+    .caption .note { font-size: 13px; color: #6a4a00; background: var(--mark-bg); border-radius: 8px; padding: 6px 10px; }
+    .caption .note.stop { color: #7d1b13; background: var(--stop-bg); }
+    .caption .note code { font-family: var(--mincho); font-size: 14px; font-weight: 700; }
+    .ctrl { display: grid; grid-template-columns: repeat(4, 44px) 1fr; gap: 6px; align-items: center; margin: 10px 0 0; }
+    .ctrl button { height: 40px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 15px; cursor: pointer; font-family: inherit; }
+    .ctrl button:hover { border-color: var(--ink-3); }
+    .ctrl button:disabled { opacity: .4; cursor: default; }
+    .ctrl .next-mark { padding: 0 12px; font-size: 13.5px; font-weight: 700; color: #6a4a00; background: var(--mark-bg); border-color: #f0dc9d; white-space: nowrap; }
+    input[type=range] { width: 100%; margin: 12px 0 0; accent-color: var(--accent); }
+    .exports { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 0; }
+    .exports .wide { grid-column: span 2; background: var(--ink); color: #fff; border-color: var(--ink); }
+    .exports .wide:hover { background: #000; }
+
+    .list { padding: 6px; }
+    .list h2 { font-size: 15px; margin: 8px 10px 6px; display: flex; justify-content: space-between; align-items: baseline; }
+    .list h2 small { color: var(--ink-3); font-weight: 400; font-size: 12px; }
+    .moves { max-height: 520px; overflow: auto; margin: 0; padding: 0 4px 4px; list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px 6px; }
+    .moves li { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-size: 14px; line-height: 1.4; }
+    .moves li:hover { background: var(--paper); }
+    .moves .n { color: var(--ink-3); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+    .moves .k { font-family: var(--mincho); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .moves .r { color: var(--ink-3); font-size: 11.5px; font-family: var(--mincho); }
+    .moves li.mark { background: var(--mark-bg); }
+    .moves li.mark .r { color: #8a6400; font-weight: 700; }
+    .moves li.stop { background: var(--stop-bg); color: var(--stop); grid-column: span 2; grid-template-columns: 28px 1fr; }
+    .moves li.cur { outline: 2px solid var(--accent); outline-offset: -2px; background: #fff3ec; }
+    .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 12px 6px; font-size: 12px; color: var(--ink-3); }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+
+    .demo-link { text-align: center; margin: 14px 0 0; font-size: 13px; }
+
+    @media (min-width: 760px) {
+      main { padding: 0 24px 72px; }
+      .hero { grid-template-columns: 1.15fr .85fr; padding: 44px 0 30px; gap: 32px; }
+      h1 { font-size: 38px; }
+      .lead { font-size: 16px; }
+      .row2 { grid-template-columns: 1fr 1.2fr; align-items: end; }
+      .viewer-wrap { grid-template-columns: minmax(0, 470px) minmax(0, 1fr); align-items: start; }
+      .list { position: sticky; top: 12px; }
+      .moves { max-height: 640px; grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1000px) { .moves { grid-template-columns: repeat(3, 1fr); } .moves li.stop { grid-column: span 3; } }
+
+    .site-foot { border-top: 1px solid var(--line); margin-top: 24px; padding: 18px 16px; text-align: center; color: var(--ink-3); font-size: 13px; background: #fff; }
+    .site-foot a { color: #0b67c2; }
+  </style>
+  <style>
+    /* 共通ヘッダー（taikai.html と同じもの） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow"><b>試験版</b>紙の棋譜 → KIF</p>
+        <h1>書いた棋譜を、<br><em>撮るだけで</em>盤に並べます。</h1>
+        <p class="lead">記録用紙や棋譜ノートを撮ると、1 手ずつ盤で指せるかを確かめながら KIF にします。<code>76、</code> <code>□ヨ</code> のような略字でも、<code>７六歩</code> <code>同銀</code> のような書き方でも読めます。</p>
+        <ol class="steps">
+          <li><b><i>1</i>撮る</b>用紙全体を真上から</li>
+          <li><b><i>2</i>読む</b>字を読んで盤で確かめる</li>
+          <li><b><i>3</i>見比べる</b>黄色の手だけ用紙と照らす</li>
+        </ol>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <svg class="art-paper" viewBox="0 0 186 250" role="img" aria-label="手書きの記録用紙">
+        <defs>
+          <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#5a4320" flood-opacity=".18"/></filter>
+                  </defs>
+        <g transform="rotate(-5 90 125)" filter="url(#sh)">
+          <rect x="18" y="26" width="150" height="196" rx="6" fill="#fffdf7"/>
+          <g stroke="#e6dcc6" stroke-width="1">
+            <line x1="30" y1="58" x2="156" y2="58"/><line x1="30" y1="84" x2="156" y2="84"/><line x1="30" y1="110" x2="156" y2="110"/>
+            <line x1="30" y1="136" x2="156" y2="136"/><line x1="30" y1="162" x2="156" y2="162"/><line x1="30" y1="188" x2="156" y2="188"/>
+            <line x1="93" y1="40" x2="93" y2="206"/>
+          </g>
+          <text x="30" y="48" font-size="10" fill="#9b8f78" font-family="sans-serif">▲先手　　　　△後手</text>
+          <g font-family="'Klee One','Hiragino Mincho ProN','Yu Mincho',serif" font-size="17" fill="#2f3b66">
+            <text x="38" y="78">76、</text><text x="101" y="78">34、</text>
+            <text x="38" y="104">26、</text><text x="101" y="104">84、</text>
+            <text x="38" y="130">25、</text><text x="101" y="130">85、</text>
+            <text x="38" y="156">78へ</text><text x="101" y="156">32へ</text>
+            <text x="38" y="182">□ヨ</text><text x="101" y="182">22ク</text>
+          </g>
+        </g>
+      </svg>
+        <svg class="art-arrow" viewBox="0 0 50 40"><defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e5672e"/></marker></defs><path d="M4 26 C 16 8, 30 8, 42 20" fill="none" stroke="#e5672e" stroke-width="3" stroke-linecap="round" marker-end="url(#ah)"/></svg>
+        <div class="art-board"><div class="ban" id="hero-ban"></div></div>
+      </div>
+    </section>
+
+    <section class="card upload">
+      <span class="lab">棋譜の写真</span>
+      <label class="pick" id="pick">
+        <input type="file" id="file" accept="image/*">
+        <span class="pick-empty" id="pick-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>
+          <b>ここを押して、写真を撮るか選ぶ</b>
+          <small>パソコンなら、写真をここへ置いても選べます</small>
+        </span>
+        <span id="pick-photo" hidden></span>
+      </label>
+      <p class="hint">用紙全体が入るように、真上から撮ると読みやすくなります。写真はこのサーバーに残しません。</p>
+      <div class="row2">
+        <div>
+          <label class="lab" for="teai">手合割</label>
+          <select id="teai">
+            <option value="">用紙から読む</option>
+            <option>平手</option><option>香落ち</option><option>角落ち</option><option>飛車落ち</option>
+            <option>二枚落ち</option><option>四枚落ち</option><option>六枚落ち</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="go" disabled>KIF にする</button>
+      </div>
+      <p class="after" id="status">写真を選ぶと押せます。</p>
+      <p class="err" id="err" hidden></p>
+    </section>
+
+    <section class="card reading" id="reading" hidden aria-live="polite">
+      <div class="scan" id="scan"></div>
+      <div>
+        <ol class="stages" id="stages">
+          <li>写真を送っています</li>
+          <li>字を読んで、1 手ずつ盤で確かめています</li>
+          <li>盤に並べています</li>
+        </ol>
+        <p class="clock" id="clock">0.0 秒</p>
+      </div>
+    </section>
+
+    <p class="demo-link" id="demo-link"><a href="?demo">見本を見る（角落ち 84 手の記録用紙）</a></p>
+
+    <section class="result" id="result" hidden>
+      <div class="summary" id="summary"></div>
+      <div class="viewer-wrap">
+        <div class="card viewer">
+          <div class="hands" id="hand-w"></div>
+          <div id="board-wrap">
+            <div class="coord-top" aria-hidden="true"><span>9</span><span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span></div>
+            <div class="board-row">
+              <div class="ban" id="board" role="img" aria-label="局面"></div>
+              <div class="coord-side" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>七</span><span>八</span><span>九</span></div>
+            </div>
+          </div>
+          <div class="hands" id="hand-b"></div>
+          <div class="caption" id="caption"></div>
+          <div class="ctrl">
+            <button id="first" aria-label="はじめへ">⏮</button>
+            <button id="prev" aria-label="1 手もどる">◀</button>
+            <button id="next" aria-label="1 手すすむ">▶</button>
+            <button id="last" aria-label="最後へ">⏭</button>
+            <button class="next-mark" id="next-mark">次の黄色の手へ</button>
+          </div>
+          <input type="range" id="seek" min="0" max="0" value="0" aria-label="手数">
+          <div class="exports">
+            <a class="btn wide" id="study" href="/study.html">検討室で開いて直す</a>
+            <button class="btn" id="save">KIF を保存</button>
+            <button class="btn" id="copy">KIF をコピー</button>
+          </div>
+        </div>
+        <div class="card list">
+          <h2>読んだ手 <small>手を押すと、その局面を出します</small></h2>
+          <div class="legend"><span><i style="background:var(--mark-bg);box-shadow:inset 0 0 0 1px #f0dc9d"></i>用紙と見比べてほしい手</span><span><i style="background:var(--stop-bg)"></i>続かなくなった手</span></div>
+          <ol class="moves" id="moves"></ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <a href="/">Shogiban to Kif</a> ｜ <a href="/taikai.html">大会・教室</a> ｜ <a href="/blog.html">ブログ一覧</a> ｜ <a href="/about.html">えぬっくまについて</a> ｜ <a href="/privacy.html">プライバシーポリシー・利用規約</a> ｜ <a href="/tokushoho.html">特定商取引法に基づく表記</a><br>
+    &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+  </footer>
+
+  <script>
+  (function () {
+    // 読み取りの入口（aws-nkkuma の KifuSheetStack, POST /read）。空のあいだは受け付けない
+    var API_URL = '';
+    var MAX_EDGE = 2400;   // 送る前に長い辺をここまで縮める（字が読める大きさは残す）
+
+    var $ = function (id) { return document.getElementById(id); };
+    var image = null, data = null, cur = 0, timer = null;
+
+    function track(name, params) { try { gtag('event', name, params || {}); } catch (e) {} }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+    // ---- 写真を選ぶ ----
+    $('file').addEventListener('change', function () { if (this.files && this.files[0]) take(this.files[0]); });
+    ['dragenter', 'dragover'].forEach(function (t) { $('pick').addEventListener(t, function (e) { e.preventDefault(); this.classList.add('drag'); }); });
+    ['dragleave', 'drop'].forEach(function (t) { $('pick').addEventListener(t, function (e) { e.preventDefault(); this.classList.remove('drag'); }); });
+    $('pick').addEventListener('drop', function (e) { var f = e.dataTransfer.files[0]; if (f) take(f); });
+
+    function take(f) {
+      shrink(f, function (dataUrl) {
+        image = dataUrl;
+        $('pick-empty').hidden = true;
+        $('pick-photo').hidden = false;
+        $('pick-photo').innerHTML = '<img alt="選んだ写真" src="' + dataUrl + '"><span class="again">撮り直す</span>';
+        $('go').disabled = false;
+        $('status').textContent = '手合割を確かめて、「KIF にする」を押してください。';
+      });
+    }
+
+    function shrink(file, done) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var s = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        done(c.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = function () { showErr('この写真は開けませんでした。JPEG か PNG で選び直してください。'); };
+      img.src = url;
+    }
+
+    function showErr(msg) { $('err').textContent = msg; $('err').hidden = false; }
+
+    // ---- 読む ----
+    function stage(n) {
+      var li = $('stages').children;
+      for (var i = 0; i < li.length; i++) li[i].className = i < n ? 'done' : (i === n ? 'now' : '');
+    }
+    function startClock() {
+      var t0 = performance.now();
+      $('clock').textContent = '0.0 秒';
+      timer = setInterval(function () { $('clock').textContent = ((performance.now() - t0) / 1000).toFixed(1) + ' 秒'; }, 100);
+      return t0;
+    }
+
+    $('go').addEventListener('click', function () {
+      $('err').hidden = true;
+      if (!API_URL) { showErr('ただいま準備中です。受け付けを始めたら、このページでお知らせします。下の「見本を見る」で、読んだあとの画面を試せます。'); return; }
+      $('go').disabled = true;
+      $('result').hidden = true;
+      $('scan').innerHTML = '<img alt="" src="' + image + '">';
+      $('reading').hidden = false;
+      stage(0);
+      startClock();
+      var toRead = setTimeout(function () { stage(1); }, 700);
+      $('status').textContent = '画面を閉じずにお待ちください。';
+      track('kami_kifu_send');
+      fetch(API_URL, {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ image: image.split(',')[1], media_type: 'image/jpeg', handicap: $('teai').value })
+      }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+        .then(function (res) {
+          clearTimeout(toRead);
+          if (!res.ok) { showErr(res.body.error || '読み取りに失敗しました。もう一度お試しください。'); return; }
+          stage(2);
+          return new Promise(function (ok) { setTimeout(ok, 250); }).then(function () { show(res.body); });
+        })
+        .catch(function () { showErr('つながりませんでした。電波のよいところで、もう一度お試しください。'); })
+        .then(function () {
+          clearInterval(timer);
+          $('reading').hidden = true;
+          $('go').disabled = false;
+          $('status').textContent = '別の写真も KIF にできます。';
+        });
+    });
+
+    // ---- 盤 ----
+    // 駒と盤の絵はアプリ(コマドリ)・検討室と同じもの: Shogi Images(久保良介)の二文字駒と木目盤、CC0。
+    // 駒は先手ぶんだけ持ち、後手は1枚を180°回す
+    var KOMA_IMG = { P: 'fu', L: 'kyo', N: 'kei', S: 'gin', G: 'kin', B: 'kaku', R: 'hi', K: 'gyoku',
+                     '+P': 'to', '+L': 'nkyo', '+N': 'nkei', '+S': 'ngin', '+B': 'uma', '+R': 'ryu' };
+    var KANJI = { P: '歩', L: '香', N: '桂', S: '銀', G: '金', B: '角', R: '飛', K: '玉', '+P': 'と', '+L': '成香', '+N': '成桂', '+S': '成銀', '+B': '馬', '+R': '龍' };
+    var HAND_ORDER = ['R', 'B', 'G', 'S', 'N', 'L', 'P'];
+
+    function parseSfen(sfen) {
+      var p = sfen.split(' '), rows = p[0].split('/'), cells = [];
+      rows.forEach(function (row) {
+        var line = [], promo = false;
+        for (var i = 0; i < row.length; i++) {
+          var ch = row[i];
+          if (ch === '+') { promo = true; continue; }
+          if (/\d/.test(ch)) { for (var k = 0; k < +ch; k++) line.push(null); continue; }
+          line.push({ t: (promo ? '+' : '') + ch.toUpperCase(), black: ch === ch.toUpperCase() });
+          promo = false;
+        }
+        cells.push(line);
+      });
+      var hands = { b: {}, w: {} }, n = '';
+      if (p[2] && p[2] !== '-') {
+        for (var j = 0; j < p[2].length; j++) {
+          var c = p[2][j];
+          if (/\d/.test(c)) { n += c; continue; }
+          (c === c.toUpperCase() ? hands.b : hands.w)[c.toUpperCase()] = +(n || 1);
+          n = '';
+        }
+      }
+      return { cells: cells, hands: hands };
+    }
+    function sq(usi2) { return { col: 9 - +usi2[0], row: usi2.charCodeAt(1) - 97 }; }
+    function komaImg(t) { return '<img src="img/komadori/koma/' + KOMA_IMG[t] + '.png" alt="' + KANJI[t] + '" draggable="false">'; }
+
+    // 直前の手は、移動元を薄く、移動先を濃く塗る（アプリ・検討室と同じ）
+    function renderBan(el, sfen, usi) {
+      var pos = parseSfen(sfen), to = null, from = null, h = [];
+      if (usi) { to = sq(usi.slice(2, 4)); if (usi[1] !== '*') from = sq(usi.slice(0, 2)); }
+      pos.cells.forEach(function (line, r) {
+        line.forEach(function (pc, c) {
+          var cls = 'sq' + (pc && !pc.black ? ' gote' : '');
+          if (to && to.row === r && to.col === c) cls += ' last';
+          else if (from && from.row === r && from.col === c) cls += ' from';
+          h.push('<div class="' + cls + '">' + (pc ? komaImg(pc.t) : '') + '</div>');
+        });
+      });
+      el.innerHTML = h.join('');
+      return pos;
+    }
+
+    function drawBoard(sfen, mv) {
+      var pos = renderBan($('board'), sfen, mv && mv.usi);
+      hand('hand-w', pos.hands.w, sideName(false), true);
+      hand('hand-b', pos.hands.b, sideName(true), false);
+    }
+
+    function sideName(black) {
+      if (data.handicap && data.handicap !== '平手') return black ? '☗下手' : '☖上手';
+      return black ? '☗先手' : '☖後手';
+    }
+    // 駒台（アプリ・検討室と同じ見せ方）: 印、駒の絵、2枚以上は「×n」、空なら「持ち駒なし」
+    function hand(id, h, who, gote) {
+      var pcs = HAND_ORDER.filter(function (t) { return h[t]; }).map(function (t) {
+        return '<span class="hand-chip' + (gote ? ' gote' : '') + '">' + komaImg(t) + (h[t] > 1 ? '<span class="hand-count">×' + h[t] + '</span>' : '') + '</span>';
+      });
+      $(id).innerHTML = '<span class="hand-mark">' + who + '</span>' + (pcs.length ? pcs.join('') : '<span class="hand-none">持ち駒なし</span>');
+    }
+
+    // はじめの帯の盤: 平手から ▲７六歩 △３四歩
+    renderBan($('hero-ban'), 'lnsgkgsnl/1r5b1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL b - 3', '3c3d');
+
+    function side(n) {   // n 手目を指した側
+      var firstBlack = (data.start || '').split(' ')[1] !== 'w';
+      return ((n % 2 === 1) === firstBlack) ? '▲' : '△';
+    }
+    function moveText(m) { return side(m['手']) + m['指し手'].replace(/\(\d\d\)$/, '').replace(/　/g, ''); }
+
+    function go(i) {
+      var n = data.moves.length;
+      cur = Math.max(0, Math.min(n, i));
+      var mv = cur ? data.moves[cur - 1] : null;
+      drawBoard(mv ? mv.sfen : data.start, mv);
+      var cap = '';
+      if (!mv) cap = '<div class="mv"><small>はじめ</small>' + esc(data.handicap || '平手') + 'の初形</div>';
+      else {
+        cap = '<div class="mv"><small>第' + mv['手'] + '手</small>' + esc(moveText(mv)) + '</div>';
+        var paper = (data.cells && data.cells[mv['手'] - 1] || [])[0];
+        if (mv['印'] === '読み替え') {
+          cap += '<div class="note">用紙の字 <code>' + esc(paper || '') + '</code> では指せないので、<code>' + esc(mv['読み']) + '</code> と読み替えました。用紙と見比べてください。</div>';
+        } else if (mv['印'] === '第二候補') {
+          cap += '<div class="note">字があいまいでした（<code>' + esc(paper || '') + '</code> か <code>' + esc(mv['読み']) + '</code>）。つながる方の <code>' + esc(mv['読み']) + '</code> にしました。</div>';
+        } else if (mv['印'] === '迷い') {
+          cap += '<div class="note">用紙の書き方 <code>' + esc(mv['読み']) + '</code> だけでは、どの駒か一つに決まりませんでした。用紙と見比べてください。</div>';
+        }
+      }
+      if (data.problem && cur === n) {
+        cap += '<div class="note stop">次の第' + data.problem['手'] + '手 <code>' + esc(data.problem['読み'].join(' / ')) + '</code> は、どう読んでもこの局面から指せませんでした。続きは検討室で直してください。</div>';
+      }
+      $('caption').innerHTML = cap;
+      $('seek').value = cur;
+      $('first').disabled = $('prev').disabled = cur === 0;
+      $('next').disabled = $('last').disabled = cur === n;
+      var marks = markList();
+      $('next-mark').hidden = !marks.length;
+      var li = $('moves').children;
+      for (var k = 0; k < li.length; k++) li[k].classList.toggle('cur', +li[k].dataset.i === cur);
+      var c = $('moves').querySelector('.cur');
+      if (c) {
+        var box = $('moves'), top = c.offsetTop - box.offsetTop;
+        if (top < box.scrollTop || top > box.scrollTop + box.clientHeight - 40) box.scrollTop = top - box.clientHeight / 2;
+      }
+    }
+    function markList() { return data.moves.filter(function (m) { return m['印']; }).map(function (m) { return m['手']; }); }
+
+    $('first').onclick = function () { go(0); };
+    $('prev').onclick = function () { go(cur - 1); };
+    $('next').onclick = function () { go(cur + 1); };
+    $('last').onclick = function () { go(data.moves.length); };
+    $('seek').oninput = function () { go(+this.value); };
+    $('next-mark').onclick = function () {
+      var marks = markList(), nx = marks.filter(function (n) { return n > cur; })[0];
+      go(nx || marks[0]);
+    };
+    $('moves').addEventListener('click', function (e) {
+      var li = e.target.closest('li');
+      if (li && li.dataset.i) go(+li.dataset.i);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!data || $('result').hidden || /input|select|textarea/i.test(e.target.tagName)) return;
+      if (e.key === 'ArrowRight') { go(cur + 1); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { go(cur - 1); e.preventDefault(); }
+    });
+
+    // ---- 結果 ----
+    function show(d) {
+      data = d;
+      var marks = markList().length, n = d.moves.length, box = $('summary');
+      var secs = (d.timing || []).reduce(function (a, t) { return a + t.read_ms + t.check_ms; }, 0);
+      var stats = '<div class="stats"><span>手合割 <b>' + esc(d.handicap || '平手') + '</b></span><span>手数 <b>' + n + '</b></span>' +
+        (marks ? '<span>黄色の手 <b>' + marks + '</b></span>' : '') + (secs ? '<span>読み取り <b>' + (secs / 1000).toFixed(1) + ' 秒</b></span>' : '') +
+        (d.result ? '<span>' + esc(d.result) + '</span>' : '') + '</div>';
+      if (d.problem) {
+        box.className = 'summary bad';
+        box.innerHTML = '<span class="icon">!</span><b>第' + d.problem['手'] + '手で、つながらなくなりました。</b><small>' + n + '手目までの KIF を作りました。続きは検討室で直してください。</small>' + stats;
+      } else if (marks) {
+        box.className = 'summary warn';
+        box.innerHTML = '<span class="icon">✓</span><b>' + n + '手を KIF にしました。</b><small>黄色の ' + marks + ' 手は、字を読み替えてつなげました。「次の黄色の手へ」で用紙と見比べてください。</small>' + stats;
+      } else {
+        box.className = 'summary ok';
+        box.innerHTML = '<span class="icon">✓</span><b>' + n + '手を KIF にしました。</b><small>すべて、書いてあるとおりに指せる手でつながりました。</small>' + stats;
+      }
+      var rows = ['<li data-i="0"><span class="n">0</span><span class="k">初形</span><span class="r"></span></li>'];
+      d.moves.forEach(function (m) {
+        rows.push('<li data-i="' + m['手'] + '"' + (m['印'] ? ' class="mark"' : '') + '><span class="n">' + m['手'] + '</span><span class="k">' + esc(moveText(m)) +
+          '</span><span class="r">' + esc(m['読み']) + '</span></li>');
+      });
+      if (d.problem) rows.push('<li class="stop"><span class="n">' + d.problem['手'] + '</span><span>' + esc(d.problem['読み'].join(' / ')) + ' … ここで続かなくなりました</span></li>');
+      $('moves').innerHTML = rows.join('');
+      $('seek').max = n;
+      $('study').href = '/study.html?kif=' + encodeURIComponent(d.kif);
+      $('result').hidden = false;
+      $('demo-link').hidden = true;
+      var first = markList()[0];
+      go(d.problem ? n : (first || n));
+      $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      track('kami_kifu_done', { moves: n, marks: marks, stopped: d.problem ? 1 : 0 });
+    }
+
+    $('save').addEventListener('click', function () {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([data.kif], { type: 'text/plain;charset=utf-8' }));
+      a.download = 'kifu.kif'; document.body.appendChild(a); a.click(); a.remove();
+    });
+    $('copy').addEventListener('click', function () {
+      var b = this;
+      navigator.clipboard.writeText(data.kif).then(function () { b.textContent = 'コピーしました'; setTimeout(function () { b.textContent = 'KIF をコピー'; }, 1600); });
+    });
+
+    // 見た目を確かめるとき: ?demo で、X の角落ち 84 手を読んだ結果を出す
+    if (/[?&]demo\b/.test(location.search)) {
+      fetch('/kami-kifu-demo.json').then(function (r) { return r.json(); }).then(show).catch(function () {});
+    }
+  })();
+  </script>
+</body>
+</html>
