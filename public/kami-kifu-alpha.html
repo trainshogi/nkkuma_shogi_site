@@ -313,7 +313,7 @@
       </div>
     </section>
 
-    <p class="demo-link" id="demo-link"><a href="?demo">見本を見る（角落ち 84 手の記録用紙）</a></p>
+    <p class="demo-link" id="demo-link"><a href="?demo">見本を見る（平手 49 手の記録用紙）</a></p>
 
     <section class="result" id="result" hidden>
       <div class="summary" id="summary"></div>
@@ -549,6 +549,11 @@
       var firstBlack = (data.start || '').split(' ')[1] !== 'w';
       return ((n % 2 === 1) === firstBlack) ? '▲' : '△';
     }
+    // 用紙がふつうの書き方なら、読みも「５四歩」の形で見せる（略字の用紙は略字のまま）
+    function yomi(m) {
+      var paper = (data.cells && data.cells[m['手'] - 1] || [])[0] || '';
+      return /[一二三四五六七八九]|同/.test(paper) ? moveText(m).slice(1) : m['読み'];
+    }
     function moveText(m) { return side(m['手']) + m['指し手'].replace(/\(\d\d\)$/, '').replace(/　/g, ''); }
 
     function go(i) {
@@ -562,11 +567,11 @@
         cap = '<div class="mv"><small>第' + mv['手'] + '手</small>' + esc(moveText(mv)) + '</div>';
         var paper = (data.cells && data.cells[mv['手'] - 1] || [])[0];
         if (mv['印'] === '読み替え') {
-          cap += '<div class="note">用紙の字 <code>' + esc(paper || '') + '</code> では指せないので、<code>' + esc(mv['読み']) + '</code> と読み替えました。用紙と見比べてください。</div>';
+          cap += '<div class="note">用紙の字 <code>' + esc(paper || '') + '</code> では指せないので、<code>' + esc(yomi(mv)) + '</code> と読み替えました。用紙と見比べてください。</div>';
         } else if (mv['印'] === '第二候補') {
-          cap += '<div class="note">字があいまいでした（<code>' + esc(paper || '') + '</code> か <code>' + esc(mv['読み']) + '</code>）。つながる方の <code>' + esc(mv['読み']) + '</code> にしました。</div>';
+          cap += '<div class="note">字があいまいでした（<code>' + esc(paper || '') + '</code> か <code>' + esc(yomi(mv)) + '</code>）。つながる方の <code>' + esc(yomi(mv)) + '</code> にしました。</div>';
         } else if (mv['印'] === '迷い') {
-          cap += '<div class="note">用紙の書き方 <code>' + esc(mv['読み']) + '</code> だけでは、どの駒か一つに決まりませんでした。用紙と見比べてください。</div>';
+          cap += '<div class="note">用紙の書き方 <code>' + esc(paper || mv['読み']) + '</code> だけでは、どの駒か一つに決まりませんでした。用紙と見比べてください。</div>';
         }
       }
       if (data.problem && cur === n) {
@@ -628,7 +633,7 @@
       var rows = ['<li data-i="0"><span class="n">0</span><span class="k">初形</span><span class="r"></span></li>'];
       d.moves.forEach(function (m) {
         rows.push('<li data-i="' + m['手'] + '"' + (m['印'] ? ' class="mark"' : '') + '><span class="n">' + m['手'] + '</span><span class="k">' + esc(moveText(m)) +
-          '</span><span class="r">' + esc(m['読み']) + '</span></li>');
+          '</span><span class="r">' + esc(yomi(m)) + '</span></li>');
       });
       if (d.problem) rows.push('<li class="stop"><span class="n">' + d.problem['手'] + '</span><span>' + esc(d.problem['読み'].join(' / ')) + ' … ここで続かなくなりました</span></li>');
       $('moves').innerHTML = rows.join('');
@@ -652,8 +657,11 @@
       navigator.clipboard.writeText(data.kif).then(function () { b.textContent = 'コピーしました'; setTimeout(function () { b.textContent = 'KIF をコピー'; }, 1600); });
     });
 
-    // 見た目を確かめるとき: ?demo で、X の角落ち 84 手を読んだ結果を出す
+    // ?demo で、自前の見本（平手 49 手、/img/kami-kifu-demo.jpg）を読んだ結果を出す
     if (/[?&]demo\b/.test(location.search)) {
+      $('pick-empty').hidden = true;
+      $('pick-photo').hidden = false;
+      $('pick-photo').innerHTML = '<img alt="見本の記録用紙" src="/img/kami-kifu-demo.jpg">';
       fetch('/kami-kifu-demo.json').then(function (r) { return r.json(); }).then(show).catch(function () {});
     }
   })();
