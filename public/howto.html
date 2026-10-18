@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 写真をKIFに (/photo.html) の使い方。2026-10-18 に絵つき 4 手順に作り直した。絵は img/howto/ (Akira さんの 9/1 の盤)。
+<!-- 写真をKIFに (/photo.html) の使い方。2026-10-18 に絵つき 4 手順に作り直した。絵は img/howto/ (Akira さんの 2019-08-01 の盤の写真。結果の画面はその局面を入れて撮った見本)。
      撮り方の ○× は 2026-08-19 に現行エンジン(v3+制約デコーダ)で実測確認したことだけ。
      根拠: 正解ラベル付き実会場写真5枚 × 回転/余白の統制実験(横長フレーム可・横倒し不可・余白30%増可・盤縮小で劣化)。 -->
 <html lang="ja">
@@ -48,7 +48,7 @@
         {
           "@type": "HowToStep",
           "name": "盤を撮る",
-          "text": "盤の 9×9 がぜんぶ入るように撮る。真上でも斜め上からでもよい。盤が切れている、横に倒れている、遠くて小さい写真は読めない。",
+          "text": "盤の 9×9 と両側の駒台がぜんぶ入るように撮る。手前から斜めでもよい。盤が切れている、横に倒れている、遠くて小さい写真は読めない。",
           "image": "https://shogi.nkkuma.tokyo/img/howto/satsuei-ok.jpg",
           "url": "https://shogi.nkkuma.tokyo/howto.html#step1"
         },
@@ -160,32 +160,32 @@
 
       <section class="g-sec" id="step1">
         <h2><span class="g-no">1</span>盤を撮る</h2>
-        <p>盤の 9×9 がぜんぶ入るように撮ります。真上からでも、斜め上からでもかまいません。</p>
+        <p>盤の 9×9 と、両側の駒台がぜんぶ入るように撮ります。手前から斜めに撮ってかまいません。</p>
         <ul class="g-ng">
-          <li class="ok"><img src="img/howto/satsuei-ok.jpg" width="300" height="375" alt="盤ぜんぶが写った写真" loading="lazy"><span class="g-mark ok">○</span>盤ぜんぶ</li>
-          <li><img src="img/howto/satsuei-ng-kire.jpg" width="300" height="375" alt="盤の右が切れた写真" loading="lazy"><span class="g-mark ng">×</span>切れている</li>
-          <li><img src="img/howto/satsuei-ng-yoko.jpg" width="300" height="375" alt="盤が横に倒れた写真" loading="lazy"><span class="g-mark ng">×</span>横に倒れている</li>
-          <li><img src="img/howto/satsuei-ng-tooi.jpg" width="300" height="375" alt="盤が遠くて小さい写真" loading="lazy"><span class="g-mark ng">×</span>遠くて小さい</li>
+          <li class="ok"><img src="img/howto/satsuei-ok.jpg" width="300" height="225" alt="盤と両側の駒台が写った写真" loading="lazy"><span class="g-mark ok">○</span>盤と駒台ぜんぶ</li>
+          <li><img src="img/howto/satsuei-ng-kire.jpg" width="300" height="225" alt="盤の左が切れた写真" loading="lazy"><span class="g-mark ng">×</span>切れている</li>
+          <li><img src="img/howto/satsuei-ng-yoko.jpg" width="300" height="225" alt="盤が横に倒れた写真" loading="lazy"><span class="g-mark ng">×</span>横に倒れている</li>
+          <li><img src="img/howto/satsuei-ng-tooi.jpg" width="300" height="225" alt="盤が遠くて小さい写真" loading="lazy"><span class="g-mark ng">×</span>遠くて小さい</li>
         </ul>
       </section>
 
       <section class="g-sec" id="step2">
         <h2><span class="g-no">2</span>「変換する」を押す</h2>
         <p><span class="g-btnname">📷 撮影する</span>で撮るか、<span class="g-btnname">🖼 画像を選ぶ</span>で撮ってあった写真をえらびます。写真が出たら<span class="g-btnname">変換する</span>。数秒で盤が出ます。</p>
-        <img class="g-shot" src="img/howto/henkan.jpg" width="640" height="474" alt="写真をえらんだあとの画面。「変換する」ボタンに印" loading="lazy">
+        <img class="g-shot" src="img/howto/henkan.jpg" width="640" height="577" alt="写真をえらんだあとの画面。「変換する」ボタンに印" loading="lazy">
       </section>
 
       <section class="g-sec" id="step3">
         <h2><span class="g-no">3</span>違う駒を直す</h2>
         <p>写真と見くらべて、違う駒を押します。下に一覧が出るので、正しい駒をえらびます。</p>
-        <img class="g-shot" src="img/howto/naosu.jpg" width="640" height="1180" alt="盤の駒を押して、下の一覧から駒をえらぶ画面" loading="lazy">
+        <img class="g-shot" src="img/howto/naosu.jpg" width="640" height="1182" alt="盤の駒を押して、下の一覧から駒をえらぶ画面" loading="lazy">
         <p>持ち駒は押すと数を直せます。手番は上の<span class="g-btnname">先手番</span><span class="g-btnname">後手番</span>で。</p>
       </section>
 
       <section class="g-sec" id="step4">
         <h2><span class="g-no">4</span>渡す</h2>
         <p>ぴよ将棋や KENTO でそのまま検討できます。ほかのアプリには KIF・SFEN をコピーか保存。局面図は画像で残せます。</p>
-        <img class="g-shot" src="img/howto/watasu.jpg" width="640" height="259" alt="ぴよ将棋・KENTO・コピー・ファイル保存・画像のボタン" loading="lazy">
+        <img class="g-shot" src="img/howto/watasu.jpg" width="640" height="245" alt="ぴよ将棋・KENTO・コピー・ファイル保存・画像のボタン" loading="lazy">
       </section>
 
       <a class="g-go" href="/photo.html">撮ってみる</a>
