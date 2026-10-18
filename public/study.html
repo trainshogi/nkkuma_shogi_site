@@ -164,7 +164,18 @@
             font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
     .pill:hover { background: #f0f5f3; }
     #ext-note { margin: 2px 0 0; }
-    #ext-game[hidden], #print-box[hidden] { display: none; }
+    #ext-game[hidden], #ext-kif[hidden], #print-box[hidden] { display: none; }
+    button.pill { cursor: pointer; font-family: inherit; }
+    /* QR で開いた人への、アプリの帯 */
+    .app-band { display: flex; align-items: center; gap: 10px; background: #fff3ea; border: 1px solid #f0dccd;
+                border-radius: 12px; padding: 10px 12px; margin: 0 0 14px; font-size: 13.5px; }
+    .app-band[hidden] { display: none; }
+    .app-band img { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+    .app-band p { margin: 0; flex: 1; min-width: 0; line-height: 1.5; color: #4a423d; }
+    .app-band b { color: #2a2522; }
+    .app-band a { flex: none; display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px;
+                  border-radius: 999px; background: #e5672e; color: #fff; font-size: 13px; font-weight: 700;
+                  text-decoration: none; white-space: nowrap; }
     #print-box { max-width: 342px; margin: 10px auto 0; }
     #print-lead { margin: 0 0 8px; color: #555; }
     .site-foot.tool-foot { margin-top: 40px; }
@@ -236,6 +247,12 @@
     どのアプリの棋譜でもかまいません。</p>
 
   <div id="error-box" hidden></div>
+
+  <div class="app-band" id="app-band" hidden>
+    <img src="/img/about/komadori-icon.png" alt="" width="40" height="40">
+    <p><b>コマドリ</b><br>盤の横に置くだけで棋譜になるアプリ</p>
+    <a href="/komadori.html?from=study_qr" id="app-band-link">アプリを見る</a>
+  </div>
 
   <div class="card" id="input-card">
     <button type="button" class="input-toggle" id="input-toggle" hidden>▸ 別の棋譜を貼る</button>
@@ -310,6 +327,11 @@
           <a class="pill" id="ext-piyo" href="#">ぴよ将棋アプリ</a>
           <a class="pill" id="ext-piyow" href="#" target="_blank" rel="noopener">ぴよ将棋w</a>
           <a class="pill" id="ext-extend" href="#" target="_blank" rel="noopener">SHOGI-EXTEND</a>
+        </div>
+        <div class="ext-row" id="ext-kif">
+          <span class="ext-label">棋譜</span>
+          <button type="button" class="pill" id="kif-save">KIF を保存</button>
+          <button type="button" class="pill" id="kif-copy">KIF をコピー</button>
         </div>
         <p class="note" id="ext-note" hidden></p>
       </div>
@@ -1272,6 +1294,55 @@
     el.textContent = text || '';
     el.hidden = !text;
   }
+  // 受け取った人が棋譜を手元に残せるように(保存・コピー)
+  function kifText() {
+    var t = $('kif-in').value || '';
+    return /\S/.test(t) ? t.replace(/\s*$/, '\n') : '';
+  }
+  $('kif-save').addEventListener('click', function () {
+    var t = kifText();
+    if (!t) { return; }
+    var d = new Date();
+    var name = 'kifu-' + d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.kif';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\ufeff' + t], { type: 'text/plain;charset=utf-8' }));
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    track('study_kif_save', { entry: metrics.entry });
+    showExtNote('KIF を保存しました。ぴよ将棋などのアプリで開けます。');
+  });
+  $('kif-copy').addEventListener('click', function () {
+    var t = kifText();
+    if (!t) { return; }
+    function done() {
+      track('study_kif_copy', { entry: metrics.entry });
+      showExtNote('KIF をコピーしました。アプリの「棋譜を貼り付け」に貼れます。');
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = t;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '-1000px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      ta.remove();
+      if (ok) { done(); } else { showExtNote('コピーできませんでした。「KIF を保存」をお使いください。'); }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(t).then(done, fallback);
+    } else {
+      fallback();
+    }
+  });
+  $('app-band-link').addEventListener('click', function () {
+    track('study_app_band', { entry: metrics.entry });
+  });
+  function showAppBand() { $('app-band').hidden = false; }
+
   $('ext-piyow').addEventListener('click', function (e) {
     e.preventDefault();
     if (!viewer.positions) { return; }
@@ -1470,6 +1541,7 @@
     var n = viewer.plies.length;
     $('print-box').hidden = n === 0;
     $('ext-game').hidden = n === 0;
+    $('ext-kif').hidden = n === 0;
     if (!n) { return; }
     $('print-lead').textContent = (viewer.idx >= 1 && viewer.idx < n)
       ? '棋譜と、いま盤に出している' + viewer.idx + '手目の局面の図を左に、最後の局面の図を右に並べ、ひとことの欄を刷ります。'
@@ -1660,6 +1732,7 @@
     // QRから開いた人がそのままKIFを持ち帰れるよう、貼り付け欄にもKIFを入れておく
     metrics.entry = 'u_hash';
     track('study_load_kif', { method: 'u_hash' });
+    showAppBand();
   } else if (params.get('sfen') && looksLikeUsiPosition(params.get('sfen'))) {
     // ?sfen= に手順つきのUSIが来ることもある(#u= と同じ形)。手順を黙って捨てない
     if (loadUsiMoves(params.get('sfen'))) {
@@ -1706,6 +1779,7 @@
     if (loadUsiMoves(decodeHashU(h[1]))) {
       metrics.entry = 'u_hash';
       track('study_load_kif', { method: 'u_hash' });
+      showAppBand();
       scrollToBoard();
     } else {
       showError('リンクの棋譜(#u=)が読めませんでした。');
