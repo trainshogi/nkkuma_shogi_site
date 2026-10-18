@@ -140,13 +140,6 @@
     body[data-state="empty"] [data-role="pick"] .btn { min-height: 50px; font-size: 16px; }
     body[data-state="empty"] [data-role="help"] { margin: 2px 0 0; gap: 0; }
     body[data-state="empty"] [data-role="help"] .btn { min-height: 36px; font-size: 12.5px; }
-    /* 開いてすぐの画面: 押したあと何が起きるかを 3 枚の絵で（撮る → 盤になる → 直して渡す） */
-    .nk-flow { display: none; margin: 14px 0 2px; padding: 0; list-style: none; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-    body[data-state="empty"] .nk-flow { display: grid; }
-    .nk-flow li { position: relative; margin: 0; text-align: center; font-size: 12.5px; font-weight: 700; line-height: 1.45; color: #333; }
-    .nk-flow img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid #eee; margin: 0 0 4px; }
-    .nk-flow li + li::before { content: "›"; position: absolute; left: -7px; top: 34%; font-size: 20px; color: #e5672e; font-weight: 900; }
-    .nk-flow b { color: #e5672e; }
     /* 使い方の窓: 1 手順 = 絵 1 枚 + 1 行 */
     .howto-steps li img { flex: none; width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid #eee; }
     .howto-steps li div { padding-top: 2px; }
@@ -154,6 +147,24 @@
     .howto-steps b .step-no { width: 22px; height: 22px; margin: 0 2px 0 0; font-size: 12.5px; vertical-align: 1px; }
     .howto-ng { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: #f6f6f8; font-size: 13.5px; line-height: 1.7; text-align: left; }
     .howto-ng b { color: #dc4a37; }
+
+    /* 開いてすぐ: ロゴとくまを小さく → 見本 → ボタン。説明と質問は 1 行にたたむ */
+    body[data-state="empty"] .app > .logo { max-width: 300px; margin: 8px auto 0; display: block; }
+    body[data-state="empty"] .app > .howto { max-width: 260px; margin: 0 auto 6px; }
+    .nk-mihon { display: none; margin: 0 0 14px; }
+    body[data-state="empty"] .nk-mihon { display: block; }
+    .nk-mihon img { display: block; width: 100%; height: auto; border-radius: 12px; }
+    .nk-mihon figcaption { margin: 6px 0 0; font-size: 13px; color: #555; text-align: center; }
+    .nk-try { display: none; margin: 10px auto 0; padding: 8px 16px; border: 0; border-radius: 999px; background: #fff1e8; color: #c4511f; font-size: 14px; font-weight: 700; cursor: pointer; }
+    body[data-state="empty"] .nk-try { display: block; }
+    body[data-state="empty"] .tf-consent { font-size: 11.5px; margin-top: 8px; }
+    .site-about { margin: 18px auto 0 !important; }
+    .nk-more { border: 1px solid #eee; border-radius: 14px; padding: 2px 14px; background: #fafafa; }
+    .nk-more > summary { padding: 12px 0; font-size: 14px; font-weight: 700; color: #555; cursor: pointer; list-style: none; }
+    .nk-more > summary::-webkit-details-marker { display: none; }
+    .nk-more > summary::after { content: "＋"; float: right; color: #e5672e; }
+    .nk-more[open] > summary::after { content: "－"; }
+    .nk-more details > summary, .nk-more h2 { font-size: 14px !important; }
   </style>
   </head>
   <body data-state="empty">
@@ -177,17 +188,15 @@
       <!-- hidden file input（単一） -->
       <input type="file" id="file-input" accept="image/*" hidden>
 
+      <!-- 見本: 写真が盤になる（開いてすぐの画面だけ） -->
+      <figure class="nk-mihon"><img src="img/howto/mihon-shashin-ban.jpg" width="960" height="401" alt="盤の写真と、読み取った盤"><figcaption>撮った写真が、そのまま直せる盤になります</figcaption></figure>
+
       <!-- 3. 操作列（empty / photo） -->
       <div class="actions" data-role="pick">
         <button type="button" class="btn" id="btn-camera">📷 撮影する</button>
         <button type="button" class="btn" id="btn-library">🖼 画像を選ぶ</button>
       </div>
-      <!-- 押したあとの流れ（開いてすぐの画面だけ） -->
-      <ol class="nk-flow" aria-label="使い方の流れ">
-        <li><img src="img/howto/mini-toru.jpg" width="200" height="200" alt=""><b>1</b> 盤を撮る</li>
-        <li><img src="img/howto/mini-ban.jpg" width="200" height="200" alt=""><b>2</b> 盤になる</li>
-        <li><img src="img/howto/mini-watasu.jpg" width="200" height="200" alt=""><b>3</b> 直して渡す</li>
-      </ol>
+      <button type="button" class="nk-try" id="btn-try">見本の写真で試してみる</button>
 
       <!-- 4. 結果カード（photo以降） -->
       <section class="card" data-role="card">
@@ -285,6 +294,7 @@
 
       <!-- サービス説明とFAQ(静的テキスト。認識機能のJSとは無関係・全状態で常時表示) -->
       <section class="site-about" style="margin:36px auto 0; max-width:640px; padding:0 8px; font-size:14px; line-height:1.9; color:#444; text-align:left;">
+        <details class="nk-more"><summary>このサービスについて・よくある質問</summary>
         <details>
           <summary style="font-size:16px; font-weight:bold; margin:0 0 8px; cursor:pointer;">Shogiban to Kif とは</summary>
           <p style="margin:8px 0 10px;">Shogiban to Kif（将棋盤認識サイト）は、将棋盤の写真から盤面を自動で読み取り、KIF形式・SFEN形式に変換する無料のWebサービスです。感想戦の局面を検討アプリに移したいとき、詰将棋や次の一手の図面を残したいとき、盤を一マスずつ入力し直す必要はありません。写真を1枚撮って、変換ボタンを押すだけです。</p>
@@ -311,6 +321,7 @@
         <details style="margin:12px 0 0;">
           <summary style="font-weight:bold; cursor:pointer;">認識が間違っていたらどうすればいいですか？</summary>
           <p style="margin:4px 0 0;">盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは<a href="/howto.html">使い方ガイド</a>と<a href="/blog/photo-tips.html">撮り方のコツ</a>をご覧ください。</p>
+        </details>
         </details>
       </section>
       <script type="application/ld+json">
@@ -410,6 +421,22 @@
     <script src="https://cdn.jsdelivr.net/gh/fengyuanchen/compressorjs/dist/compressor.min.js"></script>
     <script src="js/kyokumen.js"></script>
     <script src="js/site.js?v=20261017a"></script>
+    <script>
+      // 見本の写真を「画像を選ぶ」と同じ道で読み込む
+      document.getElementById('btn-try').addEventListener('click', async function () {
+        var btn = this; btn.disabled = true;
+        try {
+          var blob = await (await fetch('img/howto/mihon-photo.jpg')).blob();
+          var dt = new DataTransfer();
+          dt.items.add(new File([blob], 'mihon.jpg', { type: 'image/jpeg' }));
+          var input = document.getElementById('file-input');
+          input.files = dt.files;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (e) {
+          alert('見本の写真を読み込めませんでした。もう一度お試しください');
+        } finally { btn.disabled = false; }
+      });
+    </script>
     <script>
       // 1 画面の並び（css/onescreen.css）用: 結果の画面では元の写真を小さく出し、押すと大きくする。上の「やり直す」は下のボタンと同じ
       (function () {
