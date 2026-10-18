@@ -1,0 +1,183 @@
+<!doctype html>
+<!-- コマドリの入口リンク（どの端末でもこの 1 本 /komadori.html。S3 は /komadori/ の index を出さないので .html にしている）。iPhone・iPad は App Store、Android は Google Play へそのまま進む。
+     パソコンはこのページで両方のストアと、スマホで読む QR を出す。?from=<どこから> を付けると、ストアへのリンクに印を付ける -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>コマドリ — 盤の横に置くだけで、1 局まるごと棋譜に</title>
+  <meta name="description" content="スマホを盤の横に置いておけば、指した手がそのまま棋譜になります。iPhone・iPad・Android のアプリです。">
+  <link rel="canonical" href="https://shogi.nkkuma.tokyo/komadori.html">
+  <meta property="og:title" content="コマドリ — 盤の横に置くだけで、1 局まるごと棋譜に">
+  <meta property="og:description" content="スマホを盤の横に置いておけば、指した手がそのまま棋譜になります。iPhone・iPad・Android のアプリです。">
+  <meta property="og:image" content="https://shogi.nkkuma.tokyo/img/ogp/komadori.png">
+  <meta property="og:url" content="https://shogi.nkkuma.tokyo/komadori.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="えぬっくま">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@nkkuma_service">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <style>
+    :root { --bg:#fff3ea; --card:#ffffff; --text:#2a2522; --muted:#6d625a; --accent:#e5672e; --line:#f0dccd; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1.8; }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; display: flex; flex-direction: column; gap: 28px; }
+    .hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+    .hero img.icon { width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 4px 14px rgba(120,60,20,.18); }
+    .hero h1 { margin: 6px 0 0; font-size: 30px; letter-spacing: .06em; }
+    .hero .catch { margin: 0; font-size: clamp(22px, 5.4vw, 30px); font-weight: 800; line-height: 1.45; }
+    .hero .catch em { font-style: normal; color: var(--accent); }
+    .hero .sub { margin: 0; color: var(--muted); font-size: 15px; }
+    .going { margin: 0; padding: 10px 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); font-weight: 700; text-align: center; }
+    .stores { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; }
+    .stores img { height: 52px; width: auto; display: block; }
+    .stores a.mine { order: -1; }
+    .stores a.mine img { height: 60px; }
+    .pc { display: flex; gap: 22px; align-items: center; justify-content: center; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+    .pc .qr { width: 156px; height: 156px; flex: none; }
+    .pc .qr svg { width: 100%; height: 100%; display: block; }
+    .pc p { margin: 0; flex: 1 1 240px; min-width: 0; font-size: 15px; }
+    .shot { width: 100%; max-width: 520px; margin: 0 auto; border-radius: 16px; display: block; }
+    .more { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; font-size: 15px; }
+    .more a { color: var(--accent); font-weight: 700; text-decoration: none; }
+    .more a:hover { text-decoration: underline; }
+    footer { text-align: center; color: var(--muted); font-size: 12px; padding: 0 20px 32px; }
+    footer a { color: inherit; }
+  </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/photo.html">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <img class="icon" src="/img/about/komadori-icon.png" alt="" width="104" height="104">
+      <h1>コマドリ</h1>
+      <p class="catch">盤の横に置くだけで、<br>1 局まるごと<em>棋譜</em>に</p>
+      <p class="sub">iPhone・iPad・Android のアプリです</p>
+    </section>
+
+    <p class="going" id="going" hidden></p>
+
+    <div class="stores">
+      <a id="to-ios" href="https://apps.apple.com/jp/app/id6800334202"><img src="/img/about/badge-appstore-ja.svg" alt="App Store からダウンロード" width="143" height="52"></a>
+      <a id="to-android" href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori"><img src="/img/about/badge-googleplay-ja.svg" alt="Google Play で手に入れよう" width="177" height="52"></a>
+    </div>
+
+    <div class="pc" id="pc" hidden>
+      <div class="qr" id="qr" aria-hidden="true"></div>
+      <p>パソコンで開いているときは、この QR をスマホのカメラで読んでください。お使いのスマホに合うストアが開きます。</p>
+    </div>
+
+    <img class="shot" src="/img/about/komadori-live.jpg" alt="対局中のコマドリの画面。指した手を記録している" width="800" height="813">
+
+    <nav class="more" aria-label="コマドリのページ">
+      <a href="/about.html#steps">使い方</a>
+      <a href="/komadori/tottemita.html">撮ってみた</a>
+      <a href="/komadori/placement.html">置き方</a>
+      <a href="/komadori/gear.html">対応している盤と駒</a>
+    </nav>
+  </main>
+
+  <footer>
+    <a href="/">えぬっくま</a>・<a href="/komadori/terms.html">利用規約</a>・<a href="/komadori/privacy.html">プライバシーポリシー</a>
+  </footer>
+
+  <script src="/js/vendor/qrcode.min.js"></script>
+  <script>
+  (function () {
+    // App Store のキャンペーンの印に使うプロバイダ番号（App Store Connect のもの）。空のあいだは印を付けない
+    var APPLE_PT = '';
+    var IOS = 'https://apps.apple.com/jp/app/id6800334202';
+    var ANDROID = 'https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori';
+
+    var q = new URLSearchParams(location.search);
+    var from = (q.get('from') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) || 'direct';
+    var iosUrl = APPLE_PT ? IOS + '?pt=' + APPLE_PT + '&ct=' + from + '&mt=8' : IOS;
+    var androidUrl = ANDROID + '&referrer=' + encodeURIComponent('utm_source=' + from + '&utm_medium=site&utm_campaign=komadori_link');
+    document.getElementById('to-ios').href = iosUrl;
+    document.getElementById('to-android').href = androidUrl;
+
+    var ua = navigator.userAgent;
+    // iPadOS の Safari は「Mac」と名乗るので、指で触れるかどうかで見分ける
+    var isIos = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    var isAndroid = /Android/.test(ua);
+    var os = isIos ? 'ios' : isAndroid ? 'android' : 'pc';
+
+    if (os === 'pc') {
+      document.getElementById('pc').hidden = false;
+      try {
+        var qr = qrcode(0, 'M');
+        qr.addData('https://shogi.nkkuma.tokyo/komadori.html?from=' + from);
+        qr.make();
+        document.getElementById('qr').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+      } catch (e) { document.getElementById('pc').hidden = true; }
+      gtag('event', 'komadori_link', { from: from, os: os });
+      return;
+    }
+
+    // スマホは、その OS のストアを先頭に大きく出し、そのまま開く（?stay を付けると開かずにこのページに残る）
+    var mine = document.getElementById(isIos ? 'to-ios' : 'to-android');
+    mine.className = 'mine';
+    var dest = isIos ? iosUrl : androidUrl;
+    if (q.has('stay')) {
+      gtag('event', 'komadori_link', { from: from, os: os });
+      return;
+    }
+    var going = document.getElementById('going');
+    going.textContent = (isIos ? 'App Store' : 'Google Play') + ' を開いています。開かないときは、下のボタンを押してください。';
+    going.hidden = false;
+    var moved = false;
+    function go() { if (moved) { return; } moved = true; location.replace(dest); }
+    gtag('event', 'komadori_link', { from: from, os: os, event_callback: go });
+    setTimeout(go, 700);
+  })();
+  </script>
+</body>
+</html>
