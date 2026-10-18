@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>検討室（β） — 棋譜を貼るだけでAI検討</title>
-  <meta name="description" content="KIFを貼り付けるだけで、候補手と読み筋・形勢をAIで検討できます。">
+  <title>検討室（β） — 棋譜を貼ると、候補手と形勢を調べられます</title>
+  <meta name="description" content="KIFを貼ると、候補手と読み筋、形勢を将棋ソフトで調べられます。">
   <meta property="og:title" content="検討室（β）">
   <meta property="og:description" content="受け取った棋譜を、盤に並べて振り返れます。">
   <meta property="og:image" content="https://shogi.nkkuma.tokyo/img/ogp/study.png">
@@ -232,7 +232,7 @@
 
 <main>
   <h1>検討室</h1>
-  <p class="lead">棋譜(KIF)を貼り付けるだけで、AIが候補手と読み筋・形勢を教えてくれます。
+  <p class="lead">棋譜(KIF)を貼り付けるだけで、将棋ソフトで候補手と読み筋・形勢を調べられます。
     どのアプリの棋譜でもかまいません。</p>
 
   <div id="error-box" hidden></div>
@@ -289,7 +289,7 @@
       <div id="study-panel">
         <div class="study-box">
           <div class="study-head">この局面の検討<span id="study-depth"></span></div>
-          <div id="study-best" class="note">「候補手を調べる」を押すと、AIが候補手3つと読み筋を出します。</div>
+          <div id="study-best" class="note">「候補手を調べる」を押すと、候補手を3つと読み筋を出します。</div>
           <div class="row" style="margin-top:8px">
             <button class="btn btn-sm btn-primary" id="btn-study">候補手を調べる</button>
             <button class="btn btn-sm" id="btn-study-close" hidden>盤を戻す</button>
@@ -328,7 +328,7 @@
   <!-- フッター: 入口ページ(alpha / beta)と同じ形。共有するのはこのページのアドレスだけで、棋譜は載せない -->
   <footer class="site-foot tool-foot">
     <div class="tf-row">
-      <a class="tf-pill tf-x" href="https://twitter.com/intent/tweet?text=%E6%A3%8B%E8%AD%9C%E3%82%92%E8%B2%BC%E3%82%8B%E3%81%A0%E3%81%91%E3%81%A7%E6%A4%9C%E8%A8%8E%E3%81%A7%E3%81%8D%E3%82%8B%E6%A4%9C%E8%A8%8E%E5%AE%A4&amp;url=https%3A%2F%2Fshogi.nkkuma.tokyo%2Fstudy.html&amp;via=nkkuma_service" target="_blank" rel="noopener" aria-label="Xでポストする"><span class="tf-mark" aria-hidden="true">𝕏</span>ポスト</a>
+      <a class="tf-pill tf-x" href="https://x.com/intent/post?text=%E6%A3%8B%E8%AD%9C%E3%82%92%E8%B2%BC%E3%82%8B%E3%81%A8%E3%80%81%E5%80%99%E8%A3%9C%E6%89%8B%E3%81%A8%E5%BD%A2%E5%8B%A2%E3%82%92%E8%AA%BF%E3%81%B9%E3%82%89%E3%82%8C%E3%82%8B%E6%A4%9C%E8%A8%8E%E5%AE%A4%E3%81%A7%E3%81%99%E3%80%82&amp;url=https%3A%2F%2Fshogi.nkkuma.tokyo%2Fstudy.html&amp;via=nkkuma_service" target="_blank" rel="noopener" aria-label="Xでポストする"><span class="tf-mark" aria-hidden="true">𝕏</span>ポスト</a>
       <a class="tf-pill tf-fb" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fshogi.nkkuma.tokyo%2Fstudy.html" target="_blank" rel="noopener" aria-label="Facebookでシェアする"><span class="tf-mark" aria-hidden="true">f</span>シェア</a>
     </div>
 
@@ -1010,7 +1010,7 @@
     if (sameIdx) { renderStudyCands(); }
     if (!ev) {
       best.className = 'note';
-      best.textContent = '「候補手を調べる」を押すと、AIが候補手3つと読み筋を出します。';
+      best.textContent = '「候補手を調べる」を押すと、候補手を3つと読み筋を出します。';
       return;
     }
     best.className = '';
@@ -1048,14 +1048,14 @@
     var hintText = hint.textContent;
     thinkBox.classList.add('thinking');
     hint.classList.add('thinking');
-    hint.textContent = 'AIがこの局面を考えています…（数秒かかります）';
+    hint.textContent = 'この局面を調べています…（数秒かかります）';
     var thinkBest = $('study-best');
     thinkBest.className = 'note';
     thinkBest.textContent = '';
     var sp = document.createElement('span');
     sp.className = 'spinner';
     thinkBest.appendChild(sp);
-    thinkBest.appendChild(document.createTextNode('AIが候補手と読み筋を考えています…'));
+    thinkBest.appendChild(document.createTextNode('候補手と読み筋を調べています…'));
     fetch(EVAL_URL, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1086,7 +1086,7 @@
       // 思考中表示のまま固まらないよう、案内文へ戻してからエラーを出す
       var best = $('study-best');
       best.className = 'note';
-      best.textContent = '「候補手を調べる」を押すと、AIが候補手3つと読み筋を出します。';
+      best.textContent = '「候補手を調べる」を押すと、候補手を3つと読み筋を出します。';
       var ol = $('study-cands');
       ol.innerHTML = '';
       var li = document.createElement('li');

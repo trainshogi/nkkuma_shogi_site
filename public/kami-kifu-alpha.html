@@ -159,6 +159,7 @@
     .exports { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 0; }
     .exports .wide { grid-column: span 2; background: var(--ink); color: #fff; border-color: var(--ink); }
     .exports .wide:hover { background: #000; }
+    .exports .span2 { grid-column: span 2; }
 
     .list { padding: 6px; }
     .list h2 { font-size: 15px; margin: 8px 10px 6px; display: flex; justify-content: space-between; align-items: baseline; }
@@ -341,6 +342,7 @@
             <a class="btn wide" id="study" href="/study.html">検討室で開いて直す</a>
             <button class="btn" id="save">KIF を保存</button>
             <button class="btn" id="copy">KIF をコピー</button>
+            <a class="btn span2" id="share-x" href="https://x.com/intent/post" target="_blank" rel="noopener">X で知らせる</a>
           </div>
         </div>
         <div class="card list">
@@ -645,6 +647,9 @@
       $('moves').innerHTML = rows.join('');
       $('seek').max = n;
       $('study').href = '/study.html?kif=' + encodeURIComponent(d.kif);
+      // X には棋譜は載せず、この道具のページだけを載せる
+      $('share-x').href = 'https://x.com/intent/post?text=' + encodeURIComponent('記録用紙の写真から、' + n + '手の棋譜にしました。 #将棋') +
+        '&url=' + encodeURIComponent('https://shogi.nkkuma.tokyo/kami-kifu-alpha.html');
       $('result').hidden = false;
       $('demo-link').hidden = true;
       var first = markList()[0];

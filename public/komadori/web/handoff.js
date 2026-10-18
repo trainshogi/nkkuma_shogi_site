@@ -129,9 +129,9 @@ export function qrSvg(text) {
 export function shareUrls(game, info) {
   const url = studyUrl(game);
   const names = info.sente || info.gote ? '▲' + (info.sente || '先手') + ' 対 ' + (info.gote || '後手') + '△ ' : '';
-  const text = info.plies + '手の棋譜ができました。' + names + '#コマドリ';
+  const text = info.plies + '手の棋譜ができました。' + names + '#将棋';
   return {
-    x: 'https://twitter.com/intent/tweet?text=' + encode(text) + '&url=' + encode(url),
+    x: 'https://x.com/intent/post?text=' + encode(text) + '&url=' + encode(url),
     facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encode(url),
   };
 }
