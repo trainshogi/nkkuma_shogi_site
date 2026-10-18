@@ -559,12 +559,12 @@
 
   // ===== 共有ボタン =====
   function setupShare() {
-    var text = '写真1枚で簡単KIF作成！';
+    var text = '将棋盤の写真から、局面をKIFにできます。';
     var via = 'nkkuma_service';
     var url = location.href;
     var x = $('share-x');
     if (x) {
-      x.href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) +
+      x.href = 'https://x.com/intent/post?text=' + encodeURIComponent(text) +
         '&url=' + encodeURIComponent(url) + '&via=' + via;
       x.target = '_blank';
       x.rel = 'noopener';

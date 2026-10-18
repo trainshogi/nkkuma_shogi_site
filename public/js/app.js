@@ -223,9 +223,9 @@ document.getElementById('btnCopy').onclick = async ()=>{
 // シェア
 (function(){
   const url = location.href.split('#')[0];
-  const text = '写真1枚で簡単KIF作成！';
+  const text = '将棋盤の写真から、局面をKIFにできます。';
   const via  = 'nkkuma_service';
-  const tw   = new URL('https://twitter.com/intent/tweet');
+  const tw   = new URL('https://x.com/intent/post');
   if(text) tw.searchParams.set('text', text);
   if(url)  tw.searchParams.set('url', url);
   if(via)  tw.searchParams.set('via', via);

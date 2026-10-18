@@ -22,7 +22,7 @@
   <meta property="og:description" content="対局を動画で撮っておくだけで、指し手と消費時間つきの棋譜（KIF）に自動変換。音声は処理後すぐ削除されます。">
   <meta property="og:url" content="https://shogi.nkkuma.tokyo/video.html">
   <meta property="og:image" content="https://shogi.nkkuma.tokyo/img/video-ogp.png">
-  <meta property="og:site_name" content="将棋盤認識サイト">
+  <meta property="og:site_name" content="えぬっくま">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@nkkuma_service">
   <meta name="description" content="対局を撮った動画1本から、指し手と消費時間つきの棋譜（KIF）を自動で復元する実験機能です。">
@@ -1335,12 +1335,12 @@
     }).length;
     var url = 'https://shogi.nkkuma.tokyo/video.html';
     var text = plies > 0
-      ? '対局を撮った動画から、' + plies + '手の棋譜が自動でできました。'
-      : '対局を撮った動画から、棋譜が自動でできました。';
+      ? '対局の動画から、' + plies + '手の棋譜にしました。 #将棋'
+      : '対局の動画から、棋譜にしました。 #将棋';
     var x = $('share-x');
     var fb = $('share-fb');
     if (x) {
-      x.href = 'https://twitter.com/intent/tweet?text='
+      x.href = 'https://x.com/intent/post?text='
         + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
     }
     if (fb) {
