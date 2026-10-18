@@ -140,6 +140,20 @@
     body[data-state="empty"] [data-role="pick"] .btn { min-height: 50px; font-size: 16px; }
     body[data-state="empty"] [data-role="help"] { margin: 2px 0 0; gap: 0; }
     body[data-state="empty"] [data-role="help"] .btn { min-height: 36px; font-size: 12.5px; }
+    /* 開いてすぐの画面: 押したあと何が起きるかを 3 枚の絵で（撮る → 盤になる → 直して渡す） */
+    .nk-flow { display: none; margin: 14px 0 2px; padding: 0; list-style: none; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    body[data-state="empty"] .nk-flow { display: grid; }
+    .nk-flow li { position: relative; margin: 0; text-align: center; font-size: 12.5px; font-weight: 700; line-height: 1.45; color: #333; }
+    .nk-flow img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid #eee; margin: 0 0 4px; }
+    .nk-flow li + li::before { content: "›"; position: absolute; left: -7px; top: 34%; font-size: 20px; color: #e5672e; font-weight: 900; }
+    .nk-flow b { color: #e5672e; }
+    /* 使い方の窓: 1 手順 = 絵 1 枚 + 1 行 */
+    .howto-steps li img { flex: none; width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid #eee; }
+    .howto-steps li div { padding-top: 2px; }
+    .howto-steps li:first-child { border-top: 0; }
+    .howto-steps b .step-no { width: 22px; height: 22px; margin: 0 2px 0 0; font-size: 12.5px; vertical-align: 1px; }
+    .howto-ng { margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: #f6f6f8; font-size: 13.5px; line-height: 1.7; text-align: left; }
+    .howto-ng b { color: #dc4a37; }
   </style>
   </head>
   <body data-state="empty">
@@ -168,6 +182,12 @@
         <button type="button" class="btn" id="btn-camera">📷 撮影する</button>
         <button type="button" class="btn" id="btn-library">🖼 画像を選ぶ</button>
       </div>
+      <!-- 押したあとの流れ（開いてすぐの画面だけ） -->
+      <ol class="nk-flow" aria-label="使い方の流れ">
+        <li><img src="img/howto/mini-toru.jpg" width="200" height="200" alt=""><b>1</b> 盤を撮る</li>
+        <li><img src="img/howto/mini-ban.jpg" width="200" height="200" alt=""><b>2</b> 盤になる</li>
+        <li><img src="img/howto/mini-watasu.jpg" width="200" height="200" alt=""><b>3</b> 直して渡す</li>
+      </ol>
 
       <!-- 4. 結果カード（photo以降） -->
       <section class="card" data-role="card">
@@ -372,13 +392,13 @@
     <div class="howto-modal" id="howto-modal" role="dialog" aria-modal="true" aria-label="使い方" hidden>
       <div class="howto-backdrop" data-close="1"></div>
       <div class="howto-card">
-        <img class="howto-kuma" src="img/shogi_intro.png" alt="えぬっくま">
         <ol class="howto-steps">
-          <li><span class="step-no">1</span><div><b>将棋盤を撮る</b><br>盤全体がまっすぐ入るように撮影。真上でも斜め上からでもかまいません</div></li>
-          <li><span class="step-no">2</span><div><b>「変換する」を押す</b><br>数秒で盤面を読み取って将棋盤に表示します</div></li>
-          <li><span class="step-no">3</span><div><b>直して、渡す</b><br>違う駒はタップで修正。コピーやぴよ将棋・KENTOで検討へ</div></li>
+          <li><img src="img/howto/mini-toru.jpg" alt=""><div><b><span class="step-no">1</span> 盤を撮る</b><br>盤と両側の駒台がぜんぶ入るように。斜めからでもかまいません</div></li>
+          <li><img src="img/howto/mini-ban.jpg" alt=""><div><b><span class="step-no">2</span> 「変換する」を押す</b><br>数秒で盤が出ます</div></li>
+          <li><img src="img/howto/mini-watasu.jpg" alt=""><div><b><span class="step-no">3</span> 直して、渡す</b><br>違う駒は押して直します。ぴよ将棋・KENTO・KIF のコピーへ</div></li>
         </ol>
-        <a href="./howto.html" style="display:block; text-align:center; font-size:13.5px; margin:0 0 10px;">くわしい使い方ガイドをみる</a>
+        <p class="howto-ng"><b>読めない写真</b>　盤が切れている・横に倒れている・遠くて小さい</p>
+        <a href="./howto.html" style="display:block; text-align:center; font-size:13.5px; margin:0 0 10px;">絵つきの使い方をみる</a>
         <button type="button" class="btn btn-cta howto-close" id="btn-howto-close">はじめる</button>
       </div>
     </div>
