@@ -68,6 +68,8 @@
     .tile .tag { font-style: normal; display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #fff; color: #8a5a2b; font-size: 10.5px; font-weight: 700; vertical-align: 2px; }
     .t-komadori { background: #fff3ea; } .t-photo { background: #f1f6ef; } .t-kami { background: #f6f2fb; }
     .t-study { background: #eef4fb; } .t-taikai { background: #fbf6e8; } .t-blog { background: #f4f4f2; }
+    .t-video { background: #f3f3f6; }
+    .tile.t-blog { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; gap: 12px; }
     .more { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; }
     .more a { padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13px; font-weight: 700; }
     @media (max-width: 360px) {
@@ -114,6 +116,7 @@
       <a class="tile t-komadori" href="/about.html#komadori"><span class="ic"><img src="/img/about/komadori-icon.png" alt=""></span><b>コマドリ</b><span>スマホを盤の横に置いて指すだけ。1 局まるごと棋譜になるアプリ</span></a>
       <a class="tile t-photo" href="/photo.html"><span class="ic" aria-hidden="true">📷</span><b>写真から局面を KIF に</b><span>盤の写真 1 枚で、その局面をぴよ将棋や KENTO へ</span></a>
       <a class="tile t-kami" href="/kami-kifu-alpha.html"><span class="ic" aria-hidden="true">📝</span><b>紙の棋譜を KIF に<i class="tag">試験版</i></b><span>記録用紙や棋譜ノートを撮ると、盤に並べて KIF に</span></a>
+      <a class="tile t-video" href="/video.html"><span class="ic" aria-hidden="true">🎥</span><b>動画まるごと棋譜化<i class="tag">終了予定</i></b><span>対局の動画から 1 局分の棋譜に。PC アプリが出たら終わります</span></a>
       <a class="tile t-study" href="/study.html"><span class="ic" aria-hidden="true">🧭</span><b>検討室<i class="tag">β</i></b><span>棋譜を貼ると、形勢と次の一手を盤で見られる</span></a>
       <a class="tile t-taikai" href="/taikai.html"><span class="ic" aria-hidden="true">🏆</span><b>大会・教室の方へ</b><span>大会や教室の対局を、まとめて棋譜に残します</span></a>
       <a class="tile t-blog" href="/blog.html"><span class="ic" aria-hidden="true">📰</span><b>ブログ</b><span>撮り方のコツや、大会のレポート</span></a>
