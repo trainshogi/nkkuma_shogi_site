@@ -168,6 +168,9 @@
     .nk-more > summary::after { content: "＋"; float: right; color: #e5672e; }
     .nk-more[open] > summary::after { content: "－"; }
     .nk-more details > summary, .nk-more h2 { font-size: 14px !important; }
+    .nk-faq-more { margin: 14px 0 12px; font-size: 14px; font-weight: 700; }
+    .nk-faq-more a { color: #c4511f; }
+    #btn-faq[hidden] { display: none; }
   </style>
   </head>
   <body data-state="empty">
@@ -325,6 +328,7 @@
           <summary style="font-weight:bold; cursor:pointer;">認識が間違っていたらどうすればいいですか？</summary>
           <p style="margin:4px 0 0;">盤上の駒や持ち駒はタップで修正できます。認識自体がうまくいかないときは、盤全体がまっすぐ入るように撮り直すと改善することが多いです。詳しくは<a href="/howto.html">使い方ガイド</a>と<a href="/blog/photo-tips.html">撮り方のコツ</a>をご覧ください。</p>
         </details>
+        <p class="nk-faq-more"><a href="/faq.html">そのほかのよくある質問 ›</a></p>
         </details>
       </section>
       <script type="application/ld+json">
@@ -367,7 +371,8 @@
         <div class="tf-row">
           <a id="share-x" class="tf-pill tf-x" href="#" aria-label="Xでポストする"><span class="tf-mark" aria-hidden="true">𝕏</span>ポスト</a>
           <a id="share-fb" class="tf-pill tf-fb" href="#" aria-label="Facebookでシェアする"><span class="tf-mark" aria-hidden="true">f</span>シェア</a>
-          <button type="button" class="tf-pill" id="btn-faq">よくある質問</button>
+          <!-- よくある質問は上の「このサービスについて」の中にまとめた。js が id を使うので消さずに隠す -->
+          <button type="button" class="tf-pill" id="btn-faq" hidden>よくある質問</button>
         </div>
 
         <div class="tf-support">
