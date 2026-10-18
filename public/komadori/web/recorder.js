@@ -231,7 +231,7 @@ document.addEventListener('visibilitychange', () => {
 async function withRetry(fn, times) {
   for (let i = 0; ; i++) {
     try { return await fn(); } catch (err) {
-      if (i >= times - 1) throw err;
+      if (err.noRetry || i >= times - 1) throw err;
       await new Promise((r) => setTimeout(r, 3000));
     }
   }
@@ -258,6 +258,15 @@ export async function upload(blob, name, meta, onProgress) {
   if (meta && meta.orientation) body.orientation = meta.orientation;
   const up = await withRetry(async () => {
     const res = await fetch(API_BASE + '/uploads', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    if (res.status === 429) {
+      // 受け口の回数の上限(1 人あたり・全体)。すぐやり直しても通らないので、そのまま伝える
+      const b = await res.json().catch(() => ({}));
+      if (b.error === 'busy') {
+        const e = new Error(b.scope === 'all' ? '今日は混み合っています。明日もう一度送ってください' : '混み合っています。少し時間をおいてから、もう一度送ってください');
+        e.noRetry = true;
+        throw e;
+      }
+    }
     if (!res.ok) throw new Error('送る準備ができませんでした (HTTP ' + res.status + ')');
     return res.json();
   }, 3);
