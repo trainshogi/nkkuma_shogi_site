@@ -72,23 +72,40 @@
     .tile.t-blog { grid-column: 1 / -1; min-height: 0; flex-direction: row; align-items: center; gap: 12px; }
     .more { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; }
     .more a { padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13px; font-weight: 700; }
-    /* スマホ: 7 つ全部が開いた画面に収まるよう、絵と名前を横に並べて詰める */
+    /* スマホ: 7 つ全部が開いた画面に収まるよう、絵と名前を横に並べ、タイルを画面の高さいっぱいに広げる */
     @media (max-width: 899px) {
-      .hub { padding-top: 10px; }
+      .hub { padding-top: 10px; display: flex; flex-direction: column; min-height: calc(100vh - 58px); min-height: calc(100svh - 58px); }
       .hello { margin: 0 0 10px; gap: 10px; }
-      .hello img { width: 46px; }
-      .hello h1 { font-size: 16px; line-height: 1.3; }
-      .hello p { font-size: 12px; line-height: 1.45; }
-      .tiles { gap: 8px; }
-      .tile { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "ic ttl" "d d"; align-items: center; column-gap: 8px; row-gap: 5px; min-height: 0; padding: 10px; border-radius: 14px; }
-      .tile .ic { grid-area: ic; width: 32px; height: 32px; border-radius: 9px; font-size: 18px; }
-      .tile .ic img { width: 32px; height: 32px; border-radius: 9px; }
-      .tile b { grid-area: ttl; font-size: 13.5px; line-height: 1.3; }
-      .tile span:not(.ic) { grid-area: d; align-self: start; font-size: 11.5px; line-height: 1.45; }
-      .tile .tag { display: inline-block; margin: 2px 0 0; font-size: 10px; padding: 0 6px; vertical-align: 0; }
-      .tile.t-blog { grid-template-columns: auto auto 1fr; grid-template-areas: "ic ttl d"; }
+      .hello img { width: 54px; }
+      .hello h1 { font-size: 17px; line-height: 1.3; }
+      .hello p { font-size: 12.5px; line-height: 1.45; }
+      .tiles { flex: 1; gap: 8px; grid-template-rows: repeat(3, minmax(0, 1fr)) auto; }
+      .tile { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto 1fr; grid-template-areas: "ic ttl" "d d"; align-items: center; align-content: start; column-gap: 9px; row-gap: 7px; min-height: 0; padding: 12px; border-radius: 16px; }
+      .tile .ic { grid-area: ic; width: 40px; height: 40px; border-radius: 11px; font-size: 22px; }
+      .tile .ic img { width: 40px; height: 40px; border-radius: 11px; }
+      .tile b { grid-area: ttl; font-size: 15.5px; line-height: 1.3; }
+      .tile span:not(.ic) { grid-area: d; align-self: start; font-size: 13px; line-height: 1.5; }
+      .tile .tag { display: inline-block; margin: 2px 0 0; font-size: 10.5px; padding: 0 6px; vertical-align: 0; }
+      .tile.t-blog { grid-template-columns: auto auto 1fr; grid-template-rows: auto; grid-template-areas: "ic ttl d"; padding: 10px 12px; }
       .tile.t-blog span:not(.ic) { align-self: center; }
       .more { margin-top: 14px; }
+    }
+    @media (max-width: 379px), (max-height: 600px) {
+      .hello img { width: 44px; }
+      .hello p { font-size: 11.5px; }
+      .tile { padding: 10px; column-gap: 7px; row-gap: 5px; }
+      .tile .ic, .tile .ic img { width: 32px; height: 32px; font-size: 18px; }
+      .hello h1 { font-size: 16px; }
+      .tiles { grid-template-rows: repeat(3, auto) min-content; }
+      .tile b { font-size: 13.5px; }
+      .tile span:not(.ic) { font-size: 11.5px; line-height: 1.45; }
+      .tile .tag { font-size: 10px; }
+    }
+    @media (min-width: 600px) and (max-width: 899px) {
+      .hub { min-height: 0; }
+      .tiles { grid-template-columns: repeat(3, 1fr); grid-template-rows: none; }
+      .tile { min-height: 130px; }
+      .tile.t-blog { min-height: 0; }
     }
     @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
     @media (min-width: 900px) {
