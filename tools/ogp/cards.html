@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!-- シェア画像（OGP, 1200×630）の元。node tools/ogp/render.js で public/img/ogp/*.png に書き出す -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+  body { margin: 0; background: #888; display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+  .card { width: 1200px; height: 630px; position: relative; overflow: hidden; box-sizing: border-box;
+    font-family: "Zen Kaku Gothic New", sans-serif; color: #2a2522; }
+  .maru { font-family: "Zen Maru Gothic", sans-serif; }
+  .url { position: absolute; font-size: 26px; font-weight: 700; letter-spacing: .02em; color: #8a7f76; }
+  .kuma { position: absolute; }
+
+  /* A: コマドリ（アプリ） */
+  #komadori { background: #fff3ea; }
+  #komadori .shot { position: absolute; left: 40px; top: 34px; width: 560px; height: 588px; object-fit: cover; object-position: left top; }
+  #komadori .side { position: absolute; left: 640px; top: 70px; right: 50px; display: flex; flex-direction: column; gap: 18px; }
+  #komadori .name { display: flex; align-items: center; gap: 18px; }
+  #komadori .name img { width: 104px; height: 104px; border-radius: 24px; box-shadow: 0 4px 14px rgba(120,60,20,.18); }
+  #komadori .name b { font-size: 64px; font-weight: 900; letter-spacing: .04em; }
+  #komadori h1 { margin: 10px 0 0; font-size: 50px; line-height: 1.38; font-weight: 900; }
+  #komadori h1 em { font-style: normal; color: #e5672e; }
+  #komadori .os { font-size: 26px; font-weight: 700; color: #6d625a; }
+  #komadori .kuma { right: 44px; bottom: 74px; width: 108px; }
+  #komadori .url { right: 44px; bottom: 30px; }
+
+  /* B: えぬっくま（入口） */
+  #hub { background: #fbfaf7; }
+  #hub .kuma { left: 70px; top: 120px; width: 300px; }
+  #hub .side { position: absolute; left: 430px; top: 92px; right: 60px; display: flex; flex-direction: column; gap: 26px; }
+  #hub .brand { font-size: 30px; font-weight: 900; letter-spacing: .3em; color: #6d625a; }
+  #hub h1 { margin: 0; font-size: 60px; line-height: 1.32; font-weight: 900; }
+  #hub .chips { display: flex; flex-wrap: nowrap; gap: 10px; }
+  #hub .chips span { font-size: 23px; font-weight: 700; padding: 8px 15px; border-radius: 999px; white-space: nowrap; }
+  #hub .c1 { background: #fff3ea; color: #b44d1d; } #hub .c2 { background: #eaf3e6; color: #3d6b2e; }
+  #hub .c3 { background: #f1ebfa; color: #5b3f95; } #hub .c4 { background: #e9f1f8; color: #2f5b85; }
+  #hub .url { left: 430px; bottom: 56px; }
+
+  /* C: 検討室（QR で開くページ） */
+  #study { background: #f9f8f3; }
+  #study .board { position: absolute; left: 60px; top: 55px; height: 520px; }
+  #study .side { position: absolute; left: 500px; top: 150px; right: 60px; display: flex; flex-direction: column; gap: 20px; }
+  #study h1 { margin: 0; font-size: 72px; font-weight: 900; line-height: 1.2; }
+  #study p { margin: 0; font-size: 34px; font-weight: 700; line-height: 1.5; color: #4a423d; }
+  #study .by { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 700; color: #6d625a; }
+  #study .by img { width: 48px; height: 48px; border-radius: 12px; }
+  #study .kuma { right: 50px; top: 40px; width: 110px; }
+  #study .url { left: 500px; bottom: 56px; }
+</style>
+</head>
+<body>
+
+<div class="card" id="komadori">
+  <img class="shot" src="../../public/img/about/komadori-live.jpg" alt="">
+  <div class="side">
+    <div class="name"><img src="komadori-icon-256.png" alt=""><b class="maru">コマドリ</b></div>
+    <h1 class="maru">盤の横に置くだけで、<br>1 局まるごと<em>棋譜</em>に</h1>
+    <div class="os">iPhone・iPad・Android</div>
+  </div>
+  <img class="kuma" src="../../public/img/kuma-20261018.png" alt="">
+  <div class="url">shogi.nkkuma.tokyo</div>
+</div>
+
+<div class="card" id="hub">
+  <img class="kuma" src="../../public/img/kuma-20261018.png" alt="">
+  <div class="side">
+    <div class="brand">えぬっくま</div>
+    <h1 class="maru">盤で指した将棋を、<br>あとに残る棋譜に</h1>
+    <div class="chips"><span class="c1">コマドリ</span><span class="c2">写真から KIF</span><span class="c3">紙の棋譜から KIF</span><span class="c4">検討室</span></div>
+  </div>
+  <div class="url">shogi.nkkuma.tokyo</div>
+</div>
+
+<div class="card" id="study">
+  <img class="board" src="board-crop.png" alt="">
+  <div class="side">
+    <h1 class="maru">検討室</h1>
+    <p>受け取った棋譜を、<br>盤に並べて振り返る</p>
+    <div class="by"><img src="komadori-icon-256.png" alt="">コマドリの棋譜もここで開きます</div>
+  </div>
+  <img class="kuma" src="../../public/img/kuma-20261018.png" alt="">
+  <div class="url">shogi.nkkuma.tokyo</div>
+</div>
+
+</body>
+</html>
