@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- トップをサービス一覧にする試し（α版）。写真の道具は photo.html。公開を決めたら index.html に置き換える -->
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BG7XXMB0B1');
+  </script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>えぬっくま — 将棋の棋譜をつくるアプリとサイト（α版）</title>
+  <meta name="description" content="盤で指した将棋を、あとに残る棋譜にする。アプリ「コマドリ」、写真から局面を KIF に、紙の棋譜を KIF に、検討室、大会・教室の棋譜づくり。">
+  <meta name="robots" content="noindex">
+  <link href="css/tool-foot.css?v=20261018a" rel="stylesheet">
+  <style>
+    /* 共通ヘッダー（ほかのページと同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+    .nk-head .nk-ver { margin-left: 10px; padding: 3px 9px; border-radius: 999px; background: #f5f3ff; border: 1px solid #ddd6fe; color: #6d28d9; font-size: 12px; font-weight: 700; line-height: 1.2; letter-spacing: .04em; white-space: nowrap; }
+  </style>
+  <style>
+    /* サービス一覧: くまの挨拶の下に、同じ大きさのタイルを並べる（スマホ 2 列、パソコン 3 列） */
+    body { margin: 0; background: #fff; color: #111; font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; }
+    .hub { max-width: 720px; margin: 0 auto; padding: 14px 16px 8px; box-sizing: border-box; }
+    .hub * { box-sizing: border-box; }
+    .hello { display: flex; align-items: center; gap: 12px; margin: 4px 0 14px; }
+    .hello img { width: 64px; height: auto; flex: none; }
+    .hello h1 { margin: 0; font-size: 19px; font-weight: 900; letter-spacing: .06em; line-height: 1.4; }
+    .hello p { margin: 2px 0 0; font-size: 13px; color: #555; line-height: 1.55; }
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tile { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 16px; color: #111; text-decoration: none; min-height: 150px; transition: transform .12s ease; }
+    .tile:active { transform: scale(.98); }
+    .tile:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .tile .ic { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: #fff; }
+    .tile .ic img { width: 46px; height: 46px; border-radius: 12px; }
+    .tile b { font-size: 15px; line-height: 1.35; }
+    .tile span:not(.ic) { font-size: 12px; line-height: 1.5; color: #555; }
+    .tile .tag { font-style: normal; display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 999px; background: #fff; color: #8a5a2b; font-size: 10.5px; font-weight: 700; vertical-align: 2px; }
+    .t-komadori { background: #fff3ea; } .t-photo { background: #f1f6ef; } .t-kami { background: #f6f2fb; }
+    .t-study { background: #eef4fb; } .t-taikai { background: #fbf6e8; } .t-blog { background: #f4f4f2; }
+    .more { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; }
+    .more a { padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111; text-decoration: none; font-size: 13px; font-weight: 700; }
+    @media (max-width: 360px) {
+      .hello img { width: 52px; }
+      .hello p { font-size: 12px; }
+      .tile { min-height: 0; padding: 10px; gap: 4px; }
+      .tile .ic, .tile .ic img { width: 38px; height: 38px; font-size: 20px; }
+      .tile b { font-size: 14px; }
+      .tile span:not(.ic) { font-size: 11.5px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+    @media (min-width: 900px) {
+      .hub { max-width: 1000px; padding-top: 24px; }
+      .tiles { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .tile { min-height: 160px; padding: 16px; }
+      .tile b { font-size: 17px; }
+      .tile span:not(.ic) { font-size: 13.5px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nk-head">
+    <a class="nk-logo" href="/top-alpha.html">えぬっくま</a>
+    <span class="nk-ver" title="アルファ版（試しに出している版）">α版</span>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/photo.html">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+
+  <main class="hub">
+    <div class="hello">
+      <img src="img/kuma-20261018.png" width="197" height="228" alt="えぬっくま">
+      <div>
+        <h1>えぬっくま</h1>
+        <p>盤で指した将棋を、あとに残る棋譜にするアプリとサイトを作っています</p>
+      </div>
+    </div>
+
+    <nav class="tiles" aria-label="サービス一覧">
+      <a class="tile t-komadori" href="/about.html#komadori"><span class="ic"><img src="/img/about/komadori-icon.png" alt=""></span><b>コマドリ</b><span>スマホを盤の横に置いて指すだけ。1 局まるごと棋譜になるアプリ</span></a>
+      <a class="tile t-photo" href="/photo.html"><span class="ic" aria-hidden="true">📷</span><b>写真から局面を KIF に</b><span>盤の写真 1 枚で、その局面をぴよ将棋や KENTO へ</span></a>
+      <a class="tile t-kami" href="/kami-kifu-alpha.html"><span class="ic" aria-hidden="true">📝</span><b>紙の棋譜を KIF に<i class="tag">試験版</i></b><span>記録用紙や棋譜ノートを撮ると、盤に並べて KIF に</span></a>
+      <a class="tile t-study" href="/study.html"><span class="ic" aria-hidden="true">🧭</span><b>検討室<i class="tag">β</i></b><span>棋譜を貼ると、形勢と次の一手を盤で見られる</span></a>
+      <a class="tile t-taikai" href="/taikai.html"><span class="ic" aria-hidden="true">🏆</span><b>大会・教室の方へ</b><span>大会や教室の対局を、まとめて棋譜に残します</span></a>
+      <a class="tile t-blog" href="/blog.html"><span class="ic" aria-hidden="true">📰</span><b>ブログ</b><span>撮り方のコツや、大会のレポート</span></a>
+    </nav>
+
+    <div class="more">
+      <a href="/about.html">えぬっくまについて</a><a href="/howto.html">使い方ガイド</a><a href="/contact.html">お問い合わせ</a>
+    </div>
+  </main>
+
+  <footer class="site-foot tool-foot" style="max-width:720px; margin:24px auto 0; padding-left:16px; padding-right:16px; box-sizing:border-box;">
+    <nav class="tf-nav" aria-label="ほかのページ">
+        <a href="/beta.html">写真認識 新エンジン版（β）</a>
+        <a href="/video.html">動画まるごと棋譜化（β）</a>
+        <a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">コマドリ（iPhone・iPad）</a>
+        <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">コマドリ（Android）</a>
+        <a href="/taikai.html">大会・教室で棋譜を残す</a>
+        <a href="/howto.html">使い方ガイド</a>
+        <a href="/blog.html">ブログ</a>
+        <a href="/about.html">えぬっくまについて</a>
+        <a href="/contact.html">お問い合わせ</a>
+        <a href="/privacy.html">プライバシーポリシー・利用規約</a>
+      </nav>
+    <div class="tf-small">
+      <p>開発：えぬっくま ・ <a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">X @nkkuma_service</a></p>
+      <p>&copy; 2019-2026 えぬっくま</p>
+    </div>
+  </footer>
+</body>
+</html>
