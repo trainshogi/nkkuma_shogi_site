@@ -8,8 +8,8 @@
 (function () {
   'use strict';
 
-  var SITE_URL = 'https://shogi.nkkuma.tokyo/';
-  var SHARE_TEXT = '将棋盤の写真からこの局面を読み取りました #将棋';
+  var SITE_URL = 'https://shogi.nkkuma.tokyo/photo.html';
+  var SHARE_TEXT = '盤の写真から、この局面を読み取りました。 #将棋';
   var WATERMARK = 'shogi.nkkuma.tokyo ─ 盤面写真から棋譜化';
 
   var KANJI = { fu: '歩', ky: '香', ke: '桂', gi: '銀', ki: '金', ka: '角', hi: '飛', ou: '玉',
@@ -193,7 +193,7 @@
       }
       // PC等: 画像を保存してXのポスト画面を開く（画像は手動添付）
       download(blob);
-      window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(SHARE_TEXT) +
+      window.open('https://x.com/intent/post?text=' + encodeURIComponent(SHARE_TEXT) +
                   '&url=' + encodeURIComponent(SITE_URL), '_blank', 'noopener');
       toast('局面画像を保存しました。ポストに添付してください');
     }).catch(function () {

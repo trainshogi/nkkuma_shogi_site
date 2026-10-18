@@ -5,7 +5,7 @@
     function pageURL(){ return location.href.split("#")[0]; }
   
     function buildTwitterIntent(url, text, via){
-      const base = "https://twitter.com/intent/tweet";
+      const base = "https://x.com/intent/post";
       const params = new URLSearchParams();
       if (text) params.set("text", text);
       if (url)  params.set("url", url);
@@ -22,7 +22,7 @@
       if(!block) return;
   
       const url = pageURL();
-      const text = "写真1枚で簡単KIF作成！"; // シェア文言
+      const text = "将棋盤の写真から、局面をKIFにできます。"; // シェア文言
       const via  = "nkkuma_service";         // Xアカウント
   
       const xBtn  = block.querySelector("#share-x");
