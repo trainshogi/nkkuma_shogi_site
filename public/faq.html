@@ -1,156 +1,231 @@
 <!DOCTYPE html>
+<!-- 写真をKIFに (/photo.html) のよくある質問。2026-10-18 に作り直した（古い Bootstrap・カウンター・広告・X の欄を外し、見出しとメニューを使い方のページにそろえた）。
+     質問は 3 つに分ける。いちばん多い「読み取れない」は使い方と同じ ○× の写真 4 枚で答える。答えを変えたら、下の FAQPage の文も同じに直す。 -->
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-    <title>よくある質問 | Shogiban to Kif</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-BG7XXMB0B1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-BG7XXMB0B1');
+    </script>
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/loader.css" rel="stylesheet">
-    <link href="css/faq.css" rel="stylesheet">
-    <link href="css/shogiban.css" rel="stylesheet">
-    
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+
+    <meta property="og:title" content="よくある質問（写真をKIFに） | Shogiban to Kif">
+    <meta property="og:description" content="将棋盤の写真がうまく読み取れないとき、駒の直し方、ほかの将棋アプリへの渡し方など。">
+    <meta property="og:image" content="https://shogi.nkkuma.tokyo/ogp.png">
+    <meta property="og:url" content="https://shogi.nkkuma.tokyo/faq.html">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="将棋盤認識サイト">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@nkkuma_service">
+
+    <title>よくある質問（写真をKIFに） | Shogiban to Kif</title>
+    <meta name="description" content="将棋盤の写真をKIFにするときのよくある質問。うまく読み取れないときの撮り方、駒の直し方、ぴよ将棋・KENTOなどへの渡し方。">
+    <link rel="canonical" href="https://shogi.nkkuma.tokyo/faq.html">
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "うまく読み取れません",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "盤の9×9と両側の駒台がぜんぶ入るように、寄って撮り直してください。切れている写真、横に倒れた写真、遠くて小さい写真はうまく読めません。駒が手や物でかくれていないかも見てください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "時間がかかります",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ふつうは数秒で盤が出ます。通信が遅いと長くかかることがあります。画面はそのままでお待ちください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "どの機種で使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "スマートフォン・タブレット・パソコンのブラウザ（Safari、Chrome など）で使えます。アプリのインストールや会員登録はいりません。写真は縦長でも横長でもかまいません。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "間違った駒はどう直しますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "写真と見くらべて、違う駒を押します。下に一覧が出るので、正しい駒をえらびます。持ち駒は押すと数を直せます。手番は上の「先手番」「後手番」でえらびます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ほかの将棋アプリに渡せますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ぴよ将棋とKENTOは、結果の画面のボタンからそのまま開けます。ほかのアプリには、KIFかSFENをコピーするかファイルに保存して渡してください。局面図は画像で保存・シェアできます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "うまく動きません",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "お問い合わせのページからお知らせください。起きた時刻と、どの画面で何をしたかを書いていただけると助かります。"
+      }
+    }
+  ]
+}
+    </script>
+
+    <link href="css/site.css" rel="stylesheet">
+    <style>
+      /* このページ専用。site.css には手を入れない。1 問 = たたんだ 1 行。開くと答え */
+      .f-head { display: flex; align-items: center; gap: 12px; margin: 16px 0 6px; }
+      .f-head img { flex: none; width: 52px; height: auto; }
+      .f-head small { display: block; font-size: 13px; font-weight: 700; color: var(--muted); }
+      .f-head h1 { margin: 0; font-size: 24px; line-height: 1.3; }
+      .f-grp { margin: 22px 0 8px; font-size: 13px; font-weight: 700; color: #c4511f; letter-spacing: .05em; }
+      .f-q { margin: 0 0 8px; border: 1px solid var(--line); border-radius: 14px; background: #fff; scroll-margin-top: 12px; }
+      .f-q > summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; font-size: 15.5px; font-weight: 700; line-height: 1.5; cursor: pointer; list-style: none; }
+      .f-q > summary::-webkit-details-marker { display: none; }
+      .f-q > summary::after { content: "＋"; margin-left: auto; color: #e5672e; font-weight: 700; }
+      .f-q[open] > summary::after { content: "－"; }
+      .f-a { padding: 0 16px 14px; }
+      .f-a p { margin: 0; font-size: 15px; line-height: 1.8; }
+      .f-a a { color: #c4511f; }
+      .f-ng { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
+      .f-ng li { margin: 0; text-align: center; font-size: 12px; font-weight: 700; line-height: 1.4; }
+      .f-ng img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; margin-bottom: 3px; }
+      .f-ng li.ok img { outline: 3px solid #1a7f37; outline-offset: -3px; }
+      .f-mark { margin-right: 2px; font-weight: 900; }
+      .f-mark.ok { color: #1a7f37; }
+      .f-mark.ng { color: #dc4a37; }
+      .f-kom { display: flex; align-items: center; gap: 12px; margin: 24px 0 12px; padding: 12px 14px; border-radius: 18px; background: #fff7f1; color: #111; text-decoration: none; }
+      .f-kom img { flex: none; width: 44px; height: 44px; border-radius: 10px; }
+      .f-kom b { display: block; font-size: 15px; line-height: 1.4; }
+      .f-kom span { display: block; font-size: 12.5px; line-height: 1.5; color: #555; }
+      .f-kom i { margin-left: auto; font-style: normal; color: #e5672e; font-weight: 700; }
+      .f-go { display: block; margin: 0 0 6px; padding: 14px; border-radius: 14px; background: #e5672e; color: #fff; text-align: center; font-size: 17px; font-weight: 700; text-decoration: none; }
+      .f-go:active { opacity: .85; }
+      .f-foot { text-align: center; margin: 24px 0 8px; font-size: 13px; color: var(--muted); }
+      .f-foot a { color: var(--muted); }
+    </style>
+  <style>
+    /* 共通ヘッダー（index.html 以外で同じもの）。スマホはメニューをボタンにまとめる（CSS だけ） */
+    .nk-head { position: relative; z-index: 30; display: flex; align-items: center; margin: 0; padding: 12px 16px; background: #fff; border: 0; border-bottom: 1px solid #eee;
+      font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif; line-height: 1; text-align: left; box-sizing: border-box; }
+    .nk-head * { box-sizing: border-box; }
+    .nk-head .nk-logo { color: #111; text-decoration: none; font-weight: 900; font-size: 17px; letter-spacing: .28em; }
+    .nk-head .nk-t { position: absolute; opacity: 0; pointer-events: none; }
+    .nk-head .nk-b { margin: 0 0 0 auto; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: #f2f2f4; color: #111;
+      font-size: 13.5px; font-weight: 700; line-height: 1.4; cursor: pointer; user-select: none; }
+    .nk-head .nk-b span, .nk-head .nk-b span::before, .nk-head .nk-b span::after { display: block; width: 14px; height: 2px; border-radius: 2px; background: currentColor; position: relative; }
+    .nk-head .nk-b span::before, .nk-head .nk-b span::after { content: ""; position: absolute; left: 0; }
+    .nk-head .nk-b span::before { top: -5px; }
+    .nk-head .nk-b span::after { top: 5px; }
+    .nk-head .nk-t:focus-visible + .nk-b { outline: 2px solid #e5672e; outline-offset: 2px; }
+    .nk-head nav { display: none; position: absolute; right: 12px; top: calc(100% + 6px); min-width: 200px; margin: 0; padding: 6px; flex-direction: column;
+      background: #fff; border: 1px solid #eee; border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+    .nk-head .nk-t:checked ~ nav { display: flex; }
+    .nk-head nav a { display: block; margin: 0; padding: 11px 14px; border-radius: 10px; color: #111; text-decoration: none; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .nk-head nav a[aria-current] { color: #e5672e; }
+    .nk-head a:focus-visible { outline: 2px solid #e5672e; outline-offset: 2px; }
+    @media (min-width: 760px) {
+      .nk-head { padding: 16px 24px; }
+      .nk-head .nk-b { display: none; }
+      .nk-head nav { display: flex; position: static; flex-direction: row; gap: 26px; margin-left: auto; min-width: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; }
+      .nk-head nav a { padding: 0; border-radius: 0; font-size: 14px; color: #555; }
+      .nk-head nav a:hover { color: #111; }
+      .nk-head nav a[aria-current] { color: #111; box-shadow: inset 0 -2px 0 #e5672e; }
+    }
+  </style>
   </head>
   <body>
-<div style="border-bottom:1px solid #e5e5e5;padding:6px 12px;font-size:13px;background:#fff;font-family:'Hiragino Sans',sans-serif;">
-  <a href="/photo.html" style="color:#555;text-decoration:none;margin-right:14px;">写真をKIFに</a>
-  <a href="/taikai.html" style="color:#555;text-decoration:none;margin-right:14px;">大会・教室</a>
-  <a href="/blog.html" style="color:#555;text-decoration:none;margin-right:14px;">ブログ</a>
-  <a href="/about.html" style="color:#555;text-decoration:none;">About</a>
-</div>
+  <header class="nk-head">
+    <a class="nk-logo" href="/">えぬっくま</a>
+    <input type="checkbox" id="nk-t" class="nk-t"><label for="nk-t" class="nk-b"><span></span>メニュー</label>
+    <nav aria-label="サイトのメニュー">
+      <a href="/photo.html">写真をKIFに</a>
+      <a href="/taikai.html">大会・教室</a>
+      <a href="/blog.html">ブログ</a>
+      <a href="/about.html">About</a>
+    </nav>
+  </header>
+    <main class="app">
+      <header class="f-head">
+        <img src="img/kuma-20261018.png" width="197" height="228" alt="えぬっくま">
+        <div><small>写真をKIFに</small><h1>よくある質問</h1></div>
+      </header>
 
-    <p class="lead">
-      <img src="img/SHOGIWEB_TITLE.png" width="100%">
-      <img id="howtoimg" src='img/shogi_intro.png' width="100%" height="auto"></img>
-    </p>
+      <h2 class="f-grp">撮る・読み取る</h2>
+      <details class="f-q" id="yomenai" open>
+        <summary>うまく読み取れません</summary>
+        <div class="f-a">
+          <ul class="f-ng">
+            <li class="ok"><img src="img/howto/satsuei-ok.jpg" width="300" height="225" alt="盤と両側の駒台が写った写真" loading="lazy"><span class="f-mark ok">○</span>ぜんぶ入る</li>
+            <li><img src="img/howto/satsuei-ng-kire.jpg" width="300" height="225" alt="盤の左が切れた写真" loading="lazy"><span class="f-mark ng">×</span>切れている</li>
+            <li><img src="img/howto/satsuei-ng-yoko.jpg" width="300" height="225" alt="盤が横に倒れた写真" loading="lazy"><span class="f-mark ng">×</span>横倒し</li>
+            <li><img src="img/howto/satsuei-ng-tooi.jpg" width="300" height="225" alt="盤が遠くて小さい写真" loading="lazy"><span class="f-mark ng">×</span>遠い</li>
+          </ul>
+          <p>盤の 9×9 と両側の駒台がぜんぶ入るように、寄って撮り直してください。駒が手や物でかくれていないかも見てください。くわしくは<a href="/blog/photo-tips.html">撮り方のコツ</a>へ。</p>
+        </div>
+      </details>
+      <details class="f-q" id="jikan">
+        <summary>時間がかかります</summary>
+        <div class="f-a">
+          <p>ふつうは数秒で盤が出ます。通信が遅いと長くかかることがあります。画面はそのままでお待ちください。</p>
+        </div>
+      </details>
+      <details class="f-q" id="kishu">
+        <summary>どの機種で使えますか？</summary>
+        <div class="f-a">
+          <p>スマートフォン・タブレット・パソコンのブラウザ（Safari、Chrome など）で使えます。アプリのインストールや会員登録はいりません。写真は縦長でも横長でもかまいません。</p>
+        </div>
+      </details>
+      <h2 class="f-grp">直す・渡す</h2>
+      <details class="f-q" id="naosu">
+        <summary>間違った駒はどう直しますか？</summary>
+        <div class="f-a">
+          <p>写真と見くらべて、違う駒を押します。下に一覧が出るので、正しい駒をえらびます。持ち駒は押すと数を直せます。手番は上の「先手番」「後手番」でえらびます。くわしくは<a href="/howto.html#step3">使い方</a>へ。</p>
+        </div>
+      </details>
+      <details class="f-q" id="watasu">
+        <summary>ほかの将棋アプリに渡せますか？</summary>
+        <div class="f-a">
+          <p>ぴよ将棋と KENTO は、結果の画面のボタンからそのまま開けます。ほかのアプリには、KIF か SFEN をコピーするかファイルに保存して渡してください。局面図は画像で保存・シェアできます。</p>
+        </div>
+      </details>
+      <h2 class="f-grp">困ったとき</h2>
+      <details class="f-q" id="ugokanai">
+        <summary>うまく動きません</summary>
+        <div class="f-a">
+          <p><a href="/contact.html">お問い合わせ</a>からお知らせください。起きた時刻と、どの画面で何をしたかを書いていただけると助かります。</p>
+        </div>
+      </details>
 
-    <h3>FAQ</h3>
+      <a class="f-kom" href="/about.html#komadori"><img src="img/about/komadori-icon.png" width="44" height="44" alt=""><div><b>1局まるごと残したいときは</b><span>写真1枚で作れるのは、その時点の局面です。指し手つきの棋譜は、盤の横に置くだけのアプリ「コマドリ」で</span></div><i>›</i></a>
 
-    <div class="accbox">
-        <!--ラベル1-->
-        <input type="checkbox" id="label1" class="cssacc" />
-        <label for="label1">使い方がわからない</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          次の順にお使いください。
-            <ol>
-              <li>「📷 撮影する」で将棋盤を撮ります（撮ってあった写真を使うときは「🖼 画像を選ぶ」）</li>
-              <li>「変換する」を押します</li>
-              <li>盤面が表示されたら、元の写真と見比べます。違っている駒や持ち駒はタップで直せます</li>
-              <li>「先手番」「後手番」で、どちらが指す番かを選びます</li>
-              <li>「ぴよ将棋」「KENTO」のボタンで検討へ。KIF・SFEN はコピーかファイル保存で、ほかの将棋アプリへ渡せます</li>
-            </ol>
-          </p>
-          <p>くわしくは<a href="/howto.html">使い方ガイド</a>をご覧ください。</p>
-        </div>
-        <!--//ラベル1-->
-        <!--ラベル3-->
-        <input type="checkbox" id="label3" class="cssacc" />
-        <label for="label3">「認識できませんでした」と出る・間違いが多い</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          次の点を確かめてから撮り直してください。
-            <ul>
-              <li>盤の一部が写真から切れていないか</li>
-              <li>盤が横倒し・上下逆に写っていないか</li>
-              <li>盤が小さく写りすぎていないか（寄って撮る）</li>
-              <li>駒が手や物で隠れていないか</li>
-            </ul>
-          </p>
-          <p>撮り方は<a href="/blog/photo-tips.html">撮り方のコツ</a>にもまとめています。</p>
-        </div>
-        <!--//ラベル3-->
-        <!--ラベル4-->
-        <input type="checkbox" id="label4" class="cssacc" />
-        <label for="label4">変換に時間がかかる</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          写真を送って読み取るまで、ふつうは数秒です。通信が遅いと長くかかることがあります。画面はそのままでお待ちください。
-          </p>
-        </div>
-        <!--//ラベル4-->
-        <!--ラベル6-->
-        <input type="checkbox" id="label6" class="cssacc" />
-        <label for="label6">対応ブラウザ・機種</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          スマートフォン・タブレット・パソコンの標準的なブラウザ（Chrome、Safari など）でご利用いただけます。アプリのインストールや会員登録はいりません。
-          </p>
-          <p>写真は縦長でも横長でもかまいません。</p>
-        </div>
-        <!--//ラベル6-->
-        <!--ラベル8-->
-        <input type="checkbox" id="label8" class="cssacc" />
-        <label for="label8">対応アプリ</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          ぴよ将棋とKENTOは、結果の画面のボタンからそのまま開けます。ほかの将棋アプリには、KIFかSFENをコピーまたはファイル保存して渡してください。
-          </p>
-        </div>
-        <!--//ラベル8-->
-        <!--ラベル10-->
-        <input type="checkbox" id="label10" class="cssacc" />
-        <label for="label10">1局まるごと棋譜にしたい</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>
-          写真1枚から作れるのは、その時点の局面です。指し手つきの棋譜が必要なときは、対局を動画で撮って変換する<a href="/video.html">動画まるごと棋譜化（β版）</a>をお使いください。
-          </p>
-          <p>iPhone・iPad・Androidなら、盤の横に置いて指すだけで棋譜になるアプリ「コマドリ」もあります。<a href="https://apps.apple.com/jp/app/id6800334202" target="_blank" rel="noopener">App Storeで見る</a> ／ <a href="https://play.google.com/store/apps/details?id=tokyo.nkkuma.komadori" target="_blank" rel="noopener">Google Playで見る</a></p>
-        </div>
-        <!--//ラベル10-->
-        <!--ラベル9-->
-        <input type="checkbox" id="label9" class="cssacc" />
-        <label for="label9">バグが発生した</label>
-        <div class="accshow">
-          <!--ここに隠す中身-->
-          <p>発生したバグは、<a href="https://x.com/nkkuma_service" target="_blank" rel="noopener">X（@nkkuma_service）</a>か、メール（nkkumaservice@gmail.com）でお知らせください。起きた時刻と、どの画面で何をしたかを添えていただけると助かります。</p>
-        </div>
-        <!--//ラベル9-->
-    </div><!--//.accbox-->
-    <div id="back"><button type="button" class="btn btn-primary" onclick="history.back()">戻る</button></div>
+      <a class="f-go" href="/photo.html">撮ってみる</a>
 
-    <div id="tmpfoot">
-      <br><!--タグはここから--><table border="0" cellspacing="0" cellpadding="0" align="center"><tr><td align="center"><a href="http://www.rays-counter.com/"><img src="http://www.rays-counter.com/d412_f6_024/5b42d99ac1c89/" alt="アクセスカウンター" border="0"></a></td></tr><tr><td align="center"><img src="http://www.rays-counter.com/images/counter_01.gif" border="0"><img src="http://www.rays-counter.com/images/counter_02.gif" border="0"><img src="http://www.rays-counter.com/images/counter_03.gif" border="0"><img src="http://www.rays-counter.com/images/counter_04.gif" border="0" ><img src="http://www.rays-counter.com/images/counter_05.gif" border="0"></td></tr></table><!--ここまで-->
-      <br><a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="写真1枚で簡単KIF作成！" data-url="https://shogi.nkkuma.tokyo" data-hashtags="えぬっくま" data-show-count="false">Tweet</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      <br>開発：えぬっくま<br>
-      <a href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @nkkuma_service</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      <a class="twitter-timeline" height="400px" href="https://twitter.com/nkkuma_service?ref_src=twsrc%5Etfw">Tweets by nkkuma_service</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>  
-      <a href="//af.moshimo.com/af/c/click?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733&guid=ON" target="_blank" rel="nofollow"><img src="//image.moshimo.com/af-img/0866/000000022733.jpg" width="234" height="60" style="border:none;"></a><img src="//i.moshimo.com/af/i/impression?a_id=1076682&p_id=1555&pc_id=2816&pl_id=22733" width="1" height="1" style="border:none;">
-    </div>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="js/jquery-3.3.1.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="exif-js/exif.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/megapix-image.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <!-- js library for canvas -->
-    <!-- <script src="/static/js/drawtrapezoid.js"></script> -->
-    <!-- js source for my canvas -->
-    <script src="js/makecanvas.js"></script>
-    <!-- js source for util func -->
-    <script src="js/util.js"></script>
-    <!-- js source for init html -->
-    <script src="js/main.js"></script>
+      <footer class="f-foot">
+        <p>
+          <a href="/howto.html">使い方</a> |
+          <a href="/contact.html">お問い合わせ</a> |
+          <a href="/privacy.html">プライバシーポリシー・利用規約</a><br>
+          &copy; 2019-2026 Shogiban to Kif（えぬっくま）
+        </p>
+      </footer>
+    </main>
   </body>
 </html>
