@@ -138,7 +138,7 @@
     /* 開いてすぐの画面: くまのすぐ下に選ぶボタン。「撮影する」をいちばん目立たせる */
     body[data-state="empty"] #btn-camera { background: #e5672e; border-color: #e5672e; color: #fff; }
     body[data-state="empty"] [data-role="pick"] .btn { min-height: 50px; font-size: 16px; }
-    body[data-state="empty"] [data-role="help"] { margin: 2px 0 0; gap: 0; }
+    body[data-state="empty"] [data-role="help"] { margin: 10px 0 0; gap: 0; }
     body[data-state="empty"] [data-role="help"] .btn { min-height: 36px; font-size: 12.5px; }
     /* 使い方の窓: 1 手順 = 絵 1 枚 + 1 行 */
     .howto-steps li img { flex: none; width: 76px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid #eee; }
@@ -149,14 +149,17 @@
     .howto-ng b { color: #dc4a37; }
 
     /* 開いてすぐ: ロゴとくま → 見本 → ボタン。説明と質問は 1 行にたたむ */
-    .nk-mihon { display: none; margin: 0 0 14px; }
+    body[data-state="empty"] .app { padding: 22px 20px 32px; }
+    body[data-state="empty"] .app > .howto { margin: 4px 0 22px; }
+    body[data-state="empty"] [data-role="pick"] { gap: 12px; }
+    .nk-mihon { display: none; margin: 0 0 24px; }
     body[data-state="empty"] .nk-mihon { display: block; }
     .nk-mihon img { display: block; width: 100%; height: auto; border-radius: 12px; }
-    .nk-mihon figcaption { margin: 6px 0 0; font-size: 13px; color: #555; text-align: center; }
-    .nk-try { display: none; margin: 10px auto 0; padding: 8px 16px; border: 0; border-radius: 999px; background: #fff1e8; color: #c4511f; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .nk-mihon figcaption { margin: 10px 0 0; font-size: 13px; color: #555; text-align: center; }
+    .nk-try { display: none; margin: 16px auto 0; padding: 8px 16px; border: 0; border-radius: 999px; background: #fff1e8; color: #c4511f; font-size: 14px; font-weight: 700; cursor: pointer; }
     body[data-state="empty"] .nk-try { display: block; }
-    body[data-state="empty"] .tf-consent { font-size: 11.5px; margin-top: 8px; }
-    .site-about { margin: 18px auto 0 !important; }
+    body[data-state="empty"] .tf-consent { font-size: 11.5px; margin-top: 18px; }
+    .site-about { margin: 28px auto 0 !important; }
     .nk-more { border: 1px solid #eee; border-radius: 14px; padding: 2px 14px; background: #fafafa; }
     .nk-more > summary { padding: 12px 0; font-size: 14px; font-weight: 700; color: #555; cursor: pointer; list-style: none; }
     .nk-more > summary::-webkit-details-marker { display: none; }
