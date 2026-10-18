@@ -149,7 +149,9 @@
     .howto-ng b { color: #dc4a37; }
 
     /* 開いてすぐ: ロゴとくま → 見本 → ボタン。説明と質問は 1 行にたたむ */
-    body[data-state="empty"] .app { padding: 22px 20px 32px; }
+    body[data-state="empty"] .app { padding: 12px 20px 32px; }
+    body[data-state="empty"] .site-foot.tool-foot { margin-top: 14px; padding-top: 12px; }
+    body[data-state="empty"] .tool-foot .tf-support { margin-top: 12px; }
     body[data-state="empty"] .app > .howto { margin: 4px 0 22px; }
     body[data-state="empty"] [data-role="pick"] { gap: 12px; }
     .nk-mihon { display: none; margin: 0 0 24px; }
@@ -159,7 +161,7 @@
     .nk-try { display: none; margin: 16px auto 0; padding: 8px 16px; border: 0; border-radius: 999px; background: #fff1e8; color: #c4511f; font-size: 14px; font-weight: 700; cursor: pointer; }
     body[data-state="empty"] .nk-try { display: block; }
     body[data-state="empty"] .tf-consent { font-size: 11.5px; margin-top: 18px; }
-    .site-about { margin: 28px auto 0 !important; }
+    .site-about { margin: 22px auto 0 !important; }
     .nk-more { border: 1px solid #eee; border-radius: 14px; padding: 2px 14px; background: #fafafa; }
     .nk-more > summary { padding: 12px 0; font-size: 14px; font-weight: 700; color: #555; cursor: pointer; list-style: none; }
     .nk-more > summary::-webkit-details-marker { display: none; }
