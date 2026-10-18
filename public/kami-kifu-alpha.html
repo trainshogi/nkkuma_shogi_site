@@ -388,7 +388,7 @@
   <script>
   (function () {
     // 読み取りの入口（aws-nkkuma の KifuSheetStack, POST /read）。空のあいだは受け付けない
-    var API_URL = '';
+    var API_URL = 'https://vne8to9img.execute-api.ap-northeast-1.amazonaws.com/read';
     var MAX_EDGE = 2400;   // 送る前に長い辺をここまで縮める（字が読める大きさは残す）
 
     var $ = function (id) { return document.getElementById(id); };
@@ -616,6 +616,9 @@
     function show(d) {
       data = d;
       var marks = markList().length, n = d.moves.length, box = $('summary');
+      var m = /([0-9０-９]+)\s*手/.exec(d.result || '');
+      var written = m ? parseInt(m[1].replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }), 10) : 0;
+      var missing = d.missing != null ? d.missing : Math.max(0, written - n);
       var secs = (d.timing || []).reduce(function (a, t) { return a + t.read_ms + t.check_ms; }, 0);
       var stats = '<div class="stats"><span>手合割 <b>' + esc(d.handicap || '平手') + '</b></span><span>手数 <b>' + n + '</b></span>' +
         (marks ? '<span>黄色の手 <b>' + marks + '</b></span>' : '') + (secs ? '<span>読み取り <b>' + (secs / 1000).toFixed(1) + ' 秒</b></span>' : '') +
@@ -623,6 +626,9 @@
       if (d.problem) {
         box.className = 'summary bad';
         box.innerHTML = '<span class="icon">!</span><b>第' + d.problem['手'] + '手で、つながらなくなりました。</b><small>' + n + '手目までの KIF を作りました。続きは検討室で直してください。</small>' + stats;
+      } else if (missing) {
+        box.className = 'summary bad';
+        box.innerHTML = '<span class="icon">!</span><b>用紙には ' + (n + missing) + ' 手とありますが、読めたのは ' + n + ' 手です。</b><small>' + n + '手目までの KIF を作りました。続きは検討室で足してください。</small>' + stats;
       } else if (marks) {
         box.className = 'summary warn';
         box.innerHTML = '<span class="icon">✓</span><b>' + n + '手を KIF にしました。</b><small>黄色の ' + marks + ' 手は、字を読み替えてつなげました。「次の黄色の手へ」で用紙と見比べてください。</small>' + stats;
@@ -644,7 +650,7 @@
       var first = markList()[0];
       go(d.problem ? n : (first || n));
       $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      track('kami_kifu_done', { moves: n, marks: marks, stopped: d.problem ? 1 : 0 });
+      track('kami_kifu_done', { moves: n, marks: marks, stopped: d.problem ? 1 : 0, missing: missing });
     }
 
     $('save').addEventListener('click', function () {
