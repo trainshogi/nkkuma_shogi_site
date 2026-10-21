@@ -468,6 +468,14 @@
         fileSizeBytes: file.size
       })
     }).then(function (res) {
+      // 受け口の回数の上限(1 人あたり・全体)。混み合いとして伝える
+      if (res.status === 429) {
+        return res.json().catch(function () { return {}; }).then(function (b) {
+          throw new Error(b.scope === 'all'
+            ? '今日は混み合っています。明日もう一度お試しください'
+            : '混み合っています。少し時間をおいてから、もう一度お試しください');
+        });
+      }
       if (!res.ok) { throw new Error('アップロード準備に失敗しました (HTTP ' + res.status + ')'); }
       return res.json();
     });
